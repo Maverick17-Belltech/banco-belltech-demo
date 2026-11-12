@@ -695,14 +695,13 @@ $('emailForm').addEventListener('submit', async ev => {
     active = true;
     try { const w = window.cognigyWebchat; if (w && w.isOpen && w.isOpen() && w.close) w.close(); } catch (_) {}
     fab.style.display = 'none';                                      // se minimiza el globito
-    const widget = await window.initWebRTCWidget(VOICE);
+    // si hay sesión de Banca Online, la llamada sale con userId "cli-<DNI>" (igual que el chat) y Cognigy reconoce al cliente desde el primer mensaje
+    const opts = (typeof session !== 'undefined' && session && session.dni) ? { userId: 'cli-' + session.dni } : undefined;
+    const widget = await window.initWebRTCWidget(VOICE, opts);
     let ending = false;
     const done = () => { if (ending) return; ending = true; setTimeout(backToSofia, 4000); };   // deja ver el final 4 s
     widget.on('newRTCSession', (s) => {
       clearTimeout(idleTimer);
-      // si hay sesión de Banca Online, Sofía recibe los datos del cliente al atender (mismo formato que el chat)
-      let sent = false;
-      s.on('answered', () => { if (sent || typeof authData === 'undefined' || !authData.authenticated) return; sent = true; try { s.sendInfo('', authData); } catch (_) {} });
       // el widget emite 'terminated' (cortó alguien), 'failed' y 'close'
       ['terminated', 'failed', 'close', 'ended'].forEach(ev => { try { s.on(ev, done); } catch (_) {} });
     });
