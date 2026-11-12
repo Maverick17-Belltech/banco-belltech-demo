@@ -711,8 +711,11 @@ $('emailForm').addEventListener('submit', async ev => {
     active = true;
     try { const w = window.cognigyWebchat; if (w && w.isOpen && w.isOpen() && w.close) w.close(); } catch (_) {}
     fab.style.display = 'none';                                      // se minimiza el globito
-    // si hay sesión de Banca Online, la llamada sale con userId "cli-<DNI>" (igual que el chat) y Cognigy reconoce al cliente desde el primer mensaje
-    const opts = (typeof session !== 'undefined' && session && session.dni) ? { userId: 'cli-' + session.dni } : undefined;
+    // si hay sesión de Banca Online, la llamada sale con userId "cli-<DNI>" (igual que el chat) y Cognigy reconoce al cliente desde el primer mensaje.
+    // v12: sin sesión se manda SIEMPRE un userId anónimo nuevo, para que el widget no reutilice el "cli-<DNI>" de una llamada anterior.
+    const opts = (typeof session !== 'undefined' && session && session.dni)
+      ? { userId: 'cli-' + session.dni }
+      : { userId: 'anon-' + Math.random().toString(36).slice(2, 10) };
     const widget = await window.initWebRTCWidget(VOICE, opts);
     let ending = false;
     const done = () => { if (ending) return; ending = true; setTimeout(backToSofia, 4000); };   // deja ver el final 4 s
