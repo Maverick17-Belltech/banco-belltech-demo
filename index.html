@@ -649,7 +649,7 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
       behavior: { enableTypingIndicator: true, enableSTT: true },
       homeScreen: { enabled: false },
       widgetSettings: { disableToggleButton: true },
-      startBehavior: { startBehavior: 'injection', getStartedPayload: 'Hola', getStartedData: authData }
+      startBehavior: { startBehavior: 'injection', getStartedPayload: 'Hola', getStartedText: 'Hola', getStartedData: authData }
     }
   }).then(w => {
     webchat = w; window.cognigyWebchat = w; while (pending.length) pending.shift()();
