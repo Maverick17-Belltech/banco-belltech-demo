@@ -124,6 +124,16 @@ textarea{min-height:96px;resize:vertical}
 .pw{position:relative}.pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--muted);cursor:pointer;font-size:13px;font-weight:600}
 .err{color:var(--err);font-size:13px;min-height:18px;margin-top:8px}
 .hint{font-size:12.5px;color:var(--muted);margin-top:10px}
+.demo-users{display:flex;flex-direction:column;gap:10px}
+.demo-users h4{margin:0;font-size:17px}.demo-users .sub{margin:0 0 4px}
+.du{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;box-shadow:0 2px 8px rgba(23,15,68,.05);transition:.15s}
+.du:hover{border-color:var(--brand);transform:translateY(-1px)}
+.du b{display:block;font-size:14px}.du span{display:block;font-size:13px;color:var(--muted)}.du small{display:block;font-size:12.5px}
+.modal.wide{width:min(860px,100%)}
+.login-split{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.login-split .demo-users{background:var(--bg);border-radius:16px;padding:18px}
+@media (max-width:720px){.login-split{grid-template-columns:1fr}}
+#loginPanel .demo-users{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;height:100%}
 @media (max-width:640px){.tiles{grid-template-columns:repeat(2,1fr)}}
 .tile{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;border:1.5px solid transparent;transition:.15s;text-align:left;font:inherit;color:inherit}
@@ -359,6 +369,7 @@ body.no-webchat .sofia-fab{bottom:20px}
         <div class="err" id="errA"></div>
       </form>
       <div class="hint">¿Olvidaste tu clave? <button class="link" onclick="askSofia('Olvidé mi clave de banca online')">Pedile ayuda a Sofía</button></div>
+      <div class="demo-users" data-form="errA"></div>
     </div>
     <div class="panel" id="welcomePanel" style="display:none">
       <p class="sub" style="margin:0">Bienvenido/a</p>
@@ -487,7 +498,7 @@ body.no-webchat .sofia-fab{bottom:20px}
     <div class="s-head"><div><h2>Guía para el presentador</h2><p>Usuarios de prueba y guion sugerido.</p></div></div>
     <div class="grid g3 guide">
       <div class="card"><h3>Banca Online (login)</h3><p style="flex:none">Clave: <code>Demo1234@</code></p>
-        <ul style="padding-left:18px;margin:0"><li><code>sebastian.sosa@belltech.la</code></li><li><code>patricia.vinyolas@gmail.com</code></li></ul>
+        <p style="flex:none;margin:0">En el ingreso hay 4 usuarios de prueba: hacé clic en uno y se completa solo.</p>
         <p style="flex:none">Sin login, Sofía valida con DNI + fecha:<br><code>30123456</code> · <code>15-03-1985</code></p></div>
       <div class="card"><h3>Guion de chat</h3><ol style="padding-left:18px;margin:0"><li>Pregunta de FAQ (seguros)</li><li>Saldo → validación o login</li><li>Bloqueo de tarjeta → confirmación</li><li>Denuncia de siniestro</li><li>"Mandame esto por mail"</li><li>"Quiero hablar con una persona"</li></ol></div>
       <div class="card"><h3>Momentos "wow"</h3><ul style="padding-left:18px;margin:0"><li>Login web → Sofía ya te reconoce</li><li>Jailbreak bloqueado</li><li>Cambio de idioma automático</li><li>Handover con contexto y vuelta a Sofía</li><li>Mismo agente por voz</li></ul></div>
@@ -511,11 +522,12 @@ body.no-webchat .sofia-fab{bottom:20px}
 
 <!-- ===== Login modal ===== -->
 <div class="modal-bg" id="loginModal" onclick="if(event.target===this)closeLogin()">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="lmTitle">
+  <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="lmTitle">
     <button class="x" onclick="closeLogin()" aria-label="Cerrar">×</button>
     <span class="brand-mark" style="margin-bottom:12px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 4h8a4 4 0 0 1 0 8H5zM5 12h9a4 4 0 0 1 0 8H5z" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg></span>
     <h3 id="lmTitle" style="margin:0 0 4px;font-size:22px">Banca Online</h3>
     <p style="color:var(--muted);margin:0 0 8px;font-size:14px">Ingresá con tu email y clave.</p>
+    <div class="login-split"><div>
     <form class="loginForm" data-err="errB">
       <label for="emB">Email</label><input id="emB" name="email" type="email" required placeholder="tu@email.com" autocomplete="off">
       <label for="pwB">Clave</label>
@@ -523,6 +535,10 @@ body.no-webchat .sofia-fab{bottom:20px}
       <button class="btn btn-primary" style="width:100%;margin-top:16px" type="submit">Ingresar</button>
       <div class="err" id="errB"></div>
     </form>
+    <p class="hint">Sitio de demostración: usuarios ficticios.</p>
+    </div>
+    <div class="demo-users" data-form="errB"></div>
+    </div>
   </div>
 </div>
 
@@ -566,8 +582,10 @@ document.querySelectorAll('.drawer a').forEach(a => a.addEventListener('click', 
 /* ---------- Login simulado ---------- */
 // Deben coincidir con los nodos "auth_web" y "validar_identidad" de Cognigy.
 const USERS = {
-  "sebastian.sosa@belltech.la":  { nombre: "Sebastian Sosa",    dni: "29018611", fecha_nacimiento: "17-07-1981", poliza: "IOU-112233", acc4: "3391" },
-  "patricia.vinyolas@gmail.com": { nombre: "Patricia Vinyolas", dni: "27933366", fecha_nacimiento: "26-02-1980", poliza: "AES-345678", acc4: "4802" }
+  "juan.perez@bancobelltech.example":        { nombre: "Juan Pérez",        dni: "30123456", fecha_nacimiento: "15-03-1985", poliza: "AUT-778812", acc4: "1287", rol: "Cliente · Seguro Automotor" },
+  "maria.gomez@bancobelltech.example":       { nombre: "María Gómez",       dni: "28987654", fecha_nacimiento: "02-11-1979", poliza: "HOG-552310", acc4: "5530", rol: "Cliente · Seguro Hogar" },
+  "sebastian.sosa@bancobelltech.example":    { nombre: "Sebastian Sosa",    dni: "29018611", fecha_nacimiento: "17-07-1981", poliza: "IOU-112233", acc4: "3391", rol: "Cliente · Cuenta y Tarjeta" },
+  "patricia.vinyolas@bancobelltech.example": { nombre: "Patricia Vinyolas", dni: "27933366", fecha_nacimiento: "26-02-1980", poliza: "AES-345678", acc4: "4802", rol: "Cliente · Seguro y Préstamo" }
 };
 const DEMO_PASS = "Demo1234@";
 const store = {
@@ -587,6 +605,12 @@ document.querySelectorAll('.loginForm').forEach(f => f.addEventListener('submit'
   location.reload();
 }));
 function logout(){ store.clear(); location.reload(); }
+document.querySelectorAll('.demo-users').forEach(box => {
+  const form = document.querySelector('.loginForm[data-err="' + box.dataset.form + '"]');
+  box.innerHTML = '<h4>Usuarios de prueba</h4><p class="sub">Hacé clic en un usuario para completar el ingreso.</p>' +
+    Object.entries(USERS).map(([em, u]) => '<button type="button" class="du" data-em="' + em + '"><b>' + u.nombre + '</b><span>' + u.rol + ' · Póliza ' + u.poliza + '</span><small>' + em + '</small></button>').join('');
+  box.addEventListener('click', e => { const b = e.target.closest('.du'); if (!b || !form) return; form.email.value = b.dataset.em; form.pass.value = DEMO_PASS; form.querySelector('[type=submit]').focus(); });
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLogin(); toggleDrawer(false); } });
 
 if (session) {
@@ -676,6 +700,9 @@ $('emailForm').addEventListener('submit', async ev => {
     const done = () => { if (ending) return; ending = true; setTimeout(backToSofia, 4000); };   // deja ver el final 4 s
     widget.on('newRTCSession', (s) => {
       clearTimeout(idleTimer);
+      // si hay sesión de Banca Online, Sofía recibe los datos del cliente al atender (mismo formato que el chat)
+      let sent = false;
+      s.on('answered', () => { if (sent || typeof authData === 'undefined' || !authData.authenticated) return; sent = true; try { s.sendInfo('', authData); } catch (_) {} });
       // el widget emite 'terminated' (cortó alguien), 'failed' y 'close'
       ['terminated', 'failed', 'close', 'ended'].forEach(ev => { try { s.on(ev, done); } catch (_) {} });
     });
