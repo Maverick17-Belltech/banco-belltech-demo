@@ -399,7 +399,7 @@ body.no-webchat .sofia-fab{bottom:20px}
     <div class="grid g3">
       <div class="acct"><span class="ico">🏦</span><b>Caja de Ahorro</b><small>•••• <span class="acc4">0000</span></small><span class="amt">$ 1.254.380,50</span><button class="link" style="text-align:left" onclick="askSofia('¿Cuál es el saldo de mi caja de ahorro?')">Preguntar a Sofía →</button></div>
       <div class="acct"><span class="ico">📄</span><b>Cuenta Corriente</b><small>Acuerdo disponible $ 500.000</small><span class="amt">$ 356.120,00</span><button class="link" style="text-align:left" onclick="askSofia('¿Cuánto tengo en la cuenta corriente?')">Preguntar a Sofía →</button></div>
-      <div class="acct"><span class="ico">💳</span><b>Tarjeta de crédito</b><small>•••• 4521 · vence 20-10-2026 · mínimo $ 28.400</small><span class="amt">$ 189.450,75</span><button class="link" style="text-align:left" onclick="askSofia('Perdí mi tarjeta terminada en 4521, quiero bloquearla')">Bloquear con Sofía →</button></div>
+      <div class="acct"><span class="ico">💳</span><b>Tarjeta de crédito</b><small>•••• 4521 · vence <span id="vtoTarjeta">20-11-2026</span> · mínimo $ 28.400</small><span class="amt">$ 189.450,75</span><button class="link" style="text-align:left" onclick="askSofia('Perdí mi tarjeta terminada en 4521, quiero bloquearla')">Bloquear con Sofía →</button></div>
     </div>
     <div class="policy">
       <div><b style="font-size:18px">🛡️ Póliza <span id="mcPoliza">—</span></b><div style="opacity:.85">Vigente · Denunciá un siniestro sin volver a identificarte.</div></div>
@@ -605,6 +605,13 @@ document.querySelectorAll('.loginForm').forEach(f => f.addEventListener('submit'
   location.reload();
 }));
 function logout(){ store.clear(); location.reload(); }
+// Vencimiento de la tarjeta: siempre el próximo día 20 (igual que la herramienta consultar_saldo de Cognigy)
+(function(){
+  const hoy = new Date(); let v = new Date(hoy.getFullYear(), hoy.getMonth(), 20);
+  if (hoy.getDate() > 20) v = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 20);
+  const el = document.getElementById('vtoTarjeta');
+  if (el) el.textContent = String(v.getDate()).padStart(2,'0') + '-' + String(v.getMonth()+1).padStart(2,'0') + '-' + v.getFullYear();
+})();
 document.querySelectorAll('.demo-users').forEach(box => {
   const form = document.querySelector('.loginForm[data-err="' + box.dataset.form + '"]');
   box.innerHTML = '<h4>Usuarios de prueba</h4><p class="sub">Hacé clic en un usuario para completar el ingreso.</p>' +
