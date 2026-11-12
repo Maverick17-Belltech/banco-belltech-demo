@@ -533,7 +533,6 @@ body.no-webchat .sofia-fab{bottom:20px}
     <div class="sofia-top"><span class="sofia-ava">S</span><div><b>Sofía</b><small>Asesora virtual · en línea</small></div></div>
     <p id="sofiaGreet">¡Hola! Soy Sofía, tu asesora con IA. Ahora también podés hablarme directamente desde el navegador 🎙️, o si preferís, escribime. ¿Cómo arrancamos?</p>
     <div class="fab-actions"><button type="button" onclick="openChat()">💬 Chatear</button><button type="button" class="call" id="fabCallBtn">📞 Llamar</button></div>
-    <div class="fab-call-st" id="fabCallSt"></div>
     <div class="chips" hidden>
       <button onclick="askSofia('¿Cuál es mi saldo?')">Mi saldo</button>
       <button onclick="askSofia('Perdí mi tarjeta')">Perdí mi tarjeta</button>
@@ -637,7 +636,7 @@ function showTeaser(){ $('sofiaCard').classList.remove('hidden'); $('sofiaMini')
 $('askForm').addEventListener('submit', e => { e.preventDefault(); const t = $('askInput').value.trim(); if (!t) return; $('askInput').value=''; askSofia(t); });
 // En mobile arranca minimizado para no tapar contenido
 if (window.matchMedia('(max-width:520px)').matches) hideTeaser();
-else setTimeout(() => { if (document.activeElement !== $('askInput') && !$('fabCallBtn').classList.contains('on') && !$('fabCallBtn').disabled) hideTeaser(); }, 15000);
+else setTimeout(() => { if (document.activeElement !== $('askInput') && $('sofiaFab').style.display !== 'none') hideTeaser(); }, 15000);
 
 /* ---------- Email (simulado vía Endpoint REST) ---------- */
 if (!CFG.REST_ENDPOINT_URL) $('emailCard').style.display = 'none';
@@ -660,11 +659,10 @@ $('emailForm').addEventListener('submit', async ev => {
 const CFG = window.DEMO_CONFIG || {};
 const $ = (id) => document.getElementById(id);
 const callBtn = $('callBtn'), hangupBtn = $('hangupBtn'), st = $('callStatus'), dot = $('callDot'), timerEl = $('callTimer');
-const fabBtn = $('fabCallBtn'), fabSt = $('fabCallSt');
-const setS = (t, c='') => { st.textContent = t; st.className = 'status ' + c; if (fabSt) fabSt.textContent = t; };
+const setS = (t, c='') => { st.textContent = t; st.className = 'status ' + c; };
 let client = null, t0, timer;
 const startT = () => { t0 = Date.now(); dot.classList.add('on'); timer = setInterval(() => { const s = Math.floor((Date.now()-t0)/1000); timerEl.textContent = String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }, 1000); };
-const reset = () => { clearInterval(timer); dot.classList.remove('on'); timerEl.textContent = '00:00'; callBtn.disabled = false; hangupBtn.disabled = true; if (fabBtn) { fabBtn.disabled = false; fabBtn.classList.remove('on'); fabBtn.textContent = '📞 Llamar'; } };
+const reset = () => { clearInterval(timer); dot.classList.remove('on'); timerEl.textContent = '00:00'; callBtn.disabled = false; hangupBtn.disabled = true; };
 if (!CFG.VOICE_ENDPOINT_URL || CFG.VOICE_ENDPOINT_URL.includes('PEGAR_TOKEN')) { callBtn.disabled = true; setS('Configurá VOICE_ENDPOINT_URL en config.js', 'err'); }
 callBtn.addEventListener('click', async () => {
   callBtn.disabled = true; setS('Iniciando…');
@@ -675,7 +673,7 @@ callBtn.addEventListener('click', async () => {
       client = await sdk.createWebRTCClient({ endpointUrl: CFG.VOICE_ENDPOINT_URL, userId: 'web-' + Math.random().toString(36).slice(2,10) });
       client.on('connecting', () => setS('Conectando…'));
       client.on('registered', () => setS('Conectado, llamando a Sofía…'));
-      client.on('answered', () => { setS('En llamada con Sofía 🎙️', 'ok'); hangupBtn.disabled = false; startT(); if (fabBtn) { fabBtn.disabled = false; fabBtn.classList.add('on'); fabBtn.textContent = '⏹ Colgar'; } });
+      client.on('answered', () => { setS('En llamada con Sofía 🎙️', 'ok'); hangupBtn.disabled = false; startT(); });
       client.on('ended', () => { setS('Llamada finalizada.'); reset(); });
       client.on('failed', (s, i) => { setS('La llamada falló: ' + (i && i.cause), 'err'); reset(); });
       client.on('error', e => { setS('Error: ' + e.message, 'err'); reset(); });
@@ -684,8 +682,41 @@ callBtn.addEventListener('click', async () => {
   } catch (e) { setS('Error: ' + e.message, 'err'); reset(); }
 });
 hangupBtn.addEventListener('click', async () => { try { await client.endCall(); await client.disconnect(); } catch(_) {} setS('Llamada finalizada.'); reset(); });
-if (fabBtn) fabBtn.addEventListener('click', () => { if (fabBtn.classList.contains('on')) hangupBtn.click(); else if (!callBtn.disabled) { fabBtn.disabled = true; callBtn.click(); } });
 window.addEventListener('beforeunload', () => { if (client) void client.destroy().catch(()=>{}); });
+</script>
+<!-- ---------- Llamar desde el globito: widget oficial Click To Call de Cognigy ---------- -->
+<script src="https://github.com/Cognigy/click-to-call-widget/releases/latest/download/webRTCWidget.js"></script>
+<script>
+(function () {
+  const VOICE = (window.DEMO_CONFIG || {}).VOICE_ENDPOINT_URL;
+  const fab = document.getElementById('sofiaFab'), btn = document.getElementById('fabCallBtn');
+  let active = false, idleTimer = null;
+  function backToSofia() {
+    clearTimeout(idleTimer);
+    try { window.destroyWebRTCWidget && window.destroyWebRTCWidget(); } catch (_) {}
+    active = false; fab.style.display = ''; hideTeaser();          // vuelve el "¿Te ayudo?"
+  }
+  async function startVoice() {
+    if (active || !window.initWebRTCWidget || !VOICE) return;
+    active = true;
+    try { const w = window.cognigyWebchat; if (w && w.isOpen && w.isOpen() && w.close) w.close(); } catch (_) {}
+    fab.style.display = 'none';                                      // se minimiza el globito
+    const widget = await window.initWebRTCWidget(VOICE);
+    widget.on('newRTCSession', (s) => {
+      clearTimeout(idleTimer);
+      const done = () => setTimeout(backToSofia, 4000);              // deja ver el final 4 s
+      s.on('ended', done); s.on('failed', done);
+    });
+    // arranca la llamada sin un segundo clic
+    let n = 0; const t = setInterval(() => {
+      const b = document.querySelector('.webrtc_widget_call_button');
+      if (b) { clearInterval(t); b.click(); } else if (++n > 40) clearInterval(t);
+    }, 250);
+    // si no se llega a iniciar la llamada, vuelve el globito a los 30 s
+    idleTimer = setTimeout(backToSofia, 30000);
+  }
+  if (btn) btn.addEventListener('click', startVoice);
+})();
 </script>
 </body>
 </html>
