@@ -455,8 +455,8 @@ body.no-webchat .sofia-fab{bottom:20px}
     <div class="grid g3">
       <div class="card"><span class="ico">💬</span><h3>Webchat</h3><p>Chateá con Sofía. Si lo necesitás, te deriva con un asesor humano.</p><button class="btn btn-primary" onclick="openChat()">Abrir chat</button><div class="status" id="chatStatus"></div></div>
       <div class="card"><span class="ico">📞</span><h3>Llamar desde la web</h3><p>Hablá con Sofía por voz desde el navegador. Necesitás micrófono.</p>
-        <div class="call-ui"><button class="btn btn-primary" id="callBtn">📞 Llamar</button><button class="btn btn-outline" id="hangupBtn" disabled>Colgar</button><span><span class="live" id="callDot"></span> <span id="callTimer">00:00</span></span></div>
-        <div class="status" id="callStatus">Listo para llamar.</div></div>
+        <div class="call-ui"><button class="btn btn-primary" id="callBtn">📞 Llamar</button></div>
+        <div class="status" id="callStatus">Se abre la llamada de Sofía abajo a la derecha.</div></div>
       <div class="card" id="emailCard"><span class="ico">✉️</span><h3>Escribinos por email</h3><p>Sofía analiza tu consulta y te responde a tu casilla.</p>
         <form id="emailForm">
           <label for="em">Tu email</label><input id="em" type="email" required placeholder="tu@email.com">
@@ -654,36 +654,6 @@ $('emailForm').addEventListener('submit', async ev => {
 });
 </script>
 
-<!-- ---------- Click to Call (SDK oficial vía esm.sh) ---------- -->
-<script type="module">
-const CFG = window.DEMO_CONFIG || {};
-const $ = (id) => document.getElementById(id);
-const callBtn = $('callBtn'), hangupBtn = $('hangupBtn'), st = $('callStatus'), dot = $('callDot'), timerEl = $('callTimer');
-const setS = (t, c='') => { st.textContent = t; st.className = 'status ' + c; };
-let client = null, t0, timer;
-const startT = () => { t0 = Date.now(); dot.classList.add('on'); timer = setInterval(() => { const s = Math.floor((Date.now()-t0)/1000); timerEl.textContent = String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }, 1000); };
-const reset = () => { clearInterval(timer); dot.classList.remove('on'); timerEl.textContent = '00:00'; callBtn.disabled = false; hangupBtn.disabled = true; };
-if (!CFG.VOICE_ENDPOINT_URL || CFG.VOICE_ENDPOINT_URL.includes('PEGAR_TOKEN')) { callBtn.disabled = true; setS('Configurá VOICE_ENDPOINT_URL en config.js', 'err'); }
-callBtn.addEventListener('click', async () => {
-  callBtn.disabled = true; setS('Iniciando…');
-  try {
-    if (!client) {
-      const sdk = await import('https://esm.sh/@cognigy/click-to-call-sdk');
-      const sup = sdk.checkWebRTCSupport(); if (!sup.supported) throw new Error('Tu navegador no soporta WebRTC');
-      client = await sdk.createWebRTCClient({ endpointUrl: CFG.VOICE_ENDPOINT_URL, userId: 'web-' + Math.random().toString(36).slice(2,10) });
-      client.on('connecting', () => setS('Conectando…'));
-      client.on('registered', () => setS('Conectado, llamando a Sofía…'));
-      client.on('answered', () => { setS('En llamada con Sofía 🎙️', 'ok'); hangupBtn.disabled = false; startT(); });
-      client.on('ended', () => { setS('Llamada finalizada.'); reset(); });
-      client.on('failed', (s, i) => { setS('La llamada falló: ' + (i && i.cause), 'err'); reset(); });
-      client.on('error', e => { setS('Error: ' + e.message, 'err'); reset(); });
-    }
-    await client.connectAndCall();
-  } catch (e) { setS('Error: ' + e.message, 'err'); reset(); }
-});
-hangupBtn.addEventListener('click', async () => { try { await client.endCall(); await client.disconnect(); } catch(_) {} setS('Llamada finalizada.'); reset(); });
-window.addEventListener('beforeunload', () => { if (client) void client.destroy().catch(()=>{}); });
-</script>
 <!-- ---------- Llamar desde el globito: widget oficial Click To Call de Cognigy ---------- -->
 <script src="https://github.com/Cognigy/click-to-call-widget/releases/latest/download/webRTCWidget.js"></script>
 <script>
@@ -696,26 +666,39 @@ window.addEventListener('beforeunload', () => { if (client) void client.destroy(
     try { window.destroyWebRTCWidget && window.destroyWebRTCWidget(); } catch (_) {}
     active = false; fab.style.display = ''; hideTeaser();          // vuelve el "¿Te ayudo?"
   }
-  async function startVoice() {
+  async function startVoice(auto) {
     if (active || !window.initWebRTCWidget || !VOICE) return;
     active = true;
     try { const w = window.cognigyWebchat; if (w && w.isOpen && w.isOpen() && w.close) w.close(); } catch (_) {}
     fab.style.display = 'none';                                      // se minimiza el globito
     const widget = await window.initWebRTCWidget(VOICE);
+    let ending = false;
+    const done = () => { if (ending) return; ending = true; setTimeout(backToSofia, 4000); };   // deja ver el final 4 s
     widget.on('newRTCSession', (s) => {
       clearTimeout(idleTimer);
-      const done = () => setTimeout(backToSofia, 4000);              // deja ver el final 4 s
-      s.on('ended', done); s.on('failed', done);
+      // el widget emite 'terminated' (cortó alguien), 'failed' y 'close'
+      ['terminated', 'failed', 'close', 'ended'].forEach(ev => { try { s.on(ev, done); } catch (_) {} });
     });
-    // arranca la llamada sin un segundo clic
-    let n = 0; const t = setInterval(() => {
-      const b = document.querySelector('.webrtc_widget_call_button');
-      if (b) { clearInterval(t); b.click(); } else if (++n > 40) clearInterval(t);
-    }, 250);
-    // si no se llega a iniciar la llamada, vuelve el globito a los 30 s
-    idleTimer = setTimeout(backToSofia, 30000);
+    // respaldo: si el botón "colgar" estuvo visible y desaparece, la llamada terminó
+    let seenEnd = false; const watch = setInterval(() => {
+      if (!active) { clearInterval(watch); return; }
+      const endBtn = document.querySelector('.webrtc_widget_end_call_button');
+      if (endBtn) { seenEnd = true; clearTimeout(idleTimer); }
+      else if (seenEnd) { clearInterval(watch); done(); }
+    }, 500);
+    if (auto) {
+      // globito: arranca la llamada sin un segundo clic
+      let n = 0; const t = setInterval(() => {
+        const b = document.querySelector('.webrtc_widget_call_button');
+        if (b) { clearInterval(t); b.click(); } else if (++n > 40) clearInterval(t);
+      }, 250);
+    }
+    // si no se inicia ninguna llamada, vuelve el globito (30 s automático / 2 min manual)
+    idleTimer = setTimeout(backToSofia, auto ? 30000 : 120000);
   }
-  if (btn) btn.addEventListener('click', startVoice);
+  if (btn) btn.addEventListener('click', () => startVoice(true));            // globito: llama solo
+  const cardBtn = document.getElementById('callBtn');
+  if (cardBtn) cardBtn.addEventListener('click', () => startVoice(false));    // tarjeta: abre el widget y la persona toca el botón verde
 })();
 </script>
 </body>
