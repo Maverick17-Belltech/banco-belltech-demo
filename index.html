@@ -676,5 +676,9 @@ callBtn.addEventListener('click', async () => {
 hangupBtn.addEventListener('click', async () => { try { await client.endCall(); await client.disconnect(); } catch(_) {} setS('Llamada finalizada.'); reset(); });
 window.addEventListener('beforeunload', () => { if (client) void client.destroy().catch(()=>{}); });
 </script>
+<script src="https://github.com/Cognigy/click-to-call-widget/releases/latest/download/webRTCWidget.js"></script>
+  <script>
+   	addEventListener("load", (event) => {if (window.initWebRTCWidget) {window.initWebRTCWidget("https://endpoint-trial.cognigy.ai/5691f148eca1748ff9498059ec2dd9db7b77bb7e2d7367e0ac4d58f4704cd853")}});
+  </script>
 </body>
 </html>
