@@ -644,7 +644,16 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
       widgetSettings: { disableToggleButton: true },
       startBehavior: { startBehavior: 'injection', getStartedPayload: 'Hola', getStartedData: authData }
     }
-  }).then(w => { webchat = w; window.cognigyWebchat = w; while (pending.length) pending.shift()(); })
+  }).then(w => {
+    webchat = w; window.cognigyWebchat = w; while (pending.length) pending.shift()();
+    // Despedida: si Cognigy manda data { cerrarChat: true } (nodo "cerrar_chat"), se cierra el chat a los 4 s y vuelve "¿Te ayudo?"
+    try {
+      w.registerAnalyticsService(ev => {
+        const d = ev && ev.type === 'webchat/incoming-message' && ev.payload && ev.payload.data;
+        if (d && d.cerrarChat === true) setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000);
+      });
+    } catch (_) {}
+  })
     .catch(e => { $('chatStatus').textContent = 'No se pudo iniciar el webchat: ' + e.message; $('chatStatus').className = 'status err'; });
 } else {
   document.body.classList.add('no-webchat');
