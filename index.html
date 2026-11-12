@@ -396,12 +396,8 @@ body.no-webchat .sofia-fab{bottom:20px}
 <section id="micuenta">
   <div class="wrap">
     <div class="s-head"><div><h2>Mi cuenta</h2><p id="mcSub">Resumen de tus productos.</p></div><button class="link" onclick="askSofia('¿Cuáles fueron mis últimos movimientos?')">Consultar movimientos con Sofía →</button></div>
-    <div class="grid g3">
-      <div class="acct"><span class="ico">🏦</span><b>Caja de Ahorro</b><small>•••• <span class="acc4">0000</span></small><span class="amt">$ 1.254.380,50</span><button class="link" style="text-align:left" onclick="askSofia('¿Cuál es el saldo de mi caja de ahorro?')">Preguntar a Sofía →</button></div>
-      <div class="acct"><span class="ico">📄</span><b>Cuenta Corriente</b><small>Acuerdo disponible $ 500.000</small><span class="amt">$ 356.120,00</span><button class="link" style="text-align:left" onclick="askSofia('¿Cuánto tengo en la cuenta corriente?')">Preguntar a Sofía →</button></div>
-      <div class="acct"><span class="ico">💳</span><b>Tarjeta de crédito</b><small>•••• 4521 · vence <span id="vtoTarjeta">20-11-2026</span> · mínimo $ 28.400</small><span class="amt">$ 189.450,75</span><button class="link" style="text-align:left" onclick="askSofia('Perdí mi tarjeta terminada en 4521, quiero bloquearla')">Bloquear con Sofía →</button></div>
-    </div>
-    <div class="policy">
+    <div class="grid g3" id="mcGrid"><div class="acct"><b>Cargando tus productos…</b><small>Consultando el sistema del banco</small></div></div>
+    <div class="policy" id="mcPolicy">
       <div><b style="font-size:18px">🛡️ Póliza <span id="mcPoliza">—</span></b><div style="opacity:.85">Vigente · Denunciá un siniestro sin volver a identificarte.</div></div>
       <button class="btn btn-light" onclick="askSofia('Quiero denunciar un siniestro de mi póliza')">Denunciar siniestro</button>
     </div>
@@ -579,15 +575,20 @@ $('hero').addEventListener('touchend', e => { if (tx === null) return; const dx 
 function toggleDrawer(o){ $('drawer').classList.toggle('open',o); $('drawerBg').classList.toggle('open',o); }
 document.querySelectorAll('.drawer a').forEach(a => a.addEventListener('click', () => toggleDrawer(false)));
 
-/* ---------- Login simulado ---------- */
-// Deben coincidir con los nodos "auth_web" y "validar_identidad" de Cognigy.
-const USERS = {
-  "juan.perez@bancobelltech.example":        { nombre: "Juan Pérez",        dni: "30123456", fecha_nacimiento: "15-03-1985", poliza: "AUT-778812", acc4: "1287", rol: "Cliente · Seguro Automotor" },
-  "maria.gomez@bancobelltech.example":       { nombre: "María Gómez",       dni: "28987654", fecha_nacimiento: "02-11-1979", poliza: "HOG-552310", acc4: "5530", rol: "Cliente · Seguro Hogar" },
-  "sebastian.sosa@bancobelltech.example":    { nombre: "Sebastian Sosa",    dni: "29018611", fecha_nacimiento: "17-07-1981", poliza: "IOU-112233", acc4: "3391", rol: "Cliente · Cuenta y Tarjeta" },
-  "patricia.vinyolas@bancobelltech.example": { nombre: "Patricia Vinyolas", dni: "27933366", fecha_nacimiento: "26-02-1980", poliza: "AES-345678", acc4: "4802", rol: "Cliente · Seguro y Préstamo" }
-};
+/* ---------- Login (v13: usuarios y datos desde la API BT_BYS / planilla BT_BYS_Datos_Demo) ---------- */
+// Todos los usuarios entran con la misma clave de demo. Los datos son ficticios.
+const API = CFG.BYS_API_URL || '';
 const DEMO_PASS = "Demo1234@";
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pesos = (n) => { const [e, d] = Number(n || 0).toFixed(2).split('.'); return '$ ' + e.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + d; };
+const apiGet = (q) => fetch(API + '?' + new URLSearchParams(q)).then(r => r.json());
+let PERSONAS = null;
+function cargarPersonas(){ if (!PERSONAS) PERSONAS = apiGet({ accion: 'personas' }).then(j => (j && j.ok) ? j.personas : []).catch(() => []); return PERSONAS; }
+function rolDe(p){
+  const s = (p.seguros || []).map(x => 'Seguro ' + x).join(' + ');
+  const prod = [p.cuentas ? p.cuentas + (p.cuentas > 1 ? ' cuentas' : ' cuenta') : '', p.tarjetas ? 'Tarjeta' : '', s].filter(Boolean).join(' · ');
+  return (p.origen === 'DEMO' ? 'Nuevo cliente' : 'Cliente') + (prod ? ' · ' + prod : ' · sin productos');
+}
 const store = {
   get(){ try { return JSON.parse(localStorage.getItem('bt_session') || 'null'); } catch(_) { return null; } },
   set(v){ try { localStorage.setItem('bt_session', JSON.stringify(v)); } catch(_) {} },
@@ -597,11 +598,14 @@ const session = store.get();
 function openLogin(){ $('loginModal').classList.add('open'); setTimeout(()=>$('emB').focus(),50); }
 function closeLogin(){ $('loginModal').classList.remove('open'); }
 function togglePw(id,b){ const i=$(id); i.type = i.type==='password'?'text':'password'; b.textContent = i.type==='password'?'Ver':'Ocultar'; }
-document.querySelectorAll('.loginForm').forEach(f => f.addEventListener('submit', ev => {
+document.querySelectorAll('.loginForm').forEach(f => f.addEventListener('submit', async ev => {
   ev.preventDefault();
-  const email = f.email.value.trim().toLowerCase(), pass = f.pass.value, u = USERS[email];
-  if (!u || pass !== DEMO_PASS) { $(f.dataset.err).textContent = 'Email o clave incorrectos.'; return; }
-  store.set({ email, ...u, loginAt: new Date().toISOString() });
+  const errEl = $(f.dataset.err); errEl.textContent = 'Validando…';
+  const email = f.email.value.trim().toLowerCase(), pass = f.pass.value;
+  const lista = await cargarPersonas();
+  const p = lista.find(x => x.email === email);
+  if (!p || pass !== DEMO_PASS) { errEl.textContent = lista.length ? 'Email o clave incorrectos.' : 'No pude conectar con el sistema. Probá de nuevo.'; return; }
+  store.set({ email, nombre: (p.nombre + ' ' + p.apellido).trim(), dni: p.dni, fecha_nacimiento: p.fecha_nacimiento, poliza: p.poliza, rol: rolDe(p), loginAt: new Date().toISOString() });
   location.reload();
 }));
 function logout(){ store.clear(); location.reload(); }
@@ -614,8 +618,14 @@ function logout(){ store.clear(); location.reload(); }
 })();
 document.querySelectorAll('.demo-users').forEach(box => {
   const form = document.querySelector('.loginForm[data-err="' + box.dataset.form + '"]');
-  box.innerHTML = '<h4>Usuarios de prueba</h4><p class="sub">Hacé clic en un usuario para completar el ingreso.</p>' +
-    Object.entries(USERS).map(([em, u]) => '<button type="button" class="du" data-em="' + em + '"><b>' + u.nombre + '</b><span>' + u.rol + ' · Póliza ' + u.poliza + '</span><small>' + em + '</small></button>').join('');
+  const head = '<h4>Usuarios de prueba</h4><p class="sub">Hacé clic en un usuario para completar el ingreso.</p>';
+  box.innerHTML = head + '<p class="sub">Cargando usuarios…</p>';
+  cargarPersonas().then(lista => {
+    // Clientes base + las últimas 6 altas hechas en la demo
+    const base = lista.filter(p => p.origen !== 'DEMO'), demo = lista.filter(p => p.origen === 'DEMO').slice(-6).reverse();
+    const items = demo.concat(base);
+    box.innerHTML = head + (items.length ? items.map(p => '<button type="button" class="du" data-em="' + esc(p.email) + '"><b>' + esc(p.nombre + ' ' + p.apellido) + '</b><span>' + esc(rolDe(p)) + (p.poliza ? ' · Póliza ' + esc(p.poliza) : '') + '</span><small>' + esc(p.email) + '</small></button>').join('') : '<p class="sub">No pude cargar los usuarios. Recargá la página.</p>');
+  });
   box.addEventListener('click', e => { const b = e.target.closest('.du'); if (!b || !form) return; form.email.value = b.dataset.em; form.pass.value = DEMO_PASS; form.querySelector('[type=submit]').focus(); });
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLogin(); toggleDrawer(false); } });
@@ -629,10 +639,40 @@ if (session) {
   $('upAva').textContent = session.nombre.split(' ').map(s=>s[0]).join('').slice(0,2);
   $('micuenta').style.display = 'block';
   $('mcSub').textContent = 'Hola ' + first + ', este es el resumen de tus productos.';
-  $('mcPoliza').textContent = session.poliza;
-  document.querySelectorAll('.acc4').forEach(e => e.textContent = session.acc4);
+  $('mcPoliza').textContent = session.poliza || '—';
+  renderMiCuenta();
   $('sofiaGreet').textContent = '¡Hola ' + first + '! 👋 Ya te reconocí. ¿En qué te ayudo hoy?';
   if (window.matchMedia('(max-width:520px)').matches) document.querySelector('.user-pill .btn').style.display='none';
+}
+
+/* ---------- Mi cuenta: datos en vivo desde la API ---------- */
+async function renderMiCuenta(){
+  const grid = $('mcGrid');
+  try {
+    const r = await apiGet({ accion: 'clientes', dni: session.dni });
+    if (!r.ok) throw new Error(r.resultado);
+    const nom = { caja_ahorro: 'Caja de Ahorro', cuenta_corriente: 'Cuenta Corriente', paquete: 'Paquete' };
+    const cards = [];
+    (r.cuentas || []).forEach(c => {
+      const ico = c.tipo === 'cuenta_corriente' ? '📄' : '🏦';
+      const mon = c.moneda === 'USD' ? pesos(c.saldo).replace('$ ', 'US$ ') : pesos(c.saldo);
+      const extra = Number(c.acuerdo) > 0 ? 'Acuerdo disponible ' + pesos(c.acuerdo) : '•••• ' + esc(String(c.numero).slice(-4)) + ' · Alias ' + esc(c.alias);
+      cards.push('<div class="acct"><span class="ico">' + ico + '</span><b>' + esc(nom[c.tipo] || c.tipo) + (c.moneda === 'USD' ? ' en dólares' : '') + '</b><small>' + extra + '</small><span class="amt">' + mon + '</span><button class="link" style="text-align:left" onclick="askSofia(\'¿Cuál es el saldo de mi ' + esc(nom[c.tipo] || 'cuenta').toLowerCase() + '?\')">Preguntar a Sofía →</button></div>');
+    });
+    (r.tarjetas || []).forEach(t => {
+      const bloq = t.estado !== 'activa';
+      cards.push('<div class="acct"><span class="ico">💳</span><b>' + esc(t.marca + ' ' + t.nivel) + '</b><small>•••• ' + esc(t.ultimos_4) + (bloq ? ' · <b style="color:#c0392b">' + esc(t.estado) + '</b>' : ' · vence ' + esc(t.vencimiento) + ' · mínimo ' + pesos(t.pago_minimo)) + '</small><span class="amt">' + pesos(t.saldo_a_pagar) + '</span>' + (bloq ? '<small>Tu tarjeta nueva llega en 5 a 7 días hábiles.</small>' : '<button class="link" style="text-align:left" onclick="askSofia(\'Perdí mi tarjeta terminada en ' + esc(t.ultimos_4) + ', quiero bloquearla\')">Bloquear con Sofía →</button>') + '</div>');
+    });
+    (r.prestamos || []).forEach(l => {
+      cards.push('<div class="acct"><span class="ico">💸</span><b>Préstamo personal</b><small>Cuota ' + (Number(l.cuotas_pagas) + 1) + ' de ' + esc(l.cuotas) + '</small><span class="amt">' + pesos(l.valor_cuota) + '</span><button class="link" style="text-align:left" onclick="askSofia(\'¿Cuánto me falta pagar de mi préstamo?\')">Preguntar a Sofía →</button></div>');
+    });
+    if (!cards.length) cards.push('<div class="acct"><span class="ico">🏦</span><b>Todavía no tenés productos</b><small>Abrí tu primera cuenta en minutos.</small><button class="btn btn-primary" onclick="askSofia(\'Quiero abrir una cuenta\')">Abrir una cuenta con Sofía</button></div>');
+    grid.innerHTML = cards.join('');
+    const seg = (r.seguros || [])[0];
+    if (seg) $('mcPoliza').textContent = seg.poliza + ' · ' + seg.tipo; else $('mcPolicy').style.display = 'none';
+  } catch (e) {
+    grid.innerHTML = '<div class="acct"><b>No pudimos cargar tus productos</b><small>Probá recargar la página en unos segundos.</small></div>';
+  }
 }
 
 /* ---------- Webchat Cognigy ---------- */

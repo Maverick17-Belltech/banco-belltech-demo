@@ -15,6 +15,10 @@ window.DEMO_CONFIG = {
   //    Dejar vacío ("") para ocultar el formulario hasta configurarlo.
   REST_ENDPOINT_URL: "",
 
+  // 4) API de datos de la demo (Apps Script BT_BYS_API_Datos, planilla BT_BYS_Datos_Demo).
+  //    Es pública y de solo lectura; la clave de escritura NO va acá.
+  BYS_API_URL: "https://script.google.com/macros/s/AKfycbw8xuOLZVk5U4sBUwLbaLAjuILVLLL-nv9RT0QcOrFBvn_4rnnkJe_w7Ly2Nt350cOI/exec",
+
   // Color principal de la marca (webchat y sitio)
   PRIMARY_COLOR: "#0B3D91"
 };
