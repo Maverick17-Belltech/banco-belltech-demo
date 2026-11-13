@@ -19,6 +19,9 @@ window.DEMO_CONFIG = {
   //    Es pública y de solo lectura; la clave de escritura NO va acá.
   BYS_API_URL: "https://script.google.com/macros/s/AKfycbw8xuOLZVk5U4sBUwLbaLAjuILVLLL-nv9RT0QcOrFBvn_4rnnkJe_w7Ly2Nt350cOI/exec",
 
+  // 5) Formulario de alta por QR (Google Form creado por crearFormulario() del Apps Script)
+  ALTA_FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLScfzQxufYXLBvjbnMpdkII1rzEJ-8u12m4mertHcGZ6DEwUFw/viewform",
+
   // Color principal de la marca (webchat y sitio)
   PRIMARY_COLOR: "#0B3D91"
 };

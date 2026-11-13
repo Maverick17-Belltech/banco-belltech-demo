@@ -287,7 +287,7 @@ body.no-webchat .sofia-fab{bottom:20px}
     </ul>
 
     <div class="actions">
-      <a class="btn btn-outline hide-md" href="#" onclick="askSofia('Quiero hacerme cliente, ¿qué necesito?');return false">Hacete cliente</a>
+      <a class="btn btn-outline hide-md" href="#" onclick="openAlta();return false">Hacete cliente</a>
       <button class="btn btn-primary" id="btnBanca" onclick="openLogin()">🔒 Banca Online</button>
       <div class="user-pill" id="userPill"><span id="upName">—</span><button class="btn btn-outline" style="padding:6px 12px" onclick="logout()">Salir</button><span class="avatar" id="upAva">—</span></div>
       <button class="burger" aria-label="Abrir menú" onclick="toggleDrawer(true)"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="#2A1B6E" stroke-width="2.2" stroke-linecap="round"/></svg></button>
@@ -523,6 +523,21 @@ body.no-webchat .sofia-fab{bottom:20px}
   </div>
 </footer>
 
+<!-- ===== v16: Hacete cliente (QR + formulario) ===== -->
+<div class="modal-bg" id="altaModal" onclick="if(event.target===this)closeAlta()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="altaTitle" style="text-align:center">
+    <button class="x" onclick="closeAlta()" aria-label="Cerrar">×</button>
+    <h3 id="altaTitle" style="margin:0 0 6px;font-size:22px">Hacete cliente en 1 minuto</h3>
+    <p style="color:var(--muted);margin:0 0 14px;font-size:14px">Escaneá el código con tu celular y completá el formulario. Al enviarlo ya tenés tu cuenta y podés entrar a Banca Online con tu email y la clave <b>Demo1234@</b>.</p>
+    <img src="qr-alta.png" alt="Código QR del formulario de alta" style="width:220px;height:220px;max-width:70vw;max-height:70vw;border-radius:12px;border:1px solid var(--border)">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+      <a class="btn btn-primary" id="altaLink" href="#" target="_blank" rel="noopener">Completar el formulario acá</a>
+      <button class="btn btn-outline" onclick="closeAlta();askSofia('Quiero hacerme cliente y abrir una cuenta')">O hacelo hablando con Sofía</button>
+    </div>
+    <p class="hint" style="margin-top:12px">Demo: usá datos inventados (el email puede ser real si querés recibir los mails).</p>
+  </div>
+</div>
+
 <!-- ===== Login modal ===== -->
 <div class="modal-bg" id="loginModal" onclick="if(event.target===this)closeLogin()">
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="lmTitle">
@@ -602,6 +617,8 @@ const store = {
   clear(){ try { localStorage.removeItem('bt_session'); } catch(_) {} }
 };
 const session = store.get();
+function openAlta(){ const l = $('altaLink'); if (l) l.href = CFG.ALTA_FORM_URL || '#'; $('altaModal').classList.add('open'); }
+function closeAlta(){ $('altaModal').classList.remove('open'); }
 function openLogin(){ $('loginModal').classList.add('open'); setTimeout(()=>$('emB').focus(),50); }
 function closeLogin(){ $('loginModal').classList.remove('open'); }
 function togglePw(id,b){ const i=$(id); i.type = i.type==='password'?'text':'password'; b.textContent = i.type==='password'?'Ver':'Ocultar'; }
@@ -635,7 +652,7 @@ document.querySelectorAll('.demo-users').forEach(box => {
   });
   box.addEventListener('click', e => { const b = e.target.closest('.du'); if (!b || !form) return; form.email.value = b.dataset.em; form.pass.value = DEMO_PASS; form.querySelector('[type=submit]').focus(); });
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLogin(); toggleDrawer(false); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAlta(); closeLogin(); toggleDrawer(false); } });
 
 if (session) {
   const first = session.nombre.split(' ')[0];
