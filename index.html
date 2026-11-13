@@ -713,6 +713,18 @@ async function renderMiCuenta(){
   }
 }
 
+/* ---------- v18.2: botón fijo "Autorizar operación" ----------
+   En una llamada, Sofía pide tocar este botón e ingresar el código que dicta (página de PIN de los xApps de Cognigy). */
+(() => {
+  const url = (window.DEMO_CONFIG || {}).XAPP_PIN_URL || 'https://static-trial.cognigy.ai';
+  const b = document.createElement('a');
+  b.href = url; b.target = '_blank'; b.rel = 'noopener';
+  b.textContent = '🔐 Autorizar operación';
+  b.setAttribute('aria-label', 'Autorizar operación con el código que te da Sofía');
+  b.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:9998;background:#fff;color:var(--brand);border:2px solid var(--brand);font-weight:700;font-size:14px;padding:11px 16px;border-radius:999px;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.18)';
+  document.body.appendChild(b);
+})();
+
 /* ---------- v15: indicador "Procesando…" del chat ---------- */
 // Webchat solo muestra sus puntos cuando Sofía ya está escribiendo; mientras espera la API no muestra nada.
 // Este indicador aparece al enviar un mensaje y se va con la primera respuesta de Sofía (o a los 45 s, por las dudas).
