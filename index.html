@@ -755,6 +755,8 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         const pl = (ev && ev.payload) || {}, cog = (pl.data && pl.data._cognigy) || {};
         const visible = ev && ev.type === 'webchat/incoming-message' &&
           ((typeof pl.text === 'string' && pl.text.trim() !== '') || cog._app || cog._default || (pl.data && pl.data.cerrarChat));
+        if (ev && ev.type === 'webchat/open') chatAbierto = true;
+        if (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize')) chatAbierto = false;
         if (ev && ev.type === 'webchat/outgoing-message') proc.mostrar();
         if (visible || (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize'))) proc.ocultar();
         if (visible && typeof session !== 'undefined' && session) refrescarMiCuenta();
@@ -769,8 +771,11 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
   $('chatStatus').textContent = 'Configurá WEBCHAT_CONFIG_URL en config.js'; $('chatStatus').className = 'status err';
 }
 function whenReady(fn){ webchat ? fn() : pending.push(fn); }
-function openChat(){ hideTeaser(true); whenReady(() => webchat.open && webchat.open()); }
-function askSofia(text){ hideTeaser(true); whenReady(() => { webchat.open && webchat.open(); webchat.sendMessage && webchat.sendMessage(text, authData); }); }
+// v16.1: open() con el chat ya abierto lo cerraba; ahora solo se abre si está cerrado
+let chatAbierto = false;
+function abrirChat(){ if (!chatAbierto && webchat.open) webchat.open(); }
+function openChat(){ hideTeaser(true); whenReady(() => abrirChat()); }
+function askSofia(text){ hideTeaser(true); whenReady(() => { abrirChat(); webchat.sendMessage && webchat.sendMessage(text, authData); }); }
 
 /* ---------- Globito de Sofía ---------- */
 function hideTeaser(){ $('sofiaCard').classList.add('hidden'); $('sofiaMini').classList.add('show'); }
