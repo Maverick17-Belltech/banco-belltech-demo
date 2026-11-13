@@ -583,7 +583,7 @@ const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&a
 const pesos = (n) => { const [e, d] = Number(n || 0).toFixed(2).split('.'); return '$ ' + e.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + d; };
 const apiGet = (q) => fetch(API + '?' + new URLSearchParams(q)).then(r => r.json());
 let PERSONAS = null;
-function cargarPersonas(){ if (!PERSONAS) PERSONAS = apiGet({ accion: 'personas' }).then(j => (j && j.ok) ? j.personas : []).catch(() => []); return PERSONAS; }
+function cargarPersonas(){ if (!PERSONAS) PERSONAS = apiGet({ accion: 'personas' }).then(j => (j && j.ok && Array.isArray(j.personas)) ? j.personas : []).catch(() => []); return PERSONAS; }
 function rolDe(p){
   const s = (p.seguros || []).map(x => 'Seguro ' + x).join(' + ');
   const prod = [p.cuentas ? p.cuentas + (p.cuentas > 1 ? ' cuentas' : ' cuenta') : '', p.tarjetas ? 'Tarjeta' : '', s].filter(Boolean).join(' · ');
@@ -641,11 +641,16 @@ if (session) {
   $('mcSub').textContent = 'Hola ' + first + ', este es el resumen de tus productos.';
   $('mcPoliza').textContent = session.poliza || '—';
   renderMiCuenta();
+  // v14: "Mi cuenta" se actualiza sola cada 15 s (si la pestaña está visible), al volver a la pestaña y después de cada respuesta de Sofía
+  setInterval(() => { if (!document.hidden) renderMiCuenta(); }, 15000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) renderMiCuenta(); });
   $('sofiaGreet').textContent = '¡Hola ' + first + '! 👋 Ya te reconocí. ¿En qué te ayudo hoy?';
   if (window.matchMedia('(max-width:520px)').matches) document.querySelector('.user-pill .btn').style.display='none';
 }
 
 /* ---------- Mi cuenta: datos en vivo desde la API ---------- */
+let _refT = null;
+function refrescarMiCuenta(){ clearTimeout(_refT); _refT = setTimeout(renderMiCuenta, 1500); }
 async function renderMiCuenta(){
   const grid = $('mcGrid');
   try {
@@ -696,6 +701,7 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
     // Despedida: si Cognigy manda data { cerrarChat: true } (nodo "cerrar_chat"), se cierra el chat a los 4 s y vuelve "¿Te ayudo?"
     try {
       w.registerAnalyticsService(ev => {
+        if (ev && ev.type === 'webchat/incoming-message' && typeof session !== 'undefined' && session) refrescarMiCuenta();
         const d = ev && ev.type === 'webchat/incoming-message' && ev.payload && ev.payload.data;
         if (d && d.cerrarChat === true) setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000);
       });
