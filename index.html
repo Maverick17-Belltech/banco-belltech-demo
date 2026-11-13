@@ -681,8 +681,10 @@ async function renderMiCuenta(){
     const r = await apiGet({ accion: 'clientes', dni: session.dni });
     // v18: después de la baja total la persona deja de ser cliente
     if (!r.ok && r.resultado === 'NO_ENCONTRADO') {
-      grid.innerHTML = '<div class="acct"><span class="ico">👋</span><b>Ya no sos cliente de Banco Belltech</b><small>Se completó la baja total de tus productos. Gracias por haber confiado en nosotros.</small><button class="btn btn-primary" onclick="logout()">Cerrar sesión</button></div>';
+      grid.innerHTML = '<div class="acct"><span class="ico">👋</span><b>Ya no sos cliente de Banco Belltech</b><small>Se completó la baja total de tus productos. Gracias por haber confiado en nosotros. Cerramos tu sesión en unos segundos.</small><button class="btn btn-primary" onclick="logout()">Cerrar sesión</button></div>';
       $('mcPolicy').style.display = 'none';
+      // v18.1: la sesión se cierra sola; si no, el chat y la llamada siguen usando al cliente eliminado (userId cli-<DNI>)
+      if (!window._bajaLogout) window._bajaLogout = setTimeout(logout, 8000);
       return;
     }
     if (!r.ok) throw new Error(r.resultado);
