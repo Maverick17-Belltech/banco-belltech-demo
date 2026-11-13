@@ -679,6 +679,12 @@ async function renderMiCuenta(){
   const grid = $('mcGrid');
   try {
     const r = await apiGet({ accion: 'clientes', dni: session.dni });
+    // v18: después de la baja total la persona deja de ser cliente
+    if (!r.ok && r.resultado === 'NO_ENCONTRADO') {
+      grid.innerHTML = '<div class="acct"><span class="ico">👋</span><b>Ya no sos cliente de Banco Belltech</b><small>Se completó la baja total de tus productos. Gracias por haber confiado en nosotros.</small><button class="btn btn-primary" onclick="logout()">Cerrar sesión</button></div>';
+      $('mcPolicy').style.display = 'none';
+      return;
+    }
     if (!r.ok) throw new Error(r.resultado);
     const nom = { caja_ahorro: 'Caja de Ahorro', cuenta_corriente: 'Cuenta Corriente', paquete: 'Paquete' };
     const cards = [];
@@ -693,7 +699,7 @@ async function renderMiCuenta(){
       const bloq = t.estado !== 'activa';
       cards.push('<div class="acct"><span class="ico">💳</span><b>' + esc(t.marca + ' ' + t.nivel) + '</b><small>•••• ' + esc(t.ultimos_4) + (bloq ? ' · <b style="color:#c0392b">' + esc(t.estado) + '</b>' : ' · vence ' + esc(t.vencimiento) + ' · mínimo ' + pesos(t.pago_minimo)) + '</small><span class="amt">' + pesos(t.saldo_a_pagar) + '</span>' + (bloq ? '<small>Tu tarjeta nueva llega en 5 a 7 días hábiles.</small>' : '<button class="link" style="text-align:left" onclick="askSofia(\'Perdí mi tarjeta terminada en ' + esc(t.ultimos_4) + ', quiero bloquearla\')">Bloquear con Sofía →</button>') + '</div>');
     });
-    (r.prestamos || []).forEach(l => {
+    (r.prestamos || []).filter(l => l.estado !== 'cancelado').forEach(l => {   // v18: préstamos cancelados no se muestran
       cards.push('<div class="acct"><span class="ico">💸</span><b>Préstamo personal</b><small>Cuota ' + (Number(l.cuotas_pagas) + 1) + ' de ' + esc(l.cuotas) + '</small><span class="amt">' + pesos(l.valor_cuota) + '</span><button class="link" style="text-align:left" onclick="askSofia(\'¿Cuánto me falta pagar de mi préstamo?\')">Preguntar a Sofía →</button></div>');
     });
     if (!cards.length) cards.push('<div class="acct"><span class="ico">🏦</span><b>Todavía no tenés productos</b><small>Abrí tu primera cuenta en minutos.</small><button class="btn btn-primary" onclick="askSofia(\'Quiero abrir una cuenta\')">Abrir una cuenta con Sofía</button></div>');
