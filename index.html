@@ -734,9 +734,14 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
     // Despedida: si Cognigy manda data { cerrarChat: true } (nodo "cerrar_chat"), se cierra el chat a los 4 s y vuelve "¿Te ayudo?"
     try {
       w.registerAnalyticsService(ev => {
+        // v15.1: Cognigy manda varios "incoming-message" técnicos sin texto (control de voz, fin de stream).
+        // El indicador se oculta solo con un mensaje visible: texto, formulario xApp o cierre del chat.
+        const pl = (ev && ev.payload) || {}, cog = (pl.data && pl.data._cognigy) || {};
+        const visible = ev && ev.type === 'webchat/incoming-message' &&
+          ((typeof pl.text === 'string' && pl.text.trim() !== '') || cog._app || cog._default || (pl.data && pl.data.cerrarChat));
         if (ev && ev.type === 'webchat/outgoing-message') proc.mostrar();
-        if (ev && (ev.type === 'webchat/incoming-message' || ev.type === 'webchat/close' || ev.type === 'webchat/minimize')) proc.ocultar();
-        if (ev && ev.type === 'webchat/incoming-message' && typeof session !== 'undefined' && session) refrescarMiCuenta();
+        if (visible || (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize'))) proc.ocultar();
+        if (visible && typeof session !== 'undefined' && session) refrescarMiCuenta();
         const d = ev && ev.type === 'webchat/incoming-message' && ev.payload && ev.payload.data;
         if (d && d.cerrarChat === true) setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000);
       });
