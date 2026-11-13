@@ -697,14 +697,13 @@ const proc = (() => {
   document.body.appendChild(el);
   let tOcultar = null, tPos = null;
   function posicionar() {
-    // Se ubica justo arriba del campo "Escribí tu mensaje…" del chat
-    const campo = [...document.querySelectorAll('textarea, input[type="text"]')]
-      .find(x => x.offsetParent !== null && /mensaje/i.test(x.placeholder || '') && x.id !== 'em');
-    if (!campo) { el.style.right = '28px'; el.style.bottom = '110px'; el.style.left = 'auto'; el.style.top = 'auto'; return; }
-    const r = campo.getBoundingClientRect();
+    // v15.2: se ubica justo arriba de la zona de escritura del chat (".webchat-input" de Webchat v3)
+    const zona = [...document.querySelectorAll('.webchat-input')].find(x => x.offsetParent !== null);
+    if (!zona) { el.style.right = '28px'; el.style.bottom = '110px'; el.style.left = 'auto'; el.style.top = 'auto'; return; }
+    const r = zona.getBoundingClientRect();
     el.style.top = 'auto'; el.style.right = 'auto';
-    el.style.left = Math.max(8, r.left) + 'px';
-    el.style.bottom = Math.max(8, window.innerHeight - r.top + 12) + 'px';
+    el.style.left = Math.max(8, r.left + 12) + 'px';
+    el.style.bottom = Math.max(8, window.innerHeight - r.top + 8) + 'px';
   }
   return {
     mostrar() { posicionar(); el.classList.add('on'); clearTimeout(tOcultar); tOcultar = setTimeout(() => this.ocultar(), 45000);
