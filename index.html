@@ -682,13 +682,14 @@ async function renderMiCuenta(){
     if (!r.ok) throw new Error(r.resultado);
     const nom = { caja_ahorro: 'Caja de Ahorro', cuenta_corriente: 'Cuenta Corriente', paquete: 'Paquete' };
     const cards = [];
-    (r.cuentas || []).forEach(c => {
+    // v17: no se muestran cuentas cerradas, tarjetas ni seguros dados de baja
+    (r.cuentas || []).filter(c => c.estado !== 'cerrada').forEach(c => {
       const ico = c.tipo === 'cuenta_corriente' ? '📄' : '🏦';
       const mon = c.moneda === 'USD' ? pesos(c.saldo).replace('$ ', 'US$ ') : pesos(c.saldo);
       const extra = Number(c.acuerdo) > 0 ? 'Acuerdo disponible ' + pesos(c.acuerdo) : '•••• ' + esc(String(c.numero).slice(-4)) + ' · Alias ' + esc(c.alias);
       cards.push('<div class="acct"><span class="ico">' + ico + '</span><b>' + esc(nom[c.tipo] || c.tipo) + (c.moneda === 'USD' ? ' en dólares' : '') + '</b><small>' + extra + '</small><span class="amt">' + mon + '</span><button class="link" style="text-align:left" onclick="askSofia(\'¿Cuál es el saldo de mi ' + esc(nom[c.tipo] || 'cuenta').toLowerCase() + '?\')">Preguntar a Sofía →</button></div>');
     });
-    (r.tarjetas || []).forEach(t => {
+    (r.tarjetas || []).filter(t => t.estado !== 'dada_de_baja').forEach(t => {
       const bloq = t.estado !== 'activa';
       cards.push('<div class="acct"><span class="ico">💳</span><b>' + esc(t.marca + ' ' + t.nivel) + '</b><small>•••• ' + esc(t.ultimos_4) + (bloq ? ' · <b style="color:#c0392b">' + esc(t.estado) + '</b>' : ' · vence ' + esc(t.vencimiento) + ' · mínimo ' + pesos(t.pago_minimo)) + '</small><span class="amt">' + pesos(t.saldo_a_pagar) + '</span>' + (bloq ? '<small>Tu tarjeta nueva llega en 5 a 7 días hábiles.</small>' : '<button class="link" style="text-align:left" onclick="askSofia(\'Perdí mi tarjeta terminada en ' + esc(t.ultimos_4) + ', quiero bloquearla\')">Bloquear con Sofía →</button>') + '</div>');
     });
@@ -697,8 +698,8 @@ async function renderMiCuenta(){
     });
     if (!cards.length) cards.push('<div class="acct"><span class="ico">🏦</span><b>Todavía no tenés productos</b><small>Abrí tu primera cuenta en minutos.</small><button class="btn btn-primary" onclick="askSofia(\'Quiero abrir una cuenta\')">Abrir una cuenta con Sofía</button></div>');
     grid.innerHTML = cards.join('');
-    const seg = (r.seguros || [])[0];
-    if (seg) $('mcPoliza').textContent = seg.poliza + ' · ' + seg.tipo; else $('mcPolicy').style.display = 'none';
+    const seg = (r.seguros || []).filter(s => s.estado !== 'baja')[0];
+    if (seg) { $('mcPoliza').textContent = seg.poliza + ' · ' + seg.tipo; $('mcPolicy').style.display = ''; } else $('mcPolicy').style.display = 'none';
   } catch (e) {
     grid.innerHTML = '<div class="acct"><b>No pudimos cargar tus productos</b><small>Probá recargar la página en unos segundos.</small></div>';
   }
