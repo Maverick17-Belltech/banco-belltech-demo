@@ -244,6 +244,13 @@ body.no-webchat .sofia-fab{bottom:20px}
 .fab-actions button.call.on{background:#D93A3A}
 .sofia-card [hidden]{display:none!important}
 .fab-call-st{font-size:12.5px;color:var(--muted);margin:-4px 0 10px;min-height:0}
+/* v15: indicador "Procesando" propio (aparece al enviar y se va cuando Sofía responde) */
+#procIndicator{position:fixed;z-index:2147483000;display:none;align-items:center;gap:8px;background:#fff;color:#2A1B6E;border:1px solid #e3e1f2;border-radius:999px;padding:7px 14px;font:600 13px/1 Inter,system-ui,sans-serif;box-shadow:0 6px 18px rgba(20,10,60,.15);pointer-events:none;white-space:nowrap}
+#procIndicator.on{display:flex}
+#procIndicator .pdots{position:static;display:inline-flex;gap:4px}
+#procIndicator .pdots i{width:6px;height:6px;border-radius:50%;background:#2A1B6E;opacity:.25;animation:procDot 1.2s infinite ease-in-out}
+#procIndicator .pdots i:nth-child(2){animation-delay:.2s}#procIndicator .pdots i:nth-child(3){animation-delay:.4s}
+@keyframes procDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
 </style>
 </head>
 <body>
@@ -680,6 +687,32 @@ async function renderMiCuenta(){
   }
 }
 
+/* ---------- v15: indicador "Procesando…" del chat ---------- */
+// Webchat solo muestra sus puntos cuando Sofía ya está escribiendo; mientras espera la API no muestra nada.
+// Este indicador aparece al enviar un mensaje y se va con la primera respuesta de Sofía (o a los 45 s, por las dudas).
+const proc = (() => {
+  const el = document.createElement('div');
+  el.id = 'procIndicator'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+  el.innerHTML = '<span>Procesando tu consulta</span><span class="pdots"><i></i><i></i><i></i></span>';
+  document.body.appendChild(el);
+  let tOcultar = null, tPos = null;
+  function posicionar() {
+    // Se ubica justo arriba del campo "Escribí tu mensaje…" del chat
+    const campo = [...document.querySelectorAll('textarea, input[type="text"]')]
+      .find(x => x.offsetParent !== null && /mensaje/i.test(x.placeholder || '') && x.id !== 'em');
+    if (!campo) { el.style.right = '28px'; el.style.bottom = '110px'; el.style.left = 'auto'; el.style.top = 'auto'; return; }
+    const r = campo.getBoundingClientRect();
+    el.style.top = 'auto'; el.style.right = 'auto';
+    el.style.left = Math.max(8, r.left) + 'px';
+    el.style.bottom = Math.max(8, window.innerHeight - r.top + 12) + 'px';
+  }
+  return {
+    mostrar() { posicionar(); el.classList.add('on'); clearTimeout(tOcultar); tOcultar = setTimeout(() => this.ocultar(), 45000);
+      clearInterval(tPos); tPos = setInterval(posicionar, 500); },
+    ocultar() { el.classList.remove('on'); clearTimeout(tOcultar); clearInterval(tPos); }
+  };
+})();
+
 /* ---------- Webchat Cognigy ---------- */
 let webchat = null; const pending = [];
 const authData = session
@@ -701,6 +734,8 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
     // Despedida: si Cognigy manda data { cerrarChat: true } (nodo "cerrar_chat"), se cierra el chat a los 4 s y vuelve "¿Te ayudo?"
     try {
       w.registerAnalyticsService(ev => {
+        if (ev && ev.type === 'webchat/outgoing-message') proc.mostrar();
+        if (ev && (ev.type === 'webchat/incoming-message' || ev.type === 'webchat/close' || ev.type === 'webchat/minimize')) proc.ocultar();
         if (ev && ev.type === 'webchat/incoming-message' && typeof session !== 'undefined' && session) refrescarMiCuenta();
         const d = ev && ev.type === 'webchat/incoming-message' && ev.payload && ev.payload.data;
         if (d && d.cerrarChat === true) setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000);
