@@ -678,7 +678,8 @@ function refrescarMiCuenta(){ clearTimeout(_refT); _refT = setTimeout(renderMiCu
 async function renderMiCuenta(){
   const grid = $('mcGrid');
   try {
-    const r = await apiGet({ accion: 'clientes', dni: session.dni });
+    // v18.4: también se traen las transferencias programadas pendientes
+    const [r, pr] = await Promise.all([apiGet({ accion: 'clientes', dni: session.dni }), apiGet({ accion: 'programadas', dni: session.dni }).catch(() => null)]);
     // v18: después de la baja total la persona deja de ser cliente
     if (!r.ok && r.resultado === 'NO_ENCONTRADO') {
       grid.innerHTML = '<div class="acct"><span class="ico">👋</span><b>Ya no sos cliente de Banco Belltech</b><small>Se completó la baja total de tus productos. Gracias por haber confiado en nosotros. Cerramos tu sesión en unos segundos.</small><button class="btn btn-primary" onclick="logout()">Cerrar sesión</button></div>';
@@ -703,6 +704,9 @@ async function renderMiCuenta(){
     });
     (r.prestamos || []).filter(l => l.estado !== 'cancelado').forEach(l => {   // v18: préstamos cancelados no se muestran
       cards.push('<div class="acct"><span class="ico">💸</span><b>Préstamo personal</b><small>Cuota ' + (Number(l.cuotas_pagas) + 1) + ' de ' + esc(l.cuotas) + '</small><span class="amt">' + pesos(l.valor_cuota) + '</span><button class="link" style="text-align:left" onclick="askSofia(\'¿Cuánto me falta pagar de mi préstamo?\')">Preguntar a Sofía →</button></div>');
+    });
+    ((pr && pr.ok && pr.pendientes) || []).forEach(p => {
+      cards.push('<div class="acct"><span class="ico">⏱</span><b>Transferencia programada</b><small>' + esc(p.ejecutar_txt) + ' hs · a ' + esc(p.alias) + (p.destinatario ? ' (' + esc(p.destinatario) + ')' : '') + '</small><span class="amt">' + pesos(p.monto) + '</span><button class="link" style="text-align:left" onclick="askSofia(\'Quiero cancelar la transferencia programada ' + esc(p.id) + '\')">Cancelar con Sofía →</button></div>');
     });
     if (!cards.length) cards.push('<div class="acct"><span class="ico">🏦</span><b>Todavía no tenés productos</b><small>Abrí tu primera cuenta en minutos.</small><button class="btn btn-primary" onclick="askSofia(\'Quiero abrir una cuenta\')">Abrir una cuenta con Sofía</button></div>');
     grid.innerHTML = cards.join('');
