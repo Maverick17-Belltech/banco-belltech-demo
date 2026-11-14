@@ -67,7 +67,7 @@ async function iniciar() {
   if (r.estado !== 'pendiente') return mensaje('info', { confirmada: 'Esta transferencia ya fue confirmada.', cancelada: 'Esta transferencia fue cancelada.', vencida: 'El link venció. Pedile a Sofía que te envíe uno nuevo.' }[r.estado] || 'Esta solicitud ya no está pendiente.');
   const d = r.datos;
   card.innerHTML = '<h1>Autorizá tu transferencia</h1><p class="sub">Revisá los datos. Si algo no está bien, podés corregir el alias o el monto antes de confirmar. El link vence en ' + r.vence_min + ' minutos.</p>' +
-    '<dl><dt>Desde</dt><dd>' + esc(d.cuenta_origen) + '</dd><dt>Destinatario</dt><dd>' + esc(d.destinatario) + '</dd><dt>Monto pedido</dt><dd>' + pesos(d.monto, d.moneda) + '</dd><dt>Concepto</dt><dd>' + esc(d.concepto) + '</dd></dl>' +
+    '<dl><dt>Desde</dt><dd>' + esc(d.cuenta_origen) + '</dd><dt>Destinatario</dt><dd>' + esc(d.destinatario) + '</dd><dt>Monto pedido</dt><dd>' + pesos(d.monto, d.moneda) + '</dd><dt>Concepto</dt><dd>' + esc(d.concepto) + '</dd>' + (d.programada_txt ? '<dt>Se ejecuta</dt><dd>' + esc(d.programada_txt) + ' hs</dd>' : '') + '</dl>' +
     '<label for="alias">Alias destino</label><input id="alias" autocomplete="off" value="' + esc(d.alias) + '">' +
     '<label for="monto">Monto en pesos (solo números)</label><input id="monto" inputmode="decimal" value="' + esc(d.monto) + '">' +
     '<div class="row"><button class="ok" id="si">Confirmar transferencia</button><button class="no" id="no">Cancelar</button></div>';
@@ -82,6 +82,7 @@ async function responder(confirmado) {
   try { r = await api(params); } catch (e) { card.querySelectorAll('button').forEach(b => b.disabled = false); return alert('No pudimos conectarnos. Probá de nuevo.'); }
   if (r.resultado === 'CANCELADA') return mensaje('info', 'Cancelaste la transferencia. Avisale a Sofía que no la querés hacer.');
   if (r.resultado === 'TRANSFERENCIA_OK') return mensaje('good', '<b>¡Listo! Transferencia realizada.</b><br>' + pesos(r.datos.monto, r.datos.moneda) + ' a ' + esc(r.datos.alias) + ' (' + esc(r.datos.destinatario) + ').<br>Operación ' + esc(r.referencia) + '.<br><br>Volvé a la llamada y decile a Sofía "listo".');
+  if (r.resultado === 'PROGRAMADA_OK') return mensaje('good', '<b>¡Listo! Transferencia programada.</b><br>' + pesos(r.datos.monto, r.datos.moneda) + ' a ' + esc(r.datos.alias) + ' (' + esc(r.datos.destinatario) + ').<br>Se ejecuta el ' + esc(r.ejecutar_txt) + ' hs. Número ' + esc(r.id) + '.<br><br>Volvé a la llamada y decile a Sofía "listo".');
   if (r.resultado === 'NO_PENDIENTE') return mensaje('info', 'Esta solicitud ya no está pendiente (' + esc(r.estado) + ').');
   mensaje('bad', '<b>La transferencia no se hizo.</b><br>' + (TEXTO[r.resultado] || 'Hubo un problema (' + esc(r.resultado || r.error) + ').') + (r.sugerencia ? '<br>¿Quisiste decir ' + esc(r.sugerencia.alias) + ' (' + esc(r.sugerencia.titular) + ')?' : '') + '<br><br>Volvé a la llamada y decile a Sofía "listo" para que te ayude.');
 }
