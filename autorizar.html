@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autorizar transferencia | Banco & Seguros Belltech</title>
+<script src="config.js"></script>
+<style>
+  :root{--brand:#2A1B6E;--brand-2:#3D2A9B;--accent:#14B8C4;--bg:#F4F3FB;--ink:#1C1B33;--muted:#5E5B7A;--ok:#0E8A5F;--err:#C0392B}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--brand);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;font-weight:800}
+  header .mk{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--brand-2),var(--accent));display:grid;place-items:center}
+  main{max-width:520px;margin:24px auto;padding:0 16px}
+  .card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 10px 30px rgba(42,27,110,.10)}
+  h1{font-size:22px;margin:0 0 6px}
+  p.sub{color:var(--muted);margin:0 0 18px;font-size:14.5px}
+  dl{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0 0 18px;font-size:15px}
+  dt{color:var(--muted)} dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+  label{display:block;font-size:13.5px;color:var(--muted);margin:12px 0 6px}
+  input{width:100%;padding:12px;border:1.5px solid #D6D3EA;border-radius:10px;font-size:16px}
+  input:focus{outline:none;border-color:var(--brand-2)}
+  .row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+  button{flex:1;min-width:140px;border:0;border-radius:12px;padding:14px;font-size:15.5px;font-weight:700;cursor:pointer}
+  .ok{background:var(--brand);color:#fff}.ok:hover{background:var(--brand-2)}
+  .no{background:#fff;color:var(--brand);box-shadow:inset 0 0 0 1.5px var(--brand)}
+  button:disabled{opacity:.6;cursor:wait}
+  .msg{padding:14px;border-radius:12px;margin-top:16px;font-size:15px}
+  .msg.good{background:#E6F6EF;color:var(--ok)} .msg.bad{background:#FBEAEA;color:var(--err)} .msg.info{background:#EEF0FF;color:var(--brand)}
+  small.note{display:block;color:var(--muted);margin-top:14px;font-size:12.5px}
+</style>
+</head>
+<body>
+<header><span class="mk">B</span> Banco &amp; Seguros Belltech</header>
+<main>
+  <div class="card" id="card">
+    <h1>Autorizá tu transferencia</h1>
+    <p class="sub">Cargando la solicitud…</p>
+  </div>
+  <small class="note">Sitio de demostración: "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales.</small>
+</main>
+<script>
+const API = (window.DEMO_CONFIG || {}).BYS_API_URL;
+const token = new URLSearchParams(location.search).get('t') || '';
+const card = document.getElementById('card');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pesos = (n, mon) => (mon === 'USD' ? 'US$ ' : '$ ') + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+async function api(params) {
+  const u = new URL(API); Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v));
+  const r = await fetch(u.toString()); return r.json();
+}
+function mensaje(clase, html) { card.innerHTML = '<h1>Autorizá tu transferencia</h1><div class="msg ' + clase + '">' + html + '</div>'; }
+const TEXTO = {
+  SALDO_INSUFICIENTE: 'No alcanza el saldo de la cuenta para ese monto.',
+  ALIAS_NO_ENCONTRADO: 'El alias no existe en el banco.',
+  BLOQUEO_ANTIFRAUDE: 'El sistema de seguridad bloqueó la operación por precaución.',
+  TRANSFERENCIAS_BLOQUEADAS: 'Las transferencias de tu cuenta están bloqueadas por seguridad.',
+  MONEDA_DISTINTA: 'La cuenta de destino es de otra moneda.',
+  MISMA_CUENTA: 'El alias es de la misma cuenta de origen.',
+  MONTO_INVALIDO: 'El monto no es válido.'
+};
+async function iniciar() {
+  if (!API || !token) return mensaje('bad', 'El link no es válido. Pedile a Sofía que te lo envíe de nuevo.');
+  let r;
+  try { r = await api({ accion: 'autorizacion', t: token }); } catch (e) { return mensaje('bad', 'No pudimos conectarnos. Probá de nuevo en unos segundos.'); }
+  if (!r.ok) return mensaje('bad', 'El link no es válido. Pedile a Sofía que te lo envíe de nuevo.');
+  if (r.estado !== 'pendiente') return mensaje('info', { confirmada: 'Esta transferencia ya fue confirmada.', cancelada: 'Esta transferencia fue cancelada.', vencida: 'El link venció. Pedile a Sofía que te envíe uno nuevo.' }[r.estado] || 'Esta solicitud ya no está pendiente.');
+  const d = r.datos;
+  card.innerHTML = '<h1>Autorizá tu transferencia</h1><p class="sub">Revisá los datos. Si algo no está bien, podés corregir el alias o el monto antes de confirmar. El link vence en ' + r.vence_min + ' minutos.</p>' +
+    '<dl><dt>Desde</dt><dd>' + esc(d.cuenta_origen) + '</dd><dt>Destinatario</dt><dd>' + esc(d.destinatario) + '</dd><dt>Monto pedido</dt><dd>' + pesos(d.monto, d.moneda) + '</dd><dt>Concepto</dt><dd>' + esc(d.concepto) + '</dd></dl>' +
+    '<label for="alias">Alias destino</label><input id="alias" autocomplete="off" value="' + esc(d.alias) + '">' +
+    '<label for="monto">Monto en pesos (solo números)</label><input id="monto" inputmode="decimal" value="' + esc(d.monto) + '">' +
+    '<div class="row"><button class="ok" id="si">Confirmar transferencia</button><button class="no" id="no">Cancelar</button></div>';
+  document.getElementById('si').onclick = () => responder('si');
+  document.getElementById('no').onclick = () => responder('no');
+}
+async function responder(confirmado) {
+  card.querySelectorAll('button').forEach(b => b.disabled = true);
+  const params = { accion: 'confirmar_autorizacion', t: token, confirmado };
+  if (confirmado === 'si') { params.alias = document.getElementById('alias').value.trim(); params.monto = document.getElementById('monto').value.trim(); }
+  let r;
+  try { r = await api(params); } catch (e) { card.querySelectorAll('button').forEach(b => b.disabled = false); return alert('No pudimos conectarnos. Probá de nuevo.'); }
+  if (r.resultado === 'CANCELADA') return mensaje('info', 'Cancelaste la transferencia. Avisale a Sofía que no la querés hacer.');
+  if (r.resultado === 'TRANSFERENCIA_OK') return mensaje('good', '<b>¡Listo! Transferencia realizada.</b><br>' + pesos(r.datos.monto, r.datos.moneda) + ' a ' + esc(r.datos.alias) + ' (' + esc(r.datos.destinatario) + ').<br>Operación ' + esc(r.referencia) + '.<br><br>Volvé a la llamada y decile a Sofía "listo".');
+  if (r.resultado === 'NO_PENDIENTE') return mensaje('info', 'Esta solicitud ya no está pendiente (' + esc(r.estado) + ').');
+  mensaje('bad', '<b>La transferencia no se hizo.</b><br>' + (TEXTO[r.resultado] || 'Hubo un problema (' + esc(r.resultado || r.error) + ').') + (r.sugerencia ? '<br>¿Quisiste decir ' + esc(r.sugerencia.alias) + ' (' + esc(r.sugerencia.titular) + ')?' : '') + '<br><br>Volvé a la llamada y decile a Sofía "listo" para que te ayude.');
+}
+iniciar();
+</script>
+</body>
+</html>
