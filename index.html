@@ -772,11 +772,6 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
     }
   }).then(w => {
     webchat = w; window.cognigyWebchat = w; while (pending.length) pending.shift()();
-    // v18.3: si la conversación anterior terminó, la página se recargó con una sesión nueva: se abre el chat y Sofía saluda de nuevo
-    try {
-      const re = sessionStorage.getItem('bt_reabrir_chat');
-      if (re !== null) { sessionStorage.removeItem('bt_reabrir_chat'); setTimeout(() => { abrirChat(); if (re && re !== '1') w.sendMessage && w.sendMessage(re, authData); }, 600); }
-    } catch (_) {}
     // Despedida: si Cognigy manda data { cerrarChat: true } (nodo "cerrar_chat"), se cierra el chat a los 4 s y vuelve "¿Te ayudo?"
     try {
       w.registerAnalyticsService(ev => {
@@ -785,13 +780,20 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         const pl = (ev && ev.payload) || {}, cog = (pl.data && pl.data._cognigy) || {};
         const visible = ev && ev.type === 'webchat/incoming-message' &&
           ((typeof pl.text === 'string' && pl.text.trim() !== '') || cog._app || cog._default || (pl.data && pl.data.cerrarChat));
-        if (ev && ev.type === 'webchat/open') chatAbierto = true;
+        if (ev && ev.type === 'webchat/open') {
+          chatAbierto = true;
+          // v18.5: si el chat ya se había cerrado (con la X o solo después de la despedida), al reabrirlo se le avisa a Sofía
+          // con un mensaje invisible (solo datos, sin texto) para que salude de nuevo. Sin recargar la página.
+          if (chatSeCerro && !omitirAvisoVolvio) { proc.mostrar(); try { w.sendMessage('', Object.assign({}, authData, { evento: 'reabrir', despedido: conversacionTerminada })); } catch (_) {} }
+          omitirAvisoVolvio = false; conversacionTerminada = false;
+        }
+        if (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize')) chatSeCerro = true;
         if (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize')) chatAbierto = false;
         if (ev && ev.type === 'webchat/outgoing-message') proc.mostrar();
         if (visible || (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize'))) proc.ocultar();
         if (visible && typeof session !== 'undefined' && session) refrescarMiCuenta();
         const d = ev && ev.type === 'webchat/incoming-message' && ev.payload && ev.payload.data;
-        if (d && d.cerrarChat === true) { conversacionTerminada = true; setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000); }
+        if (d && d.cerrarChat === true) { conversacionTerminada = true; chatSeCerro = true; setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000); }
       });
     } catch (_) {}
   })
@@ -803,12 +805,13 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
 function whenReady(fn){ webchat ? fn() : pending.push(fn); }
 // v16.1: open() con el chat ya abierto lo cerraba; ahora solo se abre si está cerrado
 let chatAbierto = false;
-// v18.3: después de que Sofía cierra la conversación, al volver a abrir el chat se arranca una sesión nueva (saludo nuevo, sin historial)
-let conversacionTerminada = false;
-function nuevaSesionChat(texto){ try { sessionStorage.setItem('bt_reabrir_chat', texto || '1'); } catch (_) {} location.reload(); }
+// v18.5: al volver a abrir el chat (después de la X o de la despedida) se mantiene el historial y Sofía saluda de nuevo (sin recargar la página)
+let conversacionTerminada = false;   // Sofía se despidió y cerró el chat (cerrarChat)
+let chatSeCerro = false;             // v18.5: el chat se cerró al menos una vez en esta página
+let omitirAvisoVolvio = false;       // v18.5: si se reabre con una pregunta (askSofia), no hace falta el aviso
 function abrirChat(){ if (!chatAbierto && webchat.open) webchat.open(); }
-function openChat(){ hideTeaser(true); if (conversacionTerminada) return nuevaSesionChat(); whenReady(() => abrirChat()); }
-function askSofia(text){ hideTeaser(true); if (conversacionTerminada) return nuevaSesionChat(text); whenReady(() => { abrirChat(); webchat.sendMessage && webchat.sendMessage(text, authData); }); }
+function openChat(){ hideTeaser(true); whenReady(() => abrirChat()); }
+function askSofia(text){ hideTeaser(true); whenReady(() => { if (!chatAbierto) omitirAvisoVolvio = true; abrirChat(); webchat.sendMessage && webchat.sendMessage(text, authData); }); }
 
 /* ---------- Globito de Sofía ---------- */
 function hideTeaser(){ $('sofiaCard').classList.add('hidden'); $('sofiaMini').classList.add('show'); }
