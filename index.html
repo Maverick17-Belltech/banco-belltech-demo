@@ -330,12 +330,23 @@
   #procIndicator .pdots i:nth-child(2){animation-delay:.2s}#procIndicator .pdots i:nth-child(3){animation-delay:.4s}
   @keyframes procDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
   @media (max-width:760px){nav .user-pill{flex-wrap:wrap}}
+  /* v22: Mi cuenta en vivo – lo nuevo se resalta y aviso para ir a verlo */
+  .acc.nuevo,.row.nuevo{animation:mcNuevo 7s ease-out 1}
+  @keyframes mcNuevo{0%,60%{box-shadow:0 0 0 3px var(--orange);background:#FFF3EC}100%{box-shadow:0 0 0 0 transparent}}
+  .acc.dark.nuevo{animation:mcNuevoD 7s ease-out 1}
+  @keyframes mcNuevoD{0%,60%{box-shadow:0 0 0 3px var(--orange)}100%{box-shadow:0 0 0 0 transparent}}
+  .mc-upd{font:600 13px "Open Sans",Arial,sans-serif;color:#888;margin-top:6px;display:block}
+  .mc-upd.on{color:var(--orange)}
+  #mcToast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:2147483000;background:var(--rich);color:#fff;padding:12px 14px 12px 18px;display:none;align-items:center;gap:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);border-left:3px solid var(--orange);max-width:calc(100% - 32px);font-size:15px}
+  #mcToast.open{display:flex}
+  #mcToast button{background:var(--orange);color:#fff;border:0;padding:8px 12px;font:700 13px "Open Sans",Arial,sans-serif;cursor:pointer;white-space:nowrap}
+  #mcToast button.x{background:transparent;padding:4px 6px;font-size:18px;line-height:1}
 </style>
 <meta name="robots" content="noindex">
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v21.4</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v22</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -391,8 +402,9 @@
   </div>
 </div></section>
 
+<div id="mcToast" role="status"><span id="mcToastTxt">Sofía actualizó Mi cuenta</span><button type="button" onclick="irAMiCuenta()">Ver en Mi cuenta</button><button type="button" class="x" aria-label="Cerrar" onclick="cerrarToast()">×</button></div>
 <section class="account" id="micuenta"><div class="wrap">
-  <div class="top"><div><span class="eyebrow">Mi cuenta</span><h2 id="mcSub">Hola.</h2></div><button class="btn btn-outline" onclick="openChat()">Pedile algo a Sofía</button></div>
+  <div class="top"><div><span class="eyebrow">Mi cuenta</span><h2 id="mcSub">Hola.</h2><span class="mc-upd" id="mcUpd"></span></div><button class="btn btn-outline" onclick="openChat()">Pedile algo a Sofía</button></div>
   <div class="acc-grid" id="mcGrid"><div class="acc"><small>Mi cuenta</small><div class="amt" style="font-size:20px">Cargando tus productos…</div><p>Consultando el sistema del banco</p></div></div>
   <div class="feed">
     <div><h5>Últimos movimientos</h5><div id="mcMov"><p class="empty">Cargando…</p></div></div>
@@ -581,7 +593,7 @@ const store = {
   set(v){ try { localStorage.setItem('bt_session', JSON.stringify(v)); } catch(_) {} },
   clear(){ try { localStorage.removeItem('bt_session'); } catch(_) {} }
 };
-const session = store.get();
+let session = store.get();   // v22: let → el alta con Sofía puede iniciar la sesión sin recargar
 // v21: el alta se hace solo con Sofía (formulario + validación de identidad con la cámara)
 function openAlta(){ askSofia('Quiero hacerme cliente'); }
 function closeAlta(){ $('altaModal').classList.remove('open'); }
@@ -620,7 +632,10 @@ document.querySelectorAll('.demo-users').forEach(box => {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAlta(); closeLogin(); closeGuia(); idvCancelar(); toggleDrawer(false); } });
 
-if (session) {
+// v22: la sesión se activa al cargar (login) o en el momento, cuando Sofía termina un alta por chat
+let _sesionActiva = false;
+function activarSesion(){
+  if (!session || _sesionActiva) return; _sesionActiva = true;
   const first = session.nombre.split(' ')[0];
   $('loginPanel').style.display = 'none'; $('welcomePanel').style.display = 'block';
   $('wName').textContent = session.nombre;
@@ -630,15 +645,65 @@ if (session) {
   $('micuenta').style.display = 'block';
   $('mcSub').textContent = 'Hola, ' + first + '.';
   renderMiCuenta();
-  // v14: "Mi cuenta" se actualiza sola cada 15 s (si la pestaña está visible), al volver a la pestaña y después de cada respuesta de Sofía
-  setInterval(() => { if (!document.hidden) renderMiCuenta(); }, 15000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) renderMiCuenta(); });
+  // v22: en vez de recargar todo cada 15 s, cada 5 s se mira el contador de cambios de la API (liviano) y Mi cuenta
+  // se recarga apenas cambia algo (lo que hace Sofía por chat o por voz, o una edición en la planilla). Respaldo: cada 60 s.
+  setInterval(() => { if (!document.hidden) verCambios(); }, 5000);
+  setInterval(() => { if (!document.hidden) renderMiCuenta(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) verCambios(); });
   $('sofiaGreet').textContent = '¡Hola ' + first + '! Ya te reconocí. ¿En qué te ayudo hoy?';
+}
+activarSesion();
+// v22: Sofía avisa (dato altaOk) que terminó el alta → se inicia la sesión con el cliente nuevo, sin recargar ni cortar el chat
+async function entrarComoCliente(c){
+  if (!c || !c.dni || (session && session.dni === String(c.dni))) return;
+  try {
+    const r = await apiGet({ accion: 'clientes', dni: c.dni });   // se confirma contra la API antes de entrar
+    if (!r || !r.ok) return;
+    const per = r.persona || {};
+    const nombre = ((per.nombre || c.nombre || '') + ' ' + (per.apellido || c.apellido || '')).trim();
+    session = { email: String(per.email || c.email || '').toLowerCase(), nombre, dni: String(c.dni), fecha_nacimiento: per.fecha_nacimiento || c.fecha_nacimiento || '', poliza: '', rol: 'Nuevo cliente', loginAt: new Date().toISOString() };
+    store.set(session);
+    authData = { authenticated: true, canal: 'web', email: session.email, nombre: session.nombre, dni: session.dni, fecha_nacimiento: session.fecha_nacimiento, poliza: '' };
+    _sesionActiva = false; activarSesion();
+    mostrarToast('Ya sos cliente: tu cuenta está en Mi cuenta');
+  } catch (_) {}
 }
 
 /* ---------- Mi cuenta: datos en vivo desde la API ---------- */
 let _refT = null;
-function refrescarMiCuenta(){ clearTimeout(_refT); _refT = setTimeout(renderMiCuenta, 1500); }
+function refrescarMiCuenta(){ clearTimeout(_refT); _refT = setTimeout(verCambios, 800); }
+// v22: contador de cambios de la API (accion=version). Si cambió, se recarga Mi cuenta.
+let _verApi = null, _verOcupado = false;
+async function verCambios(){
+  if (!session || _verOcupado) return; _verOcupado = true;
+  try {
+    const r = await apiGet({ accion: 'version', _: Date.now() });
+    const v = r && r.ok ? String(r.ver) : null;
+    if (v === null) { await renderMiCuenta(); }            // API anterior a v6.11: se recarga igual
+    else if (v !== _verApi) { _verApi = v; await renderMiCuenta(); }
+  } catch (_) {} finally { _verOcupado = false; }
+}
+// v22: lo nuevo se resalta, se muestra "Actualizado recién" y un aviso para ir a Mi cuenta
+let _mcPrevio = null, _mcUpdT = null;
+function marcarNuevos(){
+  const els = [...document.querySelectorAll('#mcGrid .acc, #mcMov .row, #mcGes .row')];
+  const textos = els.map(e => e.innerText.replace(/\s+/g, ' ').trim());
+  const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  const u = $('mcUpd');
+  let hay = 0;
+  if (_mcPrevio) els.forEach((e, i) => { if (!_mcPrevio.has(textos[i])) { e.classList.add('nuevo'); hay++; } });
+  if (hay) {
+    u.textContent = 'Actualizado recién (' + hora + ')'; u.classList.add('on');
+    clearTimeout(_mcUpdT); _mcUpdT = setTimeout(() => u.classList.remove('on'), 10000);
+    const r = $('micuenta').getBoundingClientRect();
+    if (r.top > window.innerHeight * 0.6 || r.bottom < 80) mostrarToast('Sofía actualizó Mi cuenta');
+  } else if (!u.classList.contains('on')) u.textContent = 'Actualizado ' + hora;
+  _mcPrevio = new Set(textos);
+}
+let _toastT = null;
+function mostrarToast(t){ $('mcToastTxt').textContent = t; $('mcToast').classList.add('open'); clearTimeout(_toastT); _toastT = setTimeout(cerrarToast, 10000); }
+function cerrarToast(){ $('mcToast').classList.remove('open'); }
+function irAMiCuenta(){ cerrarToast(); $('micuenta').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 // v20: Mi cuenta con el diseño Belltech + constancias de lo que hace Sofía (movimientos, programadas y gestiones)
 const fmtMonto = (n, mon) => (mon === 'USD' ? pesos(n).replace('$ ', 'US$ ') : pesos(n));
 const ESTADO_FIN = ['resuelta', 'cerrada', 'ejecutada', 'cancelada', 'finalizada', 'pagada'];
@@ -692,6 +757,7 @@ async function renderMiCuenta(){
     ((ge && ge.ok && ge.gestiones) || []).slice(0, 6).forEach(g => items.push('<div class="row"><span>' + esc(g.titulo) + '<em>' + esc(g.id) + ' · ' + esc(g.actualizado || g.fecha) + '</em></span><span class="pill' + (ESTADO_FIN.indexOf(String(g.estado).toLowerCase()) >= 0 ? '' : ' o') + '">' + esc(g.estado) + '</span></div>'));
     ((pr && pr.ok && pr.recientes) || []).forEach(p => items.push('<div class="row"><span>Transferencia programada a ' + esc(p.alias) + ' · ' + pesos(p.monto) + '<em>' + esc(p.ejecutar_txt) + ' hs · ' + esc(p.id) + '</em></span><span class="pill">' + esc(p.estado) + '</span></div>'));
     $('mcGes').innerHTML = items.length ? items.join('') : '<p class="empty">No tenés gestiones abiertas. Lo que hagas con Sofía (bloqueos, siniestros, programadas) aparece acá.</p>';
+    marcarNuevos();
   } catch (e) {
     grid.innerHTML = '<div class="acc"><small>Mi cuenta</small><div class="amt" style="font-size:20px">No pudimos cargar tus productos</div><p>Probá recargar la página en unos segundos.</p></div>';
   }
@@ -925,7 +991,7 @@ function idvCancelar(){ if (!$('idvModal').classList.contains('open')) return; i
 
 /* ---------- Webchat Cognigy ---------- */
 let webchat = null; const pending = [];
-const authData = session
+let authData = session
   ? { authenticated: true, canal: 'web', email: session.email, nombre: session.nombre, dni: session.dni, fecha_nacimiento: session.fecha_nacimiento, poliza: session.poliza }
   : { authenticated: false, canal: 'web' };
 if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
@@ -963,6 +1029,8 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         if (visible && typeof session !== 'undefined' && session) refrescarMiCuenta();
         const d = ev && ev.type === 'webchat/incoming-message' && ev.payload && ev.payload.data;
         if (d && d.validarIdentidad === true && d.token) abrirIdentidad(d.token, d.nombre);   // v21
+        if (d && d.altaOk === true && d.cliente) entrarComoCliente(d.cliente);                // v22
+        if (d && d.actualizarCuenta === true) refrescarMiCuenta();                            // v22
         if (d && d.cerrarChat === true) { conversacionTerminada = true; chatSeCerro = true; setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000); }
       });
     } catch (_) {}
