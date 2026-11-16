@@ -335,7 +335,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v21.2</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v21.3</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -810,6 +810,7 @@ async function abrirIdentidad(token, nombre){
   idvEl('idvTitle').textContent = 'Validá tu identidad' + (nombre ? ', ' + nombre : '');
   idvEl('idvRes').hidden = true; idvEl('idvStage').hidden = false; idvEl('idvDemo').hidden = true;
   $('idvModal').classList.add('open');
+  idvVigilar();   // v21.3: se cancela sola a los 5 minutos sin actividad
   try { const w = window.cognigyWebchat; if (w && w.isOpen && w.isOpen() && w.close) { w.close(); IDV.reabrirChat = true; } } catch (_) {}
   idvPaso(1); idvMsg('Cargando el validador…'); idvBotones([]);
   try {
@@ -884,13 +885,26 @@ async function idvPasoSelfie(){
     } catch (e) { /* frame con error: se sigue con el próximo */ } finally { ocupado = false; }
   }, 250);
 }
+/* v21.3: inactividad. Si la persona no toca nada en la ventana durante 5 minutos, la validación se cancela sola
+   y se le avisa a Sofía (igual que con "Cancelar"). Cuenta como actividad: tocar, escribir o elegir un archivo en la ventana. */
+const IDV_INACTIVIDAD_MS = 5 * 60 * 1000;
+let _idvVigia = null;
+function idvActividad(){ IDV.ultimaAccion = Date.now(); }
+function idvVigilar(){
+  idvActividad(); clearInterval(_idvVigia);
+  _idvVigia = setInterval(() => {
+    if (!$('idvModal').classList.contains('open') || IDV.fin) { clearInterval(_idvVigia); _idvVigia = null; return; }
+    if (Date.now() - (IDV.ultimaAccion || 0) >= IDV_INACTIVIDAD_MS) { clearInterval(_idvVigia); _idvVigia = null; idvTerminar('cancelada', 0, 'se canceló sola por inactividad (5 minutos)'); }
+  }, 5000);
+}
+['pointerdown', 'keydown', 'change'].forEach(t => $('idvModal').addEventListener(t, idvActividad, true));
 async function idvTerminar(resultado, similitud, motivo){
-  if (IDV.fin) return; IDV.fin = true; idvFrenar(); idvPaso(3); idvBotones([], true);
+  if (IDV.fin) return; IDV.fin = true; clearInterval(_idvVigia); _idvVigia = null; idvFrenar(); idvPaso(3); idvBotones([], true);
   idvEl('idvStage').hidden = true;
   const res = idvEl('idvRes'); res.hidden = false;
   res.innerHTML = resultado === 'aprobada'
     ? '<b>Identidad validada</b>' + (similitud ? 'Coincidencia DNI y selfie: ' + similitud + ' %. ' : '') + 'Prueba de vida superada. Volvé al chat: Sofía termina tu alta.'
-    : resultado === 'cancelada' ? '<b>Validación cancelada</b>Podés retomarla con Sofía cuando quieras.'
+    : resultado === 'cancelada' ? '<b>Validación cancelada</b>' + (/inactividad/.test(motivo || '') ? 'Pasaron 5 minutos sin actividad. ' : '') + 'Podés retomarla con Sofía cuando quieras.'
     : '<b>No pudimos validar tu identidad</b>' + (motivo ? 'Motivo: ' + motivo + '. ' : '') + 'Sofía te ayuda a intentarlo de nuevo.';
   idvMsg('Enviando el resultado…');
   try { await idvConLimite(apiGet({ accion: 'identidad', t: IDV.token, resultado, similitud: similitud || '', vida: IDV.vida ? 'si' : 'no', cara: IDV.cara ? 'si' : 'no', modo: IDV.demo ? 'demo' : 'real', intentos: IDV.intentos, motivo: motivo || '' }), 15000); } catch (_) {}
