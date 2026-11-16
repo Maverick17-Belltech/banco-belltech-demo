@@ -12,7 +12,7 @@
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{font-family:Calibri,Carlito,"Open Sans",sans-serif;font-size:18px;line-height:1.55;color:var(--jet);background:var(--white);-webkit-font-smoothing:antialiased}
-  h1,h2,h3,h4,h5,.eyebrow,.btn,nav a,label{font-family:"Open Sans",Arial,sans-serif}
+  h1,h2,h3,h4,h5,.eyebrow,.btn,#nav a,.login label,.modal label,.cta label{font-family:"Open Sans",Arial,sans-serif}
   img{display:block;max-width:100%}
   .wrap{max-width:var(--wrap);margin:0 auto;padding:0 32px}
   .eyebrow{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange)}
@@ -22,13 +22,13 @@
   .btn-ghost:hover{background:rgba(255,255,255,.08)}
 
   /* ---------- HEADER ---------- */
-  header{position:sticky;top:0;z-index:50;background:rgba(17,28,36,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06)}
-  header .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
-  header .logo img{height:36px;width:auto}
-  nav{display:flex;gap:32px;align-items:center}
-  nav a{color:rgba(255,255,255,.78);text-decoration:none;font-size:15px;font-weight:600}
-  nav a:hover{color:#fff}
-  nav .btn{padding:12px 20px;font-size:14px;color:#fff}
+  body > header{position:sticky;top:0;z-index:50;background:rgba(17,28,36,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06)}
+  body > header .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
+  body > header .logo img{height:36px;width:auto}
+  #nav{display:flex;gap:32px;align-items:center}
+  #nav a{color:rgba(255,255,255,.78);text-decoration:none;font-size:15px;font-weight:600}
+  #nav a:hover{color:#fff}
+  #nav .btn{padding:12px 20px;font-size:14px;color:#fff}
   .menu-btn{display:none;background:none;border:0;color:#fff;font-size:26px;cursor:pointer}
 
   /* ---------- HERO ---------- */
@@ -68,7 +68,7 @@
   /* ---------- TRANSFORMACIÓN ---------- */
   .shift{padding:120px 0;background:#fff}
   .shift .head{max-width:760px;margin-bottom:56px}
-  h2{font-size:44px;line-height:1.12;font-weight:800;letter-spacing:-.015em;color:var(--rich);margin-top:14px}
+  .wrap h2{font-size:44px;line-height:1.12;font-weight:800;letter-spacing:-.015em;color:var(--rich);margin-top:14px}
   .shift .head p{font-size:20px;margin-top:18px;color:#555}
   .flow{display:grid;grid-template-columns:1fr 2fr 1fr;align-items:center;gap:24px}
   .flow .side h4{font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--silver);margin-bottom:10px}
@@ -116,19 +116,19 @@
   .cta p{color:#fff;font-size:20px;margin-top:18px;max-width:480px}
   .cta form{background:#fff;padding:36px;color:var(--rich);box-shadow:0 30px 60px rgba(120,40,0,.25)}
   .cta form h4{font-size:20px;font-weight:800;margin-bottom:20px}
-  label{display:block;font-family:"Open Sans",Arial,sans-serif;font-size:13px;font-weight:700;margin:14px 0 6px;color:var(--jet)}
-  input,select{width:100%;padding:14px;font:inherit;font-size:16px;border:1px solid #ccc;border-radius:0;background:#fff;color:var(--rich)}
-  input:focus,select:focus{outline:2px solid var(--orange);outline-offset:-1px;border-color:transparent}
+  .login label,.modal label,.cta form label{display:block;font-family:"Open Sans",Arial,sans-serif;font-size:13px;font-weight:700;margin:14px 0 6px;color:var(--jet)}
+  .login input,.modal input,.cta form input,.cta form select,.ask-row input{width:100%;padding:14px;font:inherit;font-size:16px;border:1px solid #ccc;border-radius:0;background:#fff;color:var(--rich)}
+  .login input:focus,.modal input:focus,.cta form input:focus,.cta form select:focus{outline:2px solid var(--orange);outline-offset:-1px;border-color:transparent}
   .cta form .btn{width:100%;margin-top:24px;font-size:16px}
 
   /* ---------- FOOTER ---------- */
-  footer{background:var(--rich);color:rgba(255,255,255,.6);padding:72px 0 36px;font-size:15px}
-  footer .top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,.1)}
-  footer img{height:34px;width:auto;margin-bottom:18px}
-  footer h5{font-family:"Open Sans",Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;margin-bottom:14px}
-  footer a{display:block;color:rgba(255,255,255,.6);text-decoration:none;padding:4px 0}
-  footer a:hover{color:var(--orange)}
-  footer .bottom{display:flex;justify-content:space-between;padding-top:28px;font-size:14px;flex-wrap:wrap;gap:12px}
+  body > footer{background:var(--rich);color:rgba(255,255,255,.6);padding:72px 0 36px;font-size:15px}
+  body > footer .top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,.1)}
+  body > footer img{height:34px;width:auto;margin-bottom:18px}
+  body > footer h5{font-family:"Open Sans",Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;margin-bottom:14px}
+  body > footer a{display:block;color:rgba(255,255,255,.6);text-decoration:none;padding:4px 0}
+  body > footer a:hover{color:var(--orange)}
+  body > footer .bottom{display:flex;justify-content:space-between;padding-top:28px;font-size:14px;flex-wrap:wrap;gap:12px}
 
   /* ---------- RESPONSIVE ---------- */
   @media (max-width:1024px){
@@ -142,14 +142,14 @@
   @media (max-width:760px){
     body{font-size:17px}
     .wrap{padding:0 20px}
-    nav{display:none;position:absolute;top:76px;left:0;right:0;background:var(--rich);flex-direction:column;align-items:flex-start;padding:20px;gap:18px}
-    nav.open{display:flex}
+    #nav{display:none;position:absolute;top:76px;left:0;right:0;background:var(--rich);flex-direction:column;align-items:flex-start;padding:20px;gap:18px}
+    #nav.open{display:flex}
     .menu-btn{display:block}
     .hero{padding:64px 0 80px}
     .hero h1{font-size:38px}
     .hero p.lead{font-size:18px}
     .hero .proof{gap:24px;flex-wrap:wrap}
-    h2{font-size:32px}
+    .wrap h2{font-size:32px}
     .cta h2{font-size:36px}
     .shift,.how,.caps{padding:80px 0}
     .verbs{grid-template-columns:1fr;border-top:0}
@@ -158,20 +158,20 @@
     .msgs{height:300px}
     .rail div{padding:12px 10px;font-size:11px}
     .cta form{padding:24px}
-    footer .top{grid-template-columns:1fr 1fr}
+    body > footer .top{grid-template-columns:1fr 1fr}
     .logos{gap:36px}
   }
 
   /* ===== v20 · Banco & Seguros (demo Belltech) sobre la base de la landing ===== */
   .strip{background:#0B141B;color:rgba(255,255,255,.6);font:600 12.5px "Open Sans",Arial,sans-serif;text-align:center;padding:8px 20px}
   .strip b{color:var(--orange)}
-  header .logo{display:flex;align-items:center;gap:14px;text-decoration:none}
-  header .logo .pw{display:flex;align-items:center;gap:8px;font:600 12px "Open Sans",Arial,sans-serif;color:rgba(255,255,255,.6);border-left:1px solid rgba(255,255,255,.2);padding-left:14px;white-space:nowrap}
-  header .logo .pw img{height:16px;width:auto}
+  body > header .logo{display:flex;align-items:center;gap:14px;text-decoration:none}
+  body > header .logo .pw{display:flex;align-items:center;gap:8px;font:600 12px "Open Sans",Arial,sans-serif;color:rgba(255,255,255,.6);border-left:1px solid rgba(255,255,255,.2);padding-left:14px;white-space:nowrap}
+  body > header .logo .pw img{height:16px;width:auto}
   .powered{display:flex;align-items:center;gap:8px;font:600 12px "Open Sans",Arial,sans-serif;color:rgba(255,255,255,.55);margin:-6px 0 18px}
   .powered img{height:15px!important;width:auto;margin:0!important}
-  header .logo small{font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);border-left:1px solid rgba(255,255,255,.2);padding-left:14px}
-  nav .btn-ghost{padding:11px 18px;font-size:14px}
+  body > header .logo small{font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);border-left:1px solid rgba(255,255,255,.2);padding-left:14px}
+  #nav .btn-ghost{padding:11px 18px;font-size:14px}
   .convo-top .who{display:flex;align-items:center;gap:10px}
   .convo-top .who .ava{width:28px;height:28px;background:var(--rich);color:#fff;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px}
   /* Banca online + accesos */
@@ -229,6 +229,10 @@
   @media (max-width:1024px){.access .wrap{grid-template-columns:1fr}.ins-grid{grid-template-columns:1fr 1fr;row-gap:36px}}
   @media (max-width:760px){header .logo .pw{font-size:0;gap:0}header .logo .pw img{margin-left:0}.quick{grid-template-columns:1fr 1fr}.quick button{padding:20px 16px}.acc-grid,.feed{grid-template-columns:1fr}.feed > div + div{border-left:0;border-top:1px solid #eee}.ins-grid{grid-template-columns:1fr}header .logo small{display:none}.access{margin-top:-40px}}
 
+  html,body{overflow-x:clip}
+  /* v20.1: el chat y la llamada de Cognigy siempre por encima de la página (header, hero y paneles) */
+  .bt-top{z-index:2147483000 !important}
+  [class*="webrtc_widget"],[data-cognigy-webchat-root],[class*="webchat-root"],[id*="webchat"]{z-index:2147483000 !important}   /* v20.1: evita la barra horizontal que generan los widgets de Cognigy */
   /* ===== v20: piezas funcionales (login, modales, Sofía flotante, estados) ===== */
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:#e5560f}
@@ -298,7 +302,7 @@
   .ask-row{display:flex;gap:6px}.ask-row input{padding:10px 12px;font-size:14px}.ask-row button{width:44px;flex:none;border:0;background:var(--orange);color:#fff;cursor:pointer}
   @media (max-width:520px){.sofia-fab{right:12px;bottom:12px}}
   /* indicador "Procesando" del chat */
-  #procIndicator{position:fixed;z-index:2147483000;display:none;align-items:center;gap:8px;background:#fff;color:var(--rich);border:1px solid #e5e5e5;border-left:3px solid var(--orange);padding:8px 14px;font:600 13px/1 "Open Sans",Arial,sans-serif;box-shadow:0 6px 18px rgba(17,28,36,.15);pointer-events:none}
+  #procIndicator{position:fixed;z-index:2147483001;display:none;align-items:center;gap:8px;background:#fff;color:var(--rich);border:1px solid #e5e5e5;border-left:3px solid var(--orange);padding:8px 14px;font:600 13px/1 "Open Sans",Arial,sans-serif;box-shadow:0 6px 18px rgba(17,28,36,.15);pointer-events:none}
   #procIndicator.on{display:flex}
   #procIndicator .pdots{display:inline-flex;gap:4px}
   #procIndicator .pdots i{width:6px;height:6px;border-radius:50%;background:var(--orange);opacity:.25;animation:procDot 1.2s infinite ease-in-out}
@@ -690,6 +694,21 @@ const proc = (() => {
       clearInterval(tPos); tPos = setInterval(posicionar, 500); },
     ocultar() { el.classList.remove('on'); clearTimeout(tOcultar); clearInterval(tPos); }
   };
+})();
+
+
+/* ---------- v20.1: chat y llamada siempre arriba de todo ----------
+   Los widgets de Cognigy (webchat y click-to-call) agregan sus ventanas al final del body; acá se las pone por encima de la página. */
+(function(){
+  const nuestros = ['sofiaFab','procIndicator','altaModal','loginModal','guiaModal'];
+  function subir(el){
+    if (!(el instanceof HTMLElement) || nuestros.indexOf(el.id) >= 0 || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
+    if (el.closest('header,section,footer,.strip')) return;
+    const pos = getComputedStyle(el).position;
+    if (pos === 'fixed' || pos === 'absolute' || el.querySelector('[class*="webchat"],[class*="webrtc"]') || /webchat|webrtc/i.test(el.className + ' ' + el.id)) el.classList.add('bt-top');
+  }
+  [...document.body.children].forEach(subir);
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { subir(n); setTimeout(() => subir(n), 300); }))).observe(document.body, { childList: true });
 })();
 
 /* ---------- Webchat Cognigy ---------- */
