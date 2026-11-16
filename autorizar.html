@@ -4,40 +4,41 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Autorizar transferencia | Banco & Seguros Belltech</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Carlito:wght@400;700&display=swap" rel="stylesheet">
 <script src="config.js"></script>
 <style>
-  :root{--brand:#2A1B6E;--brand-2:#3D2A9B;--accent:#14B8C4;--bg:#F4F3FB;--ink:#1C1B33;--muted:#5E5B7A;--ok:#0E8A5F;--err:#C0392B}
+  :root{--brand:#111C24;--brand-2:#1E2C38;--accent:#FF6418;--bg:#F2F2F2;--ink:#111C24;--muted:#555;--ok:#0E8A5F;--err:#C0392B}
   *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  body{margin:0;font-family:Calibri,Carlito,"Open Sans",Arial,sans-serif;background:var(--bg);color:var(--ink)}
   header{background:var(--brand);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;font-weight:800}
   header .mk{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--brand-2),var(--accent));display:grid;place-items:center}
   main{max-width:520px;margin:24px auto;padding:0 16px}
-  .card{background:#fff;border-radius:18px;padding:22px;box-shadow:0 10px 30px rgba(42,27,110,.10)}
-  h1{font-size:22px;margin:0 0 6px}
+  .card{background:#fff;border-radius:0;border-top:3px solid var(--accent);padding:22px;box-shadow:0 10px 30px rgba(42,27,110,.10)}
+  h1{font:800 22px "Open Sans",Arial,sans-serif;margin:0 0 6px;color:var(--ink)}
   p.sub{color:var(--muted);margin:0 0 18px;font-size:14.5px}
   dl{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0 0 18px;font-size:15px}
   dt{color:var(--muted)} dd{margin:0;font-weight:600;overflow-wrap:anywhere}
   label{display:block;font-size:13.5px;color:var(--muted);margin:12px 0 6px}
-  input{width:100%;padding:12px;border:1.5px solid #D6D3EA;border-radius:10px;font-size:16px}
-  input:focus{outline:none;border-color:var(--brand-2)}
+  input{width:100%;padding:12px;border:1px solid #ccc;border-radius:0;font-size:16px}
+  input:focus{outline:none;border-color:var(--accent)}
   .row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
-  button{flex:1;min-width:140px;border:0;border-radius:12px;padding:14px;font-size:15.5px;font-weight:700;cursor:pointer}
-  .ok{background:var(--brand);color:#fff}.ok:hover{background:var(--brand-2)}
+  button{flex:1;min-width:140px;border:0;border-radius:0;font-family:"Open Sans",Arial,sans-serif;padding:14px;font-size:15.5px;font-weight:700;cursor:pointer}
+  .ok{background:var(--accent);color:#fff}.ok:hover{background:#e5560f}
   .no{background:#fff;color:var(--brand);box-shadow:inset 0 0 0 1.5px var(--brand)}
   button:disabled{opacity:.6;cursor:wait}
-  .msg{padding:14px;border-radius:12px;margin-top:16px;font-size:15px}
+  .msg{padding:14px;border-radius:0;margin-top:16px;font-size:15px}
   .msg.good{background:#E6F6EF;color:var(--ok)} .msg.bad{background:#FBEAEA;color:var(--err)} .msg.info{background:#EEF0FF;color:var(--brand)}
   small.note{display:block;color:var(--muted);margin-top:14px;font-size:12.5px}
 </style>
 </head>
 <body>
-<header><span class="mk">B</span> Banco &amp; Seguros Belltech</header>
+<header><img src="assets/logo_blanco.png" alt="Belltech" style="height:28px;display:block"><span style="display:flex;align-items:center;gap:8px;font:600 12px 'Open Sans',Arial;color:rgba(255,255,255,.6);border-left:1px solid rgba(255,255,255,.2);padding-left:12px">powered by <img src="assets/nice.png" alt="NiCE" style="height:15px"></span></header>
 <main>
   <div class="card" id="card">
     <h1>Autorizá tu transferencia</h1>
     <p class="sub">Cargando la solicitud…</p>
   </div>
-  <small class="note">Sitio de demostración: "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales.</small>
+  <small class="note">Banco &amp; Seguros Belltech · Demo de Belltech powered by NiCE. Entidad ficticia: no ingreses datos reales.</small>
 </main>
 <script>
 const API = (window.DEMO_CONFIG || {}).BYS_API_URL;

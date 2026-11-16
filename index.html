@@ -1,535 +1,448 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Banco &amp; Seguros Belltech | Demo</title>
-<meta name="robots" content="noindex">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banco &amp; Seguros Belltech | Demo Belltech powered by NiCE</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Carlito:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --brand:#2A1B6E; --brand-2:#3D2A9B; --brand-dark:#170F44;
-  --accent:#00C2C7; --accent-dark:#00999D; --warm:#FFB547;
-  --bg:#F5F6FB; --surface:#FFFFFF; --text:#16152B; --muted:#5E6078; --border:#E4E5F0;
-  --ok:#14945F; --err:#D0393E; --radius:16px; --shadow:0 10px 30px rgba(23,15,68,.10);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
-img,svg{max-width:100%}
-button{font-family:inherit}
-.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  :root{
+    --orange:#FF6418; --rich:#111C24; --blue:#18B2FF;
+    --smoke:#F2F2F2; --silver:#B7B7B7; --jet:#333333; --white:#FFFFFF;
+    --grad:linear-gradient(110deg,#FFCF1B 0%,#FF881B 38%,#FFA62E 62%,#EA4D2C 100%);
+    --wrap:1200px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:Calibri,Carlito,"Open Sans",sans-serif;font-size:18px;line-height:1.55;color:var(--jet);background:var(--white);-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4,h5,.eyebrow,.btn,nav a,label{font-family:"Open Sans",Arial,sans-serif}
+  img{display:block;max-width:100%}
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 32px}
+  .eyebrow{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange)}
+  .btn{display:inline-block;background:var(--orange);color:#fff;font-weight:700;font-size:16px;padding:16px 28px;border:0;border-radius:0;text-decoration:none;cursor:pointer;transition:background .2s}
+  .btn:hover{background:#e5560f}
+  .btn-ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+  .btn-ghost:hover{background:rgba(255,255,255,.08)}
 
-/* ===== Demo strip ===== */
-.demo-strip{background:#FFF6E0;color:#6B4A00;font-size:12.5px;text-align:center;padding:6px 16px}
+  /* ---------- HEADER ---------- */
+  header{position:sticky;top:0;z-index:50;background:rgba(17,28,36,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
+  header .logo img{height:36px;width:auto}
+  nav{display:flex;gap:32px;align-items:center}
+  nav a{color:rgba(255,255,255,.78);text-decoration:none;font-size:15px;font-weight:600}
+  nav a:hover{color:#fff}
+  nav .btn{padding:12px 20px;font-size:14px;color:#fff}
+  .menu-btn{display:none;background:none;border:0;color:#fff;font-size:26px;cursor:pointer}
 
-/* ===== Top bar (segmentos) ===== */
-.topbar{background:var(--brand-dark);color:#CFCBEF;font-size:13.5px}
-.topbar .wrap{display:flex;justify-content:space-between;align-items:center;height:40px;gap:12px}
-.segments{display:flex;gap:4px;height:100%}
-.segments a{display:flex;align-items:center;padding:0 14px;height:100%;border-bottom:3px solid transparent}
-.segments a.on{color:#fff;border-bottom-color:var(--accent);font-weight:600}
-.segments a:hover{color:#fff}
-.util{display:flex;gap:18px}
-.util a:hover{color:#fff}
-@media (max-width:760px){.util{display:none}.segments a{padding:0 10px}}
+  /* ---------- HERO ---------- */
+  .hero{background:var(--rich);color:#fff;position:relative;overflow:hidden;padding:96px 0 120px}
+  .hero::after{content:"";position:absolute;right:-20%;top:-30%;width:70%;height:140%;background:radial-gradient(closest-side,rgba(255,100,24,.22),transparent 70%);pointer-events:none}
+  .hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:64px;align-items:center;position:relative;z-index:1}
+  .hero h1{font-size:60px;line-height:1.06;font-weight:800;letter-spacing:-.02em;margin:18px 0 24px}
+  .hero h1 em{font-style:normal;color:var(--orange)}
+  .hero p.lead{font-size:21px;color:rgba(255,255,255,.75);max-width:520px;margin-bottom:36px}
+  .hero .ctas{display:flex;gap:14px;flex-wrap:wrap}
+  .hero .proof{display:flex;gap:40px;margin-top:56px;padding-top:28px;border-top:1px solid rgba(255,255,255,.1)}
+  .hero .proof b{display:block;font-family:"Open Sans",Arial,sans-serif;font-size:30px;font-weight:800;color:#fff}
+  .hero .proof span{font-size:15px;color:rgba(255,255,255,.6)}
 
-/* ===== Header ===== */
-header{background:var(--surface);position:sticky;top:0;z-index:50;box-shadow:0 1px 0 var(--border)}
-.nav{display:flex;align-items:center;justify-content:space-between;height:72px;gap:16px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;color:var(--brand);letter-spacing:-.2px;white-space:nowrap}
-.brand-mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--accent));display:grid;place-items:center}
-.brand small{display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;margin-top:-3px}
-.menu{display:flex;gap:4px;align-items:center}
-.menu > li{list-style:none;position:relative}
-.menu > li > a,.menu > li > button{display:flex;align-items:center;gap:6px;padding:10px 12px;border-radius:10px;font-weight:600;font-size:15px;color:var(--text);background:none;border:0;cursor:pointer}
-.menu > li > a:hover,.menu > li > button:hover{background:var(--bg);color:var(--brand)}
-.dd{position:absolute;top:calc(100% + 8px);left:0;min-width:240px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:8px;opacity:0;visibility:hidden;transform:translateY(-4px);transition:.15s}
-.menu > li:hover .dd,.menu > li:focus-within .dd{opacity:1;visibility:visible;transform:none}
-.dd a{display:block;padding:9px 12px;border-radius:9px;font-size:14.5px;color:var(--text)}
-.dd a:hover{background:var(--bg);color:var(--brand)}
-.actions{display:flex;gap:10px;align-items:center}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:11px 20px;font:700 14.5px "Plus Jakarta Sans",sans-serif;cursor:pointer;transition:.15s;white-space:nowrap}
-.btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-2)}
-.btn-accent{background:var(--accent);color:#06272A}.btn-accent:hover{background:#2FD3D7}
-.btn-outline{background:transparent;color:var(--brand);box-shadow:inset 0 0 0 1.5px var(--brand)}
-.btn-outline:hover{background:var(--brand);color:#fff}
-.btn-light{background:#fff;color:var(--brand)}
-.btn-ghost-w{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.7)}
-.btn-ghost-w:hover{background:rgba(255,255,255,.12)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.burger{display:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--surface);cursor:pointer;align-items:center;justify-content:center}
-.user-pill{display:none;align-items:center;gap:8px;padding:6px 6px 6px 14px;border-radius:999px;background:var(--bg);font-weight:600;font-size:14px}
-.avatar{width:32px;height:32px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700}
-@media (max-width:1020px){.menu,.hide-md{display:none}.burger{display:flex}}
-@media (max-width:480px){.brand small{display:none}.brand{font-size:17px}.actions .btn-primary{padding:10px 14px}}
+  /* conversation protagonist */
+  .convo{background:#fff;color:var(--rich);box-shadow:0 40px 80px rgba(0,0,0,.45);position:relative}
+  .convo-top{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 10px 22px;border-bottom:1px solid #eee;font-family:"Open Sans",Arial,sans-serif;font-size:13px;font-weight:700}
+  .convo-top .live{display:flex;align-items:center;gap:8px;color:var(--jet)}
+  .convo-top .live i{width:8px;height:8px;border-radius:50%;background:#2ecc71;box-shadow:0 0 0 4px rgba(46,204,113,.18)}
+  .convo-top .ch{color:#888;font-weight:600}
+  .msgs{padding:22px;height:330px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px;overflow:hidden;background:var(--smoke)}
+  .msg{max-width:82%;padding:12px 16px;font-size:16px;line-height:1.4;opacity:0;transform:translateY(8px);transition:all .4s ease}
+  .msg.show{opacity:1;transform:none}
+  .msg.user{align-self:flex-end;background:var(--rich);color:#fff}
+  .msg.bot{align-self:flex-start;background:#fff;border-left:3px solid var(--orange)}
+  .msg.sys{align-self:center;max-width:100%;background:transparent;font-family:"Open Sans",Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--orange);padding:4px}
+  .rail{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #eee}
+  .rail div{padding:14px 18px;font-family:"Open Sans",Arial,sans-serif;font-size:12px;font-weight:600;color:#aaa;border-right:1px solid #eee;transition:all .4s}
+  .rail div:last-child{border-right:0}
+  .rail div small{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+  .rail div.on{color:var(--rich);box-shadow:inset 0 3px 0 var(--orange)}
+  .rail div.on small{color:var(--orange)}
+  .timer{background:var(--orange);color:#fff;padding:8px 14px;font-family:"Open Sans",Arial,sans-serif;display:flex;align-items:baseline;gap:10px}
+  .timer small{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+  .timer b{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
 
-/* ===== Mobile drawer ===== */
-.drawer-bg{position:fixed;inset:0;background:rgba(10,8,30,.45);opacity:0;visibility:hidden;transition:.2s;z-index:80}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(360px,88vw);background:var(--surface);z-index:90;transform:translateX(100%);transition:.25s;display:flex;flex-direction:column}
-.drawer.open{transform:none}.drawer-bg.open{opacity:1;visibility:visible}
-.drawer-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border)}
-.drawer-body{overflow:auto;padding:8px 12px 24px}
-.acc{border-bottom:1px solid var(--border)}
-.acc summary{list-style:none;cursor:pointer;padding:15px 8px;font-weight:700;display:flex;justify-content:space-between}
-.acc summary::-webkit-details-marker{display:none}
-.acc summary::after{content:"+";color:var(--brand);font-size:20px;line-height:1}
-.acc[open] summary::after{content:"–"}
-.acc a{display:block;padding:9px 16px;color:var(--muted)}
-.x{width:40px;height:40px;border-radius:10px;border:0;background:var(--bg);cursor:pointer;font-size:20px}
+  /* ---------- TRANSFORMACIÓN ---------- */
+  .shift{padding:120px 0;background:#fff}
+  .shift .head{max-width:760px;margin-bottom:56px}
+  h2{font-size:44px;line-height:1.12;font-weight:800;letter-spacing:-.015em;color:var(--rich);margin-top:14px}
+  .shift .head p{font-size:20px;margin-top:18px;color:#555}
+  .flow{display:grid;grid-template-columns:1fr 2fr 1fr;align-items:center;gap:24px}
+  .flow .side h4{font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--silver);margin-bottom:10px}
+  .flow .side.after h4{color:var(--orange)}
+  .flow .side p{font-size:17px;color:#555}
+  .flow .side strong{font-family:"Open Sans",Arial,sans-serif;display:block;font-size:26px;font-weight:800;color:var(--rich);line-height:1.2;margin-bottom:8px}
+  .flow svg{width:100%;height:auto}
+  .flow .after{text-align:left}
 
-/* ===== Hero carousel ===== */
-.hero{position:relative;overflow:hidden;background:var(--brand-dark)}
-.slides{display:flex;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
-.slide{min-width:100%;color:#fff;padding:64px 0 130px;position:relative}
-.slide.s1{background:radial-gradient(1100px 500px at 85% 20%,rgba(0,194,199,.35),transparent 60%),linear-gradient(120deg,var(--brand-dark),var(--brand) 60%,#4A2BB0)}
-.slide.s2{background:radial-gradient(900px 500px at 80% 30%,rgba(255,181,71,.35),transparent 60%),linear-gradient(120deg,#0E2F4F,#155E75)}
-.slide.s3{background:radial-gradient(900px 500px at 85% 30%,rgba(0,194,199,.30),transparent 60%),linear-gradient(120deg,#1E1250,#5B2A86)}
-.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;margin-bottom:16px}
-.hero h1{font-size:clamp(30px,4.6vw,52px);line-height:1.08;margin:0 0 16px;letter-spacing:-1px}
-.hero p.lead{font-size:clamp(16px,1.6vw,19px);opacity:.92;margin:0 0 28px;max-width:540px}
-.hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
-.hero-art{display:flex;justify-content:center}
-.dots{position:absolute;bottom:72px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:3}
-.dots button{width:10px;height:10px;border-radius:99px;border:0;background:rgba(255,255,255,.45);cursor:pointer;transition:.2s;padding:0}
-.dots button.on{width:28px;background:#fff}
-.arrows{position:absolute;bottom:76px;right:24px;display:flex;gap:8px;z-index:3}
-.arrows button{width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;cursor:pointer;font-size:18px}
-@media (max-width:860px){.hero-grid{grid-template-columns:1fr}.hero-art{display:none}.slide{padding:44px 0 110px}.arrows{display:none}}
+  /* ---------- CÓMO FUNCIONA ---------- */
+  .how{background:var(--smoke);padding:120px 0}
+  .verbs{display:grid;grid-template-columns:repeat(3,1fr);margin-top:64px;border-top:2px solid var(--rich)}
+  .verb{padding:36px 36px 0 0;position:relative}
+  .verb::before{content:"";position:absolute;top:-8px;left:0;width:14px;height:14px;background:var(--orange)}
+  .verb .n{font-family:"Open Sans",Arial,sans-serif;font-size:14px;font-weight:700;color:var(--orange)}
+  .verb h3{font-size:46px;font-weight:800;color:var(--rich);letter-spacing:-.02em;margin:6px 0 14px}
+  .verb p{color:#555;font-size:17px;max-width:320px}
+  .verb ul{list-style:none;margin-top:18px}
+  .verb li{font-size:15px;padding:8px 0;border-top:1px solid #ddd;color:var(--jet)}
 
-/* Phone mock in hero */
-.phone{width:260px;height:470px;border-radius:38px;background:#0B0828;padding:12px;box-shadow:0 30px 60px rgba(0,0,0,.35);transform:rotate(4deg)}
-.screen{width:100%;height:100%;border-radius:28px;background:linear-gradient(180deg,#fff,#F1F0FB);color:var(--text);padding:18px 14px;overflow:hidden}
-.screen .row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)}
-.bubble{border-radius:16px;padding:9px 12px;font-size:12px;margin:8px 0;max-width:85%}
-.bubble.b{background:var(--brand);color:#fff;border-bottom-left-radius:4px}
-.bubble.u{background:#E6E4F5;margin-left:auto;border-bottom-right-radius:4px}
+  /* ---------- CAPACIDADES ---------- */
+  .caps{padding:120px 0}
+  .caps .wrap{display:grid;grid-template-columns:1fr 1.4fr;gap:80px;align-items:start}
+  .caps .stick{position:sticky;top:120px}
+  .caps .stick p{margin-top:18px;color:#555;font-size:19px}
+  .caps .stick .btn{margin-top:32px}
+  .cap{display:grid;grid-template-columns:64px 1fr;gap:20px;padding:30px 0;border-bottom:1px solid #e5e5e5}
+  .cap:first-child{border-top:1px solid #e5e5e5}
+  .cap .num{font-family:"Open Sans",Arial,sans-serif;font-size:15px;font-weight:800;color:var(--orange);padding-top:4px}
+  .cap h4{font-size:23px;font-weight:700;color:var(--rich);margin-bottom:6px}
+  .cap p{color:#555;font-size:17px}
 
-/* ===== Login card (overlap) ===== */
-.overlap{margin-top:-56px;position:relative;z-index:5}
-.quick-grid{display:grid;grid-template-columns:380px 1fr;gap:20px}
-@media (max-width:960px){.quick-grid{grid-template-columns:1fr}}
-.panel{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);padding:24px}
-.panel h3{margin:0 0 4px;font-size:18px}
-.panel .sub{color:var(--muted);font-size:14px;margin:0 0 16px}
-label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:10px 0 6px}
-input,select,textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font:15px "Plus Jakarta Sans",sans-serif;background:#FAFAFE;color:var(--text);transition:.15s}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);background:#fff}
-textarea{min-height:96px;resize:vertical}
-.pw{position:relative}.pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--muted);cursor:pointer;font-size:13px;font-weight:600}
-.err{color:var(--err);font-size:13px;min-height:18px;margin-top:8px}
-.hint{font-size:12.5px;color:var(--muted);margin-top:10px}
-.demo-users{display:flex;flex-direction:column;gap:10px}
-.demo-users h4{margin:0;font-size:17px}.demo-users .sub{margin:0 0 4px}
-.du{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;box-shadow:0 2px 8px rgba(23,15,68,.05);transition:.15s}
-.du:hover{border-color:var(--brand);transform:translateY(-1px)}
-.du b{display:block;font-size:14px}.du span{display:block;font-size:13px;color:var(--muted)}.du small{display:block;font-size:12.5px}
-.modal.wide{width:min(860px,100%)}
-.login-split{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-.login-split .demo-users{background:var(--bg);border-radius:16px;padding:18px}
-@media (max-width:720px){.login-split{grid-template-columns:1fr}}
-#loginPanel .demo-users{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
-.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;height:100%}
-@media (max-width:640px){.tiles{grid-template-columns:repeat(2,1fr)}}
-.tile{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:10px;cursor:pointer;border:1.5px solid transparent;transition:.15s;text-align:left;font:inherit;color:inherit}
-.tile:hover{border-color:var(--accent);transform:translateY(-2px)}
-.ico{width:44px;height:44px;border-radius:12px;background:#EEEBFB;display:grid;place-items:center;font-size:22px}
-.tile b{font-size:15px}.tile span{font-size:13px;color:var(--muted)}
+  /* ---------- PARTNERS ---------- */
+  .partners{background:var(--rich);padding:72px 0;color:#fff}
+  .partners .wrap{display:flex;align-items:center;justify-content:space-between;gap:48px;flex-wrap:wrap}
+  .partners p{font-family:"Open Sans",Arial,sans-serif;font-size:15px;font-weight:600;color:rgba(255,255,255,.6);max-width:260px}
+  .logos{display:flex;align-items:center;gap:64px;flex-wrap:wrap}
+  .logos img{height:34px;width:auto;opacity:.9}
+  .logos img.glass{height:24px}
 
-/* ===== Sections ===== */
-section{padding:64px 0}
-.s-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:28px;flex-wrap:wrap}
-.s-head h2{font-size:clamp(24px,3vw,34px);margin:0;letter-spacing:-.5px}
-.s-head p{margin:6px 0 0;color:var(--muted)}
-.link{color:var(--brand);font-weight:700;font-size:14.5px;background:none;border:0;cursor:pointer;padding:0}
-.link:hover{text-decoration:underline}
-.grid{display:grid;gap:20px}
-.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
-@media (max-width:1020px){.g4{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:760px){.g3,.g2{grid-template-columns:1fr}}
-@media (max-width:520px){.g4{grid-template-columns:1fr}}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;gap:10px;transition:.15s}
-.card:hover{box-shadow:var(--shadow)}
-.card h3{margin:0;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14.5px;flex:1}
-.promo{border-radius:20px;overflow:hidden;background:var(--surface);border:1px solid var(--border);display:flex;flex-direction:column}
-.promo .art{height:150px;display:grid;place-items:center;font-size:56px}
-.promo .body{padding:20px;display:flex;flex-direction:column;gap:8px;flex:1}
-.promo h3{margin:0;font-size:18px}.promo p{margin:0;color:var(--muted);font-size:14.5px;flex:1}
-.tag{display:inline-block;font-size:12px;font-weight:700;color:var(--brand);background:#EEEBFB;padding:4px 10px;border-radius:999px;align-self:flex-start}
+  /* ---------- CTA ---------- */
+  .cta{background:var(--grad);color:#fff;padding:110px 0}
+  .cta .wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:center}
+  .cta h2{color:#fff;font-size:50px}
+  .cta p{color:#fff;font-size:20px;margin-top:18px;max-width:480px}
+  .cta form{background:#fff;padding:36px;color:var(--rich);box-shadow:0 30px 60px rgba(120,40,0,.25)}
+  .cta form h4{font-size:20px;font-weight:800;margin-bottom:20px}
+  label{display:block;font-family:"Open Sans",Arial,sans-serif;font-size:13px;font-weight:700;margin:14px 0 6px;color:var(--jet)}
+  input,select{width:100%;padding:14px;font:inherit;font-size:16px;border:1px solid #ccc;border-radius:0;background:#fff;color:var(--rich)}
+  input:focus,select:focus{outline:2px solid var(--orange);outline-offset:-1px;border-color:transparent}
+  .cta form .btn{width:100%;margin-top:24px;font-size:16px}
 
-/* Split feature */
-.split{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;background:var(--surface);border-radius:24px;padding:40px;border:1px solid var(--border)}
-@media (max-width:860px){.split{grid-template-columns:1fr;padding:24px}}
-.split ul{padding-left:0;list-style:none;margin:16px 0 24px}
-.split li{padding:6px 0 6px 30px;position:relative}
-.split li::before{content:"✓";position:absolute;left:0;top:6px;width:20px;height:20px;border-radius:50%;background:#DDF8F8;color:var(--accent-dark);font-size:12px;font-weight:800;display:grid;place-items:center}
-.sofia-art{background:linear-gradient(135deg,var(--brand),#4A2BB0);border-radius:20px;padding:28px;color:#fff;min-height:280px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;position:relative;overflow:hidden}
-.sofia-art .bubble{font-size:14px}
-.sofia-art .bubble.u{background:rgba(255,255,255,.18);color:#fff}
-.sofia-art .bubble.b{background:#fff;color:var(--text)}
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--rich);color:rgba(255,255,255,.6);padding:72px 0 36px;font-size:15px}
+  footer .top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:48px;border-bottom:1px solid rgba(255,255,255,.1)}
+  footer img{height:34px;width:auto;margin-bottom:18px}
+  footer h5{font-family:"Open Sans",Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;margin-bottom:14px}
+  footer a{display:block;color:rgba(255,255,255,.6);text-decoration:none;padding:4px 0}
+  footer a:hover{color:var(--orange)}
+  footer .bottom{display:flex;justify-content:space-between;padding-top:28px;font-size:14px;flex-wrap:wrap;gap:12px}
 
-/* Mi cuenta */
-#micuenta{display:none;padding-top:40px}
-.acct{background:var(--surface);border-radius:20px;border:1px solid var(--border);padding:22px;display:flex;flex-direction:column;gap:6px}
-.acct .amt{font-size:28px;font-weight:800;color:var(--brand);letter-spacing:-.5px}
-.acct small{color:var(--muted)}
-.policy{margin-top:20px;background:linear-gradient(120deg,var(--brand),#4A2BB0);color:#fff;border-radius:20px;padding:24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:1024px){
+    .hero h1{font-size:48px}
+    .hero .wrap,.cta .wrap,.caps .wrap{grid-template-columns:1fr;gap:56px}
+    .caps .stick{position:static}
+    
+    .flow{grid-template-columns:1fr;text-align:left}
+    .flow svg{max-width:560px}
+  }
+  @media (max-width:760px){
+    body{font-size:17px}
+    .wrap{padding:0 20px}
+    nav{display:none;position:absolute;top:76px;left:0;right:0;background:var(--rich);flex-direction:column;align-items:flex-start;padding:20px;gap:18px}
+    nav.open{display:flex}
+    .menu-btn{display:block}
+    .hero{padding:64px 0 80px}
+    .hero h1{font-size:38px}
+    .hero p.lead{font-size:18px}
+    .hero .proof{gap:24px;flex-wrap:wrap}
+    h2{font-size:32px}
+    .cta h2{font-size:36px}
+    .shift,.how,.caps{padding:80px 0}
+    .verbs{grid-template-columns:1fr;border-top:0}
+    .verb{border-top:2px solid var(--rich);padding:30px 0 36px}
+    .verb h3{font-size:38px}
+    .msgs{height:300px}
+    .rail div{padding:12px 10px;font-size:11px}
+    .cta form{padding:24px}
+    footer .top{grid-template-columns:1fr 1fr}
+    .logos{gap:36px}
+  }
 
-/* Canales */
-.channels{background:var(--surface)}
-.status{font-size:13px;color:var(--muted);min-height:20px}
-.status.ok{color:var(--ok)}.status.err{color:var(--err)}
-.call-ui{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.live{width:10px;height:10px;border-radius:50%;background:#C3C5D6;display:inline-block}
-.live.on{background:#E53935;animation:p 1.2s infinite}@keyframes p{50%{opacity:.3}}
+  /* ===== v20 · Banco & Seguros (demo Belltech) sobre la base de la landing ===== */
+  .strip{background:#0B141B;color:rgba(255,255,255,.6);font:600 12.5px "Open Sans",Arial,sans-serif;text-align:center;padding:8px 20px}
+  .strip b{color:var(--orange)}
+  header .logo{display:flex;align-items:center;gap:14px;text-decoration:none}
+  header .logo .pw{display:flex;align-items:center;gap:8px;font:600 12px "Open Sans",Arial,sans-serif;color:rgba(255,255,255,.6);border-left:1px solid rgba(255,255,255,.2);padding-left:14px;white-space:nowrap}
+  header .logo .pw img{height:16px;width:auto}
+  .powered{display:flex;align-items:center;gap:8px;font:600 12px "Open Sans",Arial,sans-serif;color:rgba(255,255,255,.55);margin:-6px 0 18px}
+  .powered img{height:15px!important;width:auto;margin:0!important}
+  header .logo small{font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);border-left:1px solid rgba(255,255,255,.2);padding-left:14px}
+  nav .btn-ghost{padding:11px 18px;font-size:14px}
+  .convo-top .who{display:flex;align-items:center;gap:10px}
+  .convo-top .who .ava{width:28px;height:28px;background:var(--rich);color:#fff;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:13px}
+  /* Banca online + accesos */
+  .access{padding:0;margin-top:-64px;position:relative;z-index:3}
+  .access .wrap{display:grid;grid-template-columns:400px 1fr;gap:24px}
+  .login{background:#fff;padding:32px;box-shadow:0 30px 60px rgba(17,28,36,.14);border-top:3px solid var(--orange)}
+  .login h4{font-size:22px;font-weight:800;color:var(--rich)}
+  .login p.sub{font-size:15px;color:#555;margin:4px 0 6px}
+  .login .btn{width:100%;margin-top:22px}
+  .login .hint{font-size:14px;color:#555;margin-top:14px}.login .hint a{color:var(--orange);font-weight:700;text-decoration:none}
+  .users{margin-top:18px;border-top:1px solid #e5e5e5;padding-top:14px;font-size:14px;color:#555}
+  .users button{display:block;width:100%;text-align:left;background:var(--smoke);border:0;border-left:3px solid transparent;padding:10px 12px;margin-top:8px;font:inherit;cursor:pointer;color:var(--rich)}
+  .users button:hover{border-left-color:var(--orange)}
+  .users b{display:block;font-family:"Open Sans",Arial,sans-serif;font-size:14px}
+  .quick{background:#fff;box-shadow:0 30px 60px rgba(17,28,36,.10);display:grid;grid-template-columns:repeat(3,1fr)}
+  .quick button{background:#fff;border:0;border-right:1px solid #eee;border-bottom:1px solid #eee;padding:28px 26px;text-align:left;cursor:pointer;font:inherit;color:var(--rich);position:relative;transition:background .2s}
+  .quick button:hover{background:var(--smoke)}
+  .quick button::before{content:"";position:absolute;top:0;left:0;width:0;height:3px;background:var(--orange);transition:width .25s}
+  .quick button:hover::before{width:100%}
+  .quick .n{font:800 13px "Open Sans",Arial,sans-serif;color:var(--orange)}
+  .quick b{display:block;font:800 19px "Open Sans",Arial,sans-serif;margin:8px 0 4px}
+  .quick span{font-size:15px;color:#555}
+  /* Mi cuenta */
+  .account{background:var(--smoke);padding:96px 0}
+  .account .top{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:36px}
+  .acc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+  .acc{background:#fff;padding:26px;border-left:3px solid var(--orange)}
+  .acc small{display:block;font:700 12px "Open Sans",Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#888}
+  .acc .amt{font:800 30px "Open Sans",Arial,sans-serif;color:var(--rich);margin:8px 0 2px}
+  .acc p{font-size:15px;color:#555}
+  .acc.dark{background:var(--rich);color:#fff;border-left-color:var(--orange)}.acc.dark .amt{color:#fff}.acc.dark p{color:rgba(255,255,255,.65)}
+  .feed{margin-top:20px;background:#fff;display:grid;grid-template-columns:1fr 1fr}
+  .feed > div{padding:26px}
+  .feed > div + div{border-left:1px solid #eee}
+  .feed h5{font:700 13px "Open Sans",Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);margin-bottom:12px}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid #eee;font-size:15.5px}
+  .row:first-of-type{border-top:0}
+  .row em{font-style:normal;color:#888;font-size:13.5px;display:block}
+  .row b{font-family:"Open Sans",Arial,sans-serif;white-space:nowrap}
+  .pill{font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;background:var(--smoke);color:var(--rich);white-space:nowrap;align-self:center}
+  .pill.o{background:#FFE6D9;color:#B33F00}
+  /* Seguros */
+  .ins{padding:120px 0}
+  .ins-grid{display:grid;grid-template-columns:repeat(4,1fr);margin-top:48px;border-top:2px solid var(--rich)}
+  .ins-grid div{padding:30px 28px 0 0;position:relative}
+  .ins-grid div::before{content:"";position:absolute;top:-8px;left:0;width:14px;height:14px;background:var(--orange)}
+  .ins-grid h3{font-size:28px;font-weight:800;color:var(--rich);margin:4px 0 10px}
+  .ins-grid p{color:#555;font-size:16px}
+  .ins-grid a{display:inline-block;margin-top:14px;color:var(--orange);font:700 14px "Open Sans",Arial,sans-serif;text-decoration:none}
+  .ins-grid .n{font:700 14px "Open Sans",Arial,sans-serif;color:var(--orange)}
+  /* CTA canales */
+  .cta .ch{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+  .cta .btn-dark{background:var(--rich)}.cta .btn-dark:hover{background:#000}
+  .cta .btn-w{background:#fff;color:var(--rich)}
+  @media (max-width:1024px){.access .wrap{grid-template-columns:1fr}.ins-grid{grid-template-columns:1fr 1fr;row-gap:36px}}
+  @media (max-width:760px){header .logo .pw{font-size:0;gap:0}header .logo .pw img{margin-left:0}.quick{grid-template-columns:1fr 1fr}.quick button{padding:20px 16px}.acc-grid,.feed{grid-template-columns:1fr}.feed > div + div{border-left:0;border-top:1px solid #eee}.ins-grid{grid-template-columns:1fr}header .logo small{display:none}.access{margin-top:-40px}}
 
-/* Ayuda */
-.help{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-@media (max-width:860px){.help{grid-template-columns:repeat(2,1fr)}}
-.help button,.help a{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;display:flex;align-items:center;gap:12px;font-weight:700;cursor:pointer;text-align:left;font-size:15px}
-.help button:hover,.help a:hover{border-color:var(--accent)}
-
-/* Guía */
-.guide code{background:#EEEBFB;padding:2px 6px;border-radius:6px;font-size:12.5px}
-.guide li{margin:6px 0;font-size:14px}
-
-/* Footer */
-footer{background:var(--brand-dark);color:#BDB8E6;padding:56px 0 24px;font-size:14px}
-.fcols{display:grid;grid-template-columns:1.3fr repeat(4,1fr);gap:28px}
-@media (max-width:960px){.fcols{grid-template-columns:1fr 1fr}}
-@media (max-width:520px){.fcols{grid-template-columns:1fr}}
-footer h4{color:#fff;margin:0 0 12px;font-size:15px}
-footer a{display:block;padding:4px 0}footer a:hover{color:#fff}
-.fbottom{border-top:1px solid rgba(255,255,255,.12);margin-top:36px;padding-top:20px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12.5px}
-.social{display:flex;gap:10px}
-.social span{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff}
-
-/* ===== Login modal ===== */
-.modal-bg{position:fixed;inset:0;background:rgba(10,8,30,.55);display:none;align-items:center;justify-content:center;z-index:120;padding:16px}
-.modal-bg.open{display:flex}
-.modal{background:var(--surface);border-radius:22px;width:min(420px,100%);padding:28px;position:relative;box-shadow:0 30px 70px rgba(0,0,0,.3)}
-.modal .x{position:absolute;top:14px;right:14px}
-
-/* ===== Sofía floating teaser ===== */
-.sofia-fab{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:none}
-.sofia-card{pointer-events:auto;width:min(330px,calc(100vw - 40px));background:var(--surface);border-radius:20px 20px 6px 20px;box-shadow:0 16px 40px rgba(23,15,68,.22);padding:16px;border:1px solid var(--border);transform-origin:bottom right;animation:pop .35s cubic-bezier(.2,.9,.3,1.3)}
-@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
-.sofia-card.hidden{display:none}
-.sofia-top{display:flex;gap:10px;align-items:center;margin-bottom:8px}
-.sofia-ava{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--accent));display:grid;place-items:center;color:#fff;font-weight:800;position:relative;flex:none}
-.sofia-ava::after{content:"";position:absolute;right:0;bottom:1px;width:11px;height:11px;border-radius:50%;background:#2BD67B;border:2px solid #fff}
-.sofia-top b{display:block;font-size:15px}.sofia-top small{color:var(--muted);font-size:12px}
-.sofia-card p{margin:4px 0 10px;font-size:14px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.chips button{border:1px solid var(--border);background:var(--bg);border-radius:999px;padding:6px 10px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--brand)}
-.chips button:hover{border-color:var(--brand)}
-.ask-row{display:flex;gap:6px}
-.ask-row input{padding:10px 12px;font-size:14px;border-radius:999px}
-.ask-row button{width:42px;height:42px;flex:none;border-radius:50%;border:0;background:var(--brand);color:#fff;cursor:pointer;font-size:16px}
-.sofia-close{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:0;background:var(--bg);cursor:pointer;color:var(--muted)}
-.sofia-mini{pointer-events:auto;display:none;align-items:center;gap:8px;background:var(--surface);border-radius:999px;padding:6px 14px 6px 6px;box-shadow:0 10px 26px rgba(23,15,68,.2);border:1px solid var(--border);cursor:pointer;font-weight:700;font-size:14px;color:var(--brand)}
-.sofia-mini .sofia-ava{width:34px;height:34px;font-size:13px}
-.sofia-mini.show{display:flex}
-/* si no hay webchat configurado, el FAB va abajo de todo */
-body.no-webchat .sofia-fab{bottom:20px}
-@media (max-width:520px){.sofia-fab{right:12px;bottom:12px}}
-.fab-actions{display:flex;gap:8px;margin-bottom:10px}
-.fab-actions button{flex:1;border:0;border-radius:999px;padding:10px 12px;font-weight:700;font-size:14px;cursor:pointer;color:#fff;background:var(--brand)}
-.fab-actions button.call{background:#1FA855}
-.fab-actions button.call.on{background:#D93A3A}
-.sofia-card [hidden]{display:none!important}
-.fab-call-st{font-size:12.5px;color:var(--muted);margin:-4px 0 10px;min-height:0}
-/* v15: indicador "Procesando" propio (aparece al enviar y se va cuando Sofía responde) */
-#procIndicator{position:fixed;z-index:2147483000;display:none;align-items:center;gap:8px;background:#fff;color:#2A1B6E;border:1px solid #e3e1f2;border-radius:999px;padding:7px 14px;font:600 13px/1 Inter,system-ui,sans-serif;box-shadow:0 6px 18px rgba(20,10,60,.15);pointer-events:none;white-space:nowrap}
-#procIndicator.on{display:flex}
-#procIndicator .pdots{position:static;display:inline-flex;gap:4px}
-#procIndicator .pdots i{width:6px;height:6px;border-radius:50%;background:#2A1B6E;opacity:.25;animation:procDot 1.2s infinite ease-in-out}
-#procIndicator .pdots i:nth-child(2){animation-delay:.2s}#procIndicator .pdots i:nth-child(3){animation-delay:.4s}
-@keyframes procDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+  /* ===== v20: piezas funcionales (login, modales, Sofía flotante, estados) ===== */
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:#e5560f}
+  .btn-outline{background:transparent;color:var(--rich);box-shadow:inset 0 0 0 1px var(--rich)}.btn-outline:hover{background:var(--rich);color:#fff}
+  .btn-sm{padding:9px 14px;font-size:13.5px}
+  .link{color:var(--orange);font:700 14px "Open Sans",Arial,sans-serif;background:none;border:0;cursor:pointer;padding:0;text-decoration:none}
+  .link:hover{text-decoration:underline}
+  .pw{position:relative}.pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:#555;cursor:pointer;font:600 13px "Open Sans",Arial,sans-serif}
+  .err{color:#C62828;font-size:14px;min-height:18px;margin-top:8px}
+  .hint{font-size:14px;color:#555;margin-top:10px}
+  .status{font-size:14px;color:rgba(255,255,255,.85);min-height:20px;margin-top:10px}
+  .status.err{color:#fff;font-weight:700}.status.ok{color:#fff}
+  .demo-users{margin-top:18px;border-top:1px solid #e5e5e5;padding-top:14px;font-size:14px;color:#555}
+  .demo-users h4{font:800 15px "Open Sans",Arial,sans-serif;color:var(--rich)}
+  .demo-users .sub{margin:2px 0 4px;font-size:13.5px}
+  .du{display:block;width:100%;text-align:left;background:var(--smoke);border:0;border-left:3px solid transparent;padding:10px 12px;margin-top:8px;font:inherit;cursor:pointer;color:var(--rich)}
+  .du:hover{border-left-color:var(--orange)}
+  .du b{display:block;font:700 14px "Open Sans",Arial,sans-serif}.du span{display:block;font-size:13.5px;color:#555}.du small{display:block;font-size:12.5px;color:#888}
+  .welcome{display:none}
+  .welcome .tag{font:700 12px "Open Sans",Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--orange)}
+  .welcome h4{font-size:28px;margin:6px 0 10px}
+  .welcome .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.welcome .acts .btn{width:auto;margin-top:0}
+  .user-pill{display:none;align-items:center;gap:10px;color:#fff;font:600 14px "Open Sans",Arial,sans-serif}
+  .avatar{width:34px;height:34px;background:var(--orange);color:#fff;display:grid;place-items:center;font:800 13px "Open Sans",Arial,sans-serif}
+  .user-pill .btn{padding:9px 14px;font-size:13px}
+  #micuenta{display:none}
+  .acc .lnk{margin-top:10px;display:inline-block}
+  .acc .st{font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#C62828}
+  .empty{font-size:15px;color:#888;padding:10px 0}
+  .ins-grid button.lnk,.cap button.lnk{display:inline-block;margin-top:14px;color:var(--orange);font:700 14px "Open Sans",Arial,sans-serif;background:none;border:0;padding:0;cursor:pointer}
+  /* modales */
+  .modal-bg{position:fixed;inset:0;background:rgba(17,28,36,.6);display:none;align-items:center;justify-content:center;z-index:120;padding:16px}
+  .modal-bg.open{display:flex}
+  .modal{background:#fff;width:min(440px,100%);padding:32px;position:relative;box-shadow:0 30px 70px rgba(0,0,0,.35);border-top:3px solid var(--orange);max-height:92vh;overflow:auto}
+  .modal.wide{width:min(880px,100%)}
+  .modal h3{font-size:24px;font-weight:800;color:var(--rich)}
+  .x{position:absolute;top:12px;right:12px;width:38px;height:38px;border:0;background:var(--smoke);cursor:pointer;font-size:20px}
+  .login-split{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .login-split .demo-users{background:var(--smoke);padding:16px;margin-top:0;border-top:0}
+  .login-split .du{background:#fff}
+  .guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:18px}
+  .guide-grid div{background:var(--smoke);padding:20px;border-left:3px solid var(--orange);font-size:15px}
+  .guide-grid h4{font-size:17px;margin-bottom:8px;color:var(--rich)}
+  .guide-grid li{margin:4px 0 4px 18px}
+  code{background:#fff;padding:2px 6px;font-size:13px}
+  @media (max-width:720px){.login-split,.guide-grid{grid-template-columns:1fr}}
+  /* Sofía flotante */
+  .sofia-fab{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:none}
+  .sofia-card{pointer-events:auto;width:min(340px,calc(100vw - 40px));background:#fff;box-shadow:0 20px 50px rgba(17,28,36,.28);padding:18px;border-top:3px solid var(--orange);position:relative;animation:pop .35s ease}
+  @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+  .sofia-card.hidden{display:none}
+  .sofia-top{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .sofia-ava{width:42px;height:42px;background:var(--rich);display:grid;place-items:center;color:#fff;font:800 16px "Open Sans",Arial,sans-serif;position:relative;flex:none}
+  .sofia-ava::after{content:"";position:absolute;right:-3px;bottom:-3px;width:11px;height:11px;border-radius:50%;background:#2ecc71;border:2px solid #fff}
+  .sofia-top b{display:block;font:800 15px "Open Sans",Arial,sans-serif;color:var(--rich)}.sofia-top small{color:#888;font-size:12.5px}
+  .sofia-card p{margin:4px 0 12px;font-size:15px;color:var(--jet)}
+  .sofia-close{position:absolute;top:10px;right:10px;width:28px;height:28px;border:0;background:var(--smoke);cursor:pointer;color:#555}
+  .sofia-mini{pointer-events:auto;display:none;align-items:center;gap:10px;background:#fff;padding:6px 16px 6px 6px;box-shadow:0 12px 30px rgba(17,28,36,.25);border:0;border-left:3px solid var(--orange);cursor:pointer;font:700 14px "Open Sans",Arial,sans-serif;color:var(--rich)}
+  .sofia-mini .sofia-ava{width:34px;height:34px;font-size:13px}
+  .sofia-mini.show{display:flex}
+  .fab-actions{display:flex;gap:8px;margin-bottom:6px}
+  .fab-actions button{flex:1;border:0;padding:12px;font:700 14px "Open Sans",Arial,sans-serif;cursor:pointer;color:#fff;background:var(--rich)}
+  .fab-actions button.call{background:var(--orange)}.fab-actions button.call:hover{background:#e5560f}
+  .sofia-card [hidden]{display:none!important}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .chips button{border:1px solid #ddd;background:var(--smoke);padding:6px 10px;font:600 12.5px "Open Sans",Arial,sans-serif;cursor:pointer;color:var(--rich)}
+  .ask-row{display:flex;gap:6px}.ask-row input{padding:10px 12px;font-size:14px}.ask-row button{width:44px;flex:none;border:0;background:var(--orange);color:#fff;cursor:pointer}
+  @media (max-width:520px){.sofia-fab{right:12px;bottom:12px}}
+  /* indicador "Procesando" del chat */
+  #procIndicator{position:fixed;z-index:2147483000;display:none;align-items:center;gap:8px;background:#fff;color:var(--rich);border:1px solid #e5e5e5;border-left:3px solid var(--orange);padding:8px 14px;font:600 13px/1 "Open Sans",Arial,sans-serif;box-shadow:0 6px 18px rgba(17,28,36,.15);pointer-events:none}
+  #procIndicator.on{display:flex}
+  #procIndicator .pdots{display:inline-flex;gap:4px}
+  #procIndicator .pdots i{width:6px;height:6px;border-radius:50%;background:var(--orange);opacity:.25;animation:procDot 1.2s infinite ease-in-out}
+  #procIndicator .pdots i:nth-child(2){animation-delay:.2s}#procIndicator .pdots i:nth-child(3){animation-delay:.4s}
+  @keyframes procDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+  @media (max-width:760px){nav .user-pill{flex-wrap:wrap}}
 </style>
+<meta name="robots" content="noindex">
 </head>
 <body>
 
-<div class="demo-strip">Sitio de demostración · "Banco &amp; Seguros Belltech" es una entidad ficticia creada para mostrar IA conversacional. No ingreses datos reales.</div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales.</div>
 
-<!-- ===== Top bar ===== -->
-<div class="topbar">
-  <div class="wrap">
-    <nav class="segments" aria-label="Segmentos">
-      <a href="#" class="on">Personas</a><a href="#">Empresas</a><a href="#">Pymes</a>
-    </nav>
-    <div class="util">
-      <a href="#ayuda">Canales digitales</a><a href="#ayuda">Sucursales y cajeros</a><a href="#ayuda">Ayuda</a>
+<header><div class="wrap">
+  <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
+  <button class="menu-btn" aria-label="Menú" onclick="toggleDrawer()">☰</button>
+  <nav id="nav">
+    <a href="#productos">Cuentas y tarjetas</a><a href="#seguros">Seguros</a><a href="#como-funciona">Cómo funciona Sofía</a><a href="#canales">Ayuda</a>
+    <a class="btn btn-ghost" href="#" onclick="openAlta();return false">Hacete cliente</a>
+    <a class="btn" href="#" id="btnBanca" onclick="openLogin();return false">Banca Online</a>
+    <div class="user-pill" id="userPill"><span class="avatar" id="upAva">—</span><span id="upName">—</span><button class="btn btn-ghost" onclick="logout()">Salir</button></div>
+  </nav>
+</div></header>
+
+<section class="hero" id="inicio"><div class="wrap">
+  <div>
+    <span class="eyebrow">Atención inteligente con IA</span>
+    <h1>Tu banco y tu seguro, <em>resueltos</em> en una sola conversación.</h1>
+    <p class="lead">Sofía consulta tus productos, ejecuta la operación y te manda la constancia por mail. Por chat o por voz, las 24 horas.</p>
+    <div class="ctas"><a class="btn" href="#" onclick="openChat();return false">Hablar con Sofía</a><a class="btn btn-ghost" href="#" onclick="document.getElementById('fabCallBtn').click();return false">Llamar a Sofía</a></div>
+    <div class="proof"><div><b>24/7</b><span>Sofía disponible</span></div><div><b>Chat + voz</b><span>Mismo agente, mismo contexto</span></div><div><b>+20</b><span>Gestiones de punta a punta</span></div></div>
+  </div>
+  <div class="convo" aria-label="Ejemplo de conversación con Sofía">
+    <div class="convo-top"><span class="who"><b class="ava">S</b><span class="live"><i></i>Sofía · Banco &amp; Seguros</span></span><div class="timer"><small>Resolución</small><b id="clock">00:00</b></div></div>
+    <div class="msgs" id="msgs"></div>
+    <div class="rail" id="rail"><div data-s="1"><small>01 Escucha</small>Intención detectada</div><div data-s="2"><small>02 Entiende</small>Validación en sistemas</div><div data-s="3"><small>03 Resuelve</small>Constancia por mail</div></div>
+  </div>
+</div></section>
+
+<section class="access" id="banca"><div class="wrap">
+  <div class="login" id="loginPanel">
+    <h4>Banca Online</h4><p class="sub">Ingresá con tu email y clave. Sofía te reconoce al instante.</p>
+    <form class="loginForm" data-err="errA">
+      <label for="emA">Email</label><input id="emA" name="email" type="email" required placeholder="tu@email.com" autocomplete="off">
+      <label for="pwA">Clave</label><div class="pw"><input id="pwA" name="pass" type="password" required placeholder="••••••••" autocomplete="off"><button type="button" onclick="togglePw('pwA',this)">Ver</button></div>
+      <button class="btn" type="submit">Ingresar</button>
+      <div class="err" id="errA"></div>
+    </form>
+    <p class="hint">¿Olvidaste tu clave? <button class="link" onclick="askSofia('Olvidé mi clave de banca online')">Pedile ayuda a Sofía</button></p>
+    <div class="demo-users" data-form="errA"></div>
+  </div>
+  <div class="login welcome" id="welcomePanel">
+    <span class="tag">Sesión iniciada · Sofía ya te reconoce</span>
+    <h4 id="wName">—</h4>
+    <p class="sub">Todo lo que hagas con Sofía queda registrado en Mi cuenta y te llega por mail.</p>
+    <div class="acts"><a class="btn" href="#micuenta">Ver mi cuenta</a><button class="btn btn-outline" onclick="openChat()">Hablar con Sofía</button></div>
+  </div>
+  <div class="quick">
+    <button onclick="askSofia('¿Cuál es mi saldo?')"><span class="n">01</span><b>Consultar saldo</b><span>Cuentas y tarjetas</span></button>
+    <button onclick="askSofia('Quiero hacer una transferencia')"><span class="n">02</span><b>Transferir</b><span>Ahora o programada</span></button>
+    <button onclick="askSofia('Perdí mi tarjeta, quiero bloquearla')"><span class="n">03</span><b>Bloquear tarjeta</b><span>Pérdida o robo</span></button>
+    <button onclick="askSofia('Quiero denunciar un siniestro')"><span class="n">04</span><b>Denunciar siniestro</b><span>Auto y hogar</span></button>
+    <button onclick="askSofia('Quiero simular un préstamo')"><span class="n">05</span><b>Simular un préstamo</b><span>Cuota al instante</span></button>
+    <button onclick="askSofia('Necesito una grúa')"><span class="n">06</span><b>Pedir una grúa</b><span>Asistencia 24 h</span></button>
+  </div>
+</div></section>
+
+<section class="account" id="micuenta"><div class="wrap">
+  <div class="top"><div><span class="eyebrow">Mi cuenta</span><h2 id="mcSub">Hola.</h2></div><button class="btn btn-outline" onclick="openChat()">Pedile algo a Sofía</button></div>
+  <div class="acc-grid" id="mcGrid"><div class="acc"><small>Mi cuenta</small><div class="amt" style="font-size:20px">Cargando tus productos…</div><p>Consultando el sistema del banco</p></div></div>
+  <div class="feed">
+    <div><h5>Últimos movimientos</h5><div id="mcMov"><p class="empty">Cargando…</p></div></div>
+    <div><h5>Gestiones y programadas</h5><div id="mcGes"><p class="empty">Cargando…</p></div></div>
+  </div>
+</div></section>
+
+<section class="how" id="como-funciona"><div class="wrap">
+  <span class="eyebrow">Cómo funciona Sofía</span><h2>Tres verbos. Un solo flujo.</h2>
+  <div class="verbs">
+    <div class="verb"><span class="n">01</span><h3>Escucha.</h3><p>Te atiende por chat o por voz y te reconoce si ya iniciaste sesión.</p><ul><li>Webchat y llamada desde la web</li><li>Español e inglés</li></ul></div>
+    <div class="verb"><span class="n">02</span><h3>Entiende.</h3><p>Interpreta lo que necesitás y consulta tus productos en tiempo real.</p><ul><li>Saldos, tarjetas, préstamos y pólizas</li><li>Validación de identidad</li></ul></div>
+    <div class="verb"><span class="n">03</span><h3>Resuelve.</h3><p>Ejecuta la operación, te manda la constancia por mail y la ves en Mi cuenta.</p><ul><li>Transferencias, pagos, bloqueos, siniestros</li><li>Derivación a un asesor con contexto</li></ul></div>
+  </div>
+</div></section>
+
+<section class="caps" id="productos"><div class="wrap">
+  <div class="stick"><span class="eyebrow">Productos</span><h2>Todo tu banco, en una conversación.</h2><p>Preguntale a Sofía, simulá, contratá y gestioná sin formularios ni filas.</p><a class="btn" href="#" onclick="openChat();return false">Hablar con Sofía</a></div>
+  <div>
+    <div class="cap"><span class="num">01</span><div><h4>Cuentas</h4><p>Caja de ahorro y cuenta corriente en pesos y dólares. Movimientos, CBU y alias, certificados por mail.</p><button class="lnk" onclick="askSofia('Quiero abrir una cuenta')">Abrir una cuenta con Sofía →</button></div></div>
+    <div class="cap"><span class="num">02</span><div><h4>Transferencias y pagos</h4><p>Inmediatas o programadas, con autorización por mail para montos altos. Pago de tarjeta y servicios.</p><button class="lnk" onclick="askSofia('Quiero hacer una transferencia')">Transferir con Sofía →</button></div></div>
+    <div class="cap"><span class="num">03</span><div><h4>Tarjetas</h4><p>Resumen, consumos y vencimientos. Bloqueo, denuncia y desconocimiento de consumos al instante.</p><button class="lnk" onclick="askSofia('Quiero ver mi tarjeta de crédito')">Consultar mi tarjeta →</button></div></div>
+    <div class="cap"><span class="num">04</span><div><h4>Préstamos y plazo fijo</h4><p>Simulá la cuota, solicitá tu préstamo preaprobado o constituí un plazo fijo con Sofía.</p><button class="lnk" onclick="askSofia('¿Qué préstamos ofrecen?')">Consultar préstamos →</button></div></div>
+  </div>
+</div></section>
+
+<section class="ins" id="seguros" style="background:var(--smoke)"><div class="wrap">
+  <span class="eyebrow">Seguros</span><h2>Protegé lo que más querés.</h2>
+  <div class="ins-grid">
+    <div><span class="n">01</span><h3>Auto</h3><p>Terceros completo y todo riesgo. Denuncia y grúa con Sofía.</p><button class="lnk" onclick="askSofia('Quiero cotizar un seguro de auto')">Cotizar con Sofía →</button></div>
+    <div><span class="n">02</span><h3>Hogar</h3><p>Agua, incendio, robo y asistencia al hogar 24 h.</p><button class="lnk" onclick="askSofia('Quiero cotizar un seguro de hogar')">Cotizar con Sofía →</button></div>
+    <div><span class="n">03</span><h3>Vida</h3><p>Protección para vos y tu familia, con beneficiarios a tu elección.</p><button class="lnk" onclick="askSofia('¿Qué cubre el seguro de vida?')">Conocer más →</button></div>
+    <div><span class="n">04</span><h3>Viaje</h3><p>Asistencia médica y equipaje en todo el mundo.</p><button class="lnk" onclick="askSofia('¿Qué cubre el seguro de viaje?')">Conocer más →</button></div>
+  </div>
+</div></section>
+
+<section class="partners"><div class="wrap"><p><b style="color:#fff">Belltech powered by NiCE.</b> Demo implementada por Belltech con NiCE Cognigy, la plataforma de IA conversacional de NiCE.</p><div class="logos"><img src="assets/nice.png" alt="NiCE"></div></div></section>
+
+<section class="cta" id="canales"><div class="wrap">
+  <div><span class="eyebrow" style="color:#fff">Contactá a Sofía</span><h2>Resolvé lo que necesites, ahora.</h2><p>Chat o llamada desde la web: siempre te atiende Sofía y, si hace falta, te pasa con una persona.</p>
+    <div class="ch"><a class="btn btn-dark" href="#" onclick="openChat();return false">Abrir chat</a><button class="btn btn-w" id="callBtn">Llamar a Sofía</button></div>
+    <div class="status" id="chatStatus"></div><div class="status" id="callStatus"></div></div>
+  <form id="sofiaForm"><h4>Escribile a Sofía</h4><label for="sfTema">Tema</label><select id="sfTema"><option>Consulta general</option><option>Cuentas y tarjetas</option><option>Préstamos</option><option>Seguros</option><option>Siniestro</option><option>Reclamo</option></select><label for="sfMsg">Mensaje</label><input id="sfMsg" required placeholder="Contanos en qué te podemos ayudar"><button class="btn" type="submit">Enviar a Sofía</button></form>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="top">
+    <div><img src="assets/logo_blanco.png" alt="Belltech"><div class="powered">powered by <img src="assets/nice.png" alt="NiCE"></div><p>Banco &amp; Seguros Belltech es una entidad ficticia creada por Belltech para demostrar IA conversacional con NiCE Cognigy.</p></div>
+    <div><h5>Productos</h5><a href="#productos">Cuentas</a><a href="#productos">Tarjetas</a><a href="#productos">Préstamos</a><a href="#seguros">Seguros</a></div>
+    <div><h5>Ayuda</h5><a href="#" onclick="openChat();return false">Hablar con Sofía</a><a href="#" onclick="askSofia('¿Dónde hay una sucursal o cajero cerca?');return false">Sucursales</a><a href="#" onclick="openGuia();return false">Guía de la demo</a></div>
+    <div><h5>Belltech</h5><a href="https://belltech.la" target="_blank" rel="noopener">belltech.la</a><a href="#">LinkedIn</a><a href="#">Instagram</a></div>
+  </div>
+  <div class="bottom"><span>© 2026 Belltech. Demo con fines de demostración.</span><span>Política de privacidad</span></div>
+</div></footer>
+
+<!-- ===== Guía del presentador (modal) ===== -->
+<div class="modal-bg" id="guiaModal" onclick="if(event.target===this)closeGuia()">
+  <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="guiaTitle">
+    <button class="x" onclick="closeGuia()" aria-label="Cerrar">×</button>
+    <span class="eyebrow">Solo para el presentador</span><h3 id="guiaTitle">Guía de la demo</h3>
+    <div class="guide-grid">
+      <div><h4>Banca Online (login)</h4><p>Clave: <code>Demo1234@</code></p><p>En el ingreso están los usuarios de prueba: hacé clic en uno y se completa solo.</p><p>Sin login, Sofía valida con DNI + fecha:<br><code>30123456</code> · <code>15-03-1985</code></p></div>
+      <div><h4>Guion de chat</h4><ol><li>Pregunta de FAQ (seguros)</li><li>Saldo → validación o login</li><li>Transferencia programada</li><li>Bloqueo de tarjeta</li><li>Denuncia de siniestro</li><li>"Mandame esto por mail"</li><li>"Quiero hablar con una persona"</li></ol></div>
+      <div><h4>Momentos "wow"</h4><ul><li>Login web → Sofía ya te reconoce</li><li>Todo queda en Mi cuenta y llega por mail</li><li>Cambio de idioma automático</li><li>Mismo agente por voz</li><li>Autorización por mail de montos altos</li></ul></div>
     </div>
   </div>
 </div>
-
-<!-- ===== Header ===== -->
-<header>
-  <div class="wrap nav">
-    <a class="brand" href="#">
-      <span class="brand-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 4h8a4 4 0 0 1 0 8H5zM5 12h9a4 4 0 0 1 0 8H5z" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg></span>
-      <span>Belltech<small>Banco &amp; Seguros</small></span>
-    </a>
-
-    <ul class="menu">
-      <li><button>Cuentas ▾</button><div class="dd"><a href="#productos">Caja de Ahorro</a><a href="#productos">Cuenta Corriente</a><a href="#productos">Paquetes</a><a href="#productos">Cuenta Sueldo</a></div></li>
-      <li><button>Tarjetas ▾</button><div class="dd"><a href="#productos">Crédito</a><a href="#productos">Débito</a><a href="#" onclick="askSofia('Perdí mi tarjeta, ¿qué hago?');return false">Denunciar pérdida o robo</a></div></li>
-      <li><button>Préstamos ▾</button><div class="dd"><a href="#productos">Personales</a><a href="#productos">Prendarios</a><a href="#productos">Hipotecarios</a></div></li>
-      <li><button>Seguros ▾</button><div class="dd"><a href="#seguros">Auto</a><a href="#seguros">Hogar</a><a href="#seguros">Vida</a><a href="#seguros">Viaje</a><a href="#" onclick="askSofia('Quiero denunciar un siniestro');return false">Denunciar siniestro</a></div></li>
-      <li><a href="#beneficios">Beneficios</a></li>
-      <li><a href="#ayuda">Ayuda</a></li>
-    </ul>
-
-    <div class="actions">
-      <a class="btn btn-outline hide-md" href="#" onclick="openAlta();return false">Hacete cliente</a>
-      <button class="btn btn-primary" id="btnBanca" onclick="openLogin()">🔒 Banca Online</button>
-      <div class="user-pill" id="userPill"><span id="upName">—</span><button class="btn btn-outline" style="padding:6px 12px" onclick="logout()">Salir</button><span class="avatar" id="upAva">—</span></div>
-      <button class="burger" aria-label="Abrir menú" onclick="toggleDrawer(true)"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" stroke="#2A1B6E" stroke-width="2.2" stroke-linecap="round"/></svg></button>
-    </div>
-  </div>
-</header>
-
-<!-- ===== Mobile drawer ===== -->
-<div class="drawer-bg" id="drawerBg" onclick="toggleDrawer(false)"></div>
-<aside class="drawer" id="drawer" aria-label="Menú">
-  <div class="drawer-head"><b>Menú</b><button class="x" onclick="toggleDrawer(false)" aria-label="Cerrar">×</button></div>
-  <div class="drawer-body">
-    <details class="acc"><summary>Cuentas</summary><a href="#productos">Caja de Ahorro</a><a href="#productos">Cuenta Corriente</a><a href="#productos">Paquetes</a></details>
-    <details class="acc"><summary>Tarjetas</summary><a href="#productos">Crédito</a><a href="#productos">Débito</a></details>
-    <details class="acc"><summary>Préstamos</summary><a href="#productos">Personales</a><a href="#productos">Hipotecarios</a></details>
-    <details class="acc"><summary>Seguros</summary><a href="#seguros">Auto</a><a href="#seguros">Hogar</a><a href="#seguros">Vida y Viaje</a></details>
-    <details class="acc"><summary>Ayuda</summary><a href="#ayuda">Canales digitales</a><a href="#ayuda">Sucursales</a><a href="#guia">Guía de la demo</a></details>
-    <div style="padding:16px 8px;display:grid;gap:10px">
-      <button class="btn btn-primary" onclick="toggleDrawer(false);openLogin()">🔒 Banca Online</button>
-      <button class="btn btn-outline" onclick="toggleDrawer(false);openChat()">💬 Hablar con Sofía</button>
-    </div>
-  </div>
-</aside>
-
-<!-- ===== Hero carousel ===== -->
-<div class="hero" id="hero">
-  <div class="slides" id="slides">
-    <div class="slide s1">
-      <div class="wrap hero-grid">
-        <div>
-          <span class="eyebrow">✨ Nuevo · Asistente con IA</span>
-          <h1>Conocé a Sofía, tu asesora 24/7.</h1>
-          <p class="lead">Consultá saldos, bloqueá tarjetas o denunciá un siniestro en minutos. Por chat, por voz o por email.</p>
-          <div class="hero-ctas"><button class="btn btn-accent" onclick="openChat()">💬 Hablar con Sofía</button><button class="btn btn-ghost-w" onclick="document.getElementById('canales').scrollIntoView()">📞 Llamar desde la web</button></div>
-        </div>
-        <div class="hero-art">
-          <div class="phone"><div class="screen">
-            <div class="row"><b style="color:var(--brand)">Sofía · Belltech</b><span>en línea</span></div>
-            <div class="bubble b">¡Hola! ¿En qué te puedo ayudar hoy?</div>
-            <div class="bubble u">Perdí mi tarjeta 😟</div>
-            <div class="bubble b">Tranquilo, la bloqueo ahora. ¿Me confirmás los últimos 4 dígitos?</div>
-            <div class="bubble u">4521</div>
-            <div class="bubble b">Listo ✅ Tarjeta bloqueada. Gestión BLQ-482193. La nueva llega en 5 a 7 días.</div>
-          </div></div>
-        </div>
-      </div>
-    </div>
-    <div class="slide s2">
-      <div class="wrap hero-grid">
-        <div>
-          <span class="eyebrow">🚗 Seguros</span>
-          <h1>Denunciá tu siniestro sin hacer filas.</h1>
-          <p class="lead">Sofía toma la denuncia, te da el número de gestión al instante y te deriva con un asesor si lo necesitás.</p>
-          <div class="hero-ctas"><button class="btn btn-light" onclick="askSofia('Quiero denunciar un siniestro')">Denunciar ahora</button><a class="btn btn-ghost-w" href="#seguros">Ver seguros</a></div>
-        </div>
-        <div class="hero-art" style="font-size:150px">🛡️</div>
-      </div>
-    </div>
-    <div class="slide s3">
-      <div class="wrap hero-grid">
-        <div>
-          <span class="eyebrow">💸 Préstamos</span>
-          <h1>Tu préstamo personal, aprobado en el día.</h1>
-          <p class="lead">Hasta 60 cuotas fijas. Si cobrás tu sueldo en Belltech, puede estar preaprobado.</p>
-          <div class="hero-ctas"><button class="btn btn-light" onclick="askSofia('¿Qué préstamos ofrecen?')">Consultar a Sofía</button><button class="btn btn-ghost-w" onclick="openLogin()">Ingresar</button></div>
-        </div>
-        <div class="hero-art" style="font-size:150px">📈</div>
-      </div>
-    </div>
-  </div>
-  <div class="dots" id="dots"></div>
-  <div class="arrows"><button aria-label="Anterior" onclick="go(cur-1)">‹</button><button aria-label="Siguiente" onclick="go(cur+1)">›</button></div>
-</div>
-
-<!-- ===== Login + accesos rápidos ===== -->
-<div class="wrap overlap">
-  <div class="quick-grid">
-    <div class="panel" id="loginPanel">
-      <h3>🔒 Banca Online</h3>
-      <p class="sub">Ingresá con tu email y clave.</p>
-      <form class="loginForm" data-err="errA">
-        <label for="emA">Email</label><input id="emA" name="email" type="email" required placeholder="tu@email.com" autocomplete="off">
-        <label for="pwA">Clave</label>
-        <div class="pw"><input id="pwA" name="pass" type="password" required placeholder="••••••••" autocomplete="off"><button type="button" onclick="togglePw('pwA',this)">Ver</button></div>
-        <button class="btn btn-primary" style="width:100%;margin-top:16px" type="submit">Ingresar</button>
-        <div class="err" id="errA"></div>
-      </form>
-      <div class="hint">¿Olvidaste tu clave? <button class="link" onclick="askSofia('Olvidé mi clave de banca online')">Pedile ayuda a Sofía</button></div>
-      <div class="demo-users" data-form="errA"></div>
-    </div>
-    <div class="panel" id="welcomePanel" style="display:none">
-      <p class="sub" style="margin:0">Bienvenido/a</p>
-      <h3 id="wName" style="font-size:26px;margin:2px 0 12px">—</h3>
-      <span class="tag">✅ Sesión iniciada · Sofía ya te reconoce</span>
-      <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">
-        <a class="btn btn-primary" href="#micuenta">Ver mi cuenta</a>
-        <button class="btn btn-outline" onclick="openChat()">💬 Hablar con Sofía</button>
-      </div>
-    </div>
-
-    <div class="tiles">
-      <button class="tile" onclick="askSofia('Perdí mi tarjeta, quiero bloquearla')"><span class="ico">💳</span><b>Bloquear tarjeta</b><span>Pérdida o robo</span></button>
-      <button class="tile" onclick="askSofia('Quiero denunciar un siniestro')"><span class="ico">🚗</span><b>Denunciar siniestro</b><span>Auto y hogar</span></button>
-      <button class="tile" onclick="askSofia('¿Cuál es el saldo de mi caja de ahorro?')"><span class="ico">💰</span><b>Consultar saldo</b><span>Cuentas y tarjetas</span></button>
-      <button class="tile" onclick="askSofia('¿Qué préstamos ofrecen?')"><span class="ico">💸</span><b>Préstamos</b><span>Simulá tu cuota</span></button>
-      <button class="tile" onclick="askSofia('Quiero abrir una cuenta')"><span class="ico">🏦</span><b>Abrir una cuenta</b><span>100% online</span></button>
-      <button class="tile" onclick="askSofia('Quiero hablar con una persona')"><span class="ico">🎧</span><b>Hablar con un asesor</b><span>Lun a vie 8 a 20 h</span></button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== Mi cuenta (logueado) ===== -->
-<section id="micuenta">
-  <div class="wrap">
-    <div class="s-head"><div><h2>Mi cuenta</h2><p id="mcSub">Resumen de tus productos.</p></div><button class="link" onclick="askSofia('¿Cuáles fueron mis últimos movimientos?')">Consultar movimientos con Sofía →</button></div>
-    <div class="grid g3" id="mcGrid"><div class="acct"><b>Cargando tus productos…</b><small>Consultando el sistema del banco</small></div></div>
-    <div class="policy" id="mcPolicy">
-      <div><b style="font-size:18px">🛡️ Póliza <span id="mcPoliza">—</span></b><div style="opacity:.85">Vigente · Denunciá un siniestro sin volver a identificarte.</div></div>
-      <button class="btn btn-light" onclick="askSofia('Quiero denunciar un siniestro de mi póliza')">Denunciar siniestro</button>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Productos ===== -->
-<section id="productos">
-  <div class="wrap">
-    <div class="s-head"><div><h2>Elegí lo que necesitás</h2><p>Productos pensados para cada momento.</p></div><button class="link" onclick="askSofia('¿Qué productos me recomendás?')">¿Dudas? Preguntale a Sofía →</button></div>
-    <div class="grid g4">
-      <div class="promo"><div class="art" style="background:linear-gradient(135deg,#EEEBFB,#DDF8F8)">🏦</div><div class="body"><span class="tag">Sin costo</span><h3>Caja de Ahorro</h3><p>Abrila 100% online, sin costo de mantenimiento.</p><button class="link" style="text-align:left" onclick="askSofia('¿Cuánto cuesta el mantenimiento de la cuenta?')">Conocer más →</button></div></div>
-      <div class="promo"><div class="art" style="background:linear-gradient(135deg,#FFF1DA,#FFE1E8)">💳</div><div class="body"><span class="tag">Beneficios</span><h3>Tarjetas</h3><p>Bloqueo inmediato y reposición sin costo.</p><button class="link" style="text-align:left" onclick="askSofia('Perdí mi tarjeta, ¿qué hago?')">Conocer más →</button></div></div>
-      <div class="promo"><div class="art" style="background:linear-gradient(135deg,#DDF8F8,#E1EEFF)">💸</div><div class="body"><span class="tag">En el día</span><h3>Préstamos</h3><p>De 12 a 60 cuotas fijas. Aprobación en el día.</p><button class="link" style="text-align:left" onclick="askSofia('¿Qué préstamos ofrecen?')">Conocer más →</button></div></div>
-      <div class="promo"><div class="art" style="background:linear-gradient(135deg,#E8E3FF,#F5E1FF)">🔐</div><div class="body"><span class="tag">Seguridad</span><h3>Operá seguro</h3><p>Nunca te pediremos claves, PIN ni códigos.</p><button class="link" style="text-align:left" onclick="askSofia('¿El banco me puede pedir mi clave por chat?')">Conocer más →</button></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Seguros ===== -->
-<section id="seguros" style="padding-top:0">
-  <div class="wrap">
-    <div class="s-head"><div><h2>Seguros Belltech</h2><p>Protegé lo que más querés y gestioná todo con Sofía.</p></div></div>
-    <div class="grid g4">
-      <div class="card"><span class="ico">🚗</span><h3>Auto</h3><p>Terceros, terceros completo y todo riesgo. Denuncia en 72 h.</p><button class="link" style="text-align:left" onclick="askSofia('Quiero denunciar un siniestro de auto')">Denunciar siniestro →</button></div>
-      <div class="card"><span class="ico">🏠</span><h3>Hogar</h3><p>Hogar Plus cubre agua, incendio, robo y responsabilidad civil.</p><button class="link" style="text-align:left" onclick="askSofia('¿El seguro de hogar cubre daños por agua?')">Conocer más →</button></div>
-      <div class="card"><span class="ico">❤️</span><h3>Vida</h3><p>Protección para vos y tu familia.</p><button class="link" style="text-align:left" onclick="askSofia('¿Qué cubre el seguro de vida?')">Conocer más →</button></div>
-      <div class="card"><span class="ico">✈️</span><h3>Viaje</h3><p>Asistencia médica y equipaje en todo el mundo.</p><button class="link" style="text-align:left" onclick="askSofia('¿Qué cubre el seguro de viaje?')">Conocer más →</button></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Sofía feature ===== -->
-<section id="beneficios" style="padding-top:0">
-  <div class="wrap">
-    <div class="split">
-      <div>
-        <span class="tag">Atención con IA</span>
-        <h2 style="font-size:clamp(24px,3vw,34px);margin:12px 0 8px;letter-spacing:-.5px">Sofía resuelve, y si hace falta, te pasa con una persona.</h2>
-        <p style="color:var(--muted);margin:0">Un mismo agente de IA en todos los canales, con acceso seguro a tus productos.</p>
-        <ul>
-          <li>Te reconoce si ya iniciaste sesión en Banca Online</li>
-          <li>Bloqueo de tarjetas y denuncia de siniestros al instante</li>
-          <li>Derivación a un asesor humano con todo el contexto</li>
-          <li>Habla tu idioma: chat, voz y email</li>
-        </ul>
-        <button class="btn btn-primary" onclick="openChat()">💬 Probar a Sofía</button>
-      </div>
-      <div class="sofia-art">
-        <div class="bubble u">Quiero hablar con una persona</div>
-        <div class="bubble b">Claro, te derivo con un asesor y le comparto el contexto de tu consulta 🙌</div>
-        <div class="bubble b">Estás primero en la fila · espera estimada: 1 min</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Canales ===== -->
-<section id="canales" class="channels">
-  <div class="wrap">
-    <div class="s-head"><div><h2>Contactanos como prefieras</h2><p>Chat, voz o email: siempre te atiende Sofía.</p></div></div>
-    <div class="grid g3">
-      <div class="card"><span class="ico">💬</span><h3>Webchat</h3><p>Chateá con Sofía. Si lo necesitás, te deriva con un asesor humano.</p><button class="btn btn-primary" onclick="openChat()">Abrir chat</button><div class="status" id="chatStatus"></div></div>
-      <div class="card"><span class="ico">📞</span><h3>Llamar desde la web</h3><p>Hablá con Sofía por voz desde el navegador. Necesitás micrófono.</p>
-        <div class="call-ui"><button class="btn btn-primary" id="callBtn">📞 Llamar</button></div>
-        <div class="status" id="callStatus">Se abre la llamada de Sofía abajo a la derecha.</div></div>
-      <div class="card" id="emailCard"><span class="ico">✉️</span><h3>Escribinos por email</h3><p>Sofía analiza tu consulta y te responde a tu casilla.</p>
-        <form id="emailForm">
-          <label for="em">Tu email</label><input id="em" type="email" required placeholder="tu@email.com">
-          <label for="subj">Asunto</label><select id="subj"><option>Consulta general</option><option>Seguros</option><option>Siniestro</option><option>Tarjetas</option><option>Reclamo</option></select>
-          <label for="msg">Mensaje</label><textarea id="msg" required placeholder="Contanos en qué te podemos ayudar"></textarea>
-          <button class="btn btn-primary" style="margin-top:12px" type="submit">Enviar</button>
-        </form><div class="status" id="emailStatus"></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Ayuda ===== -->
-<section id="ayuda">
-  <div class="wrap">
-    <div class="s-head"><div><h2>¿Necesitás ayuda?</h2></div></div>
-    <div class="help">
-      <button onclick="openChat()"><span class="ico">🤖</span>Asistente virtual</button>
-      <button onclick="askSofia('¿Dónde hay una sucursal o cajero cerca?')"><span class="ico">📍</span>Sucursales y cajeros</button>
-      <button onclick="askSofia('Recibí un mensaje sospechoso, ¿qué hago?')"><span class="ico">🚨</span>Ayuda urgente</button>
-      <a href="#guia"><span class="ico">📘</span>Guía de la demo</a>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Guía presentador ===== -->
-<section id="guia" style="padding-top:0">
-  <div class="wrap">
-    <div class="s-head"><div><h2>Guía para el presentador</h2><p>Usuarios de prueba y guion sugerido.</p></div></div>
-    <div class="grid g3 guide">
-      <div class="card"><h3>Banca Online (login)</h3><p style="flex:none">Clave: <code>Demo1234@</code></p>
-        <p style="flex:none;margin:0">En el ingreso hay 4 usuarios de prueba: hacé clic en uno y se completa solo.</p>
-        <p style="flex:none">Sin login, Sofía valida con DNI + fecha:<br><code>30123456</code> · <code>15-03-1985</code></p></div>
-      <div class="card"><h3>Guion de chat</h3><ol style="padding-left:18px;margin:0"><li>Pregunta de FAQ (seguros)</li><li>Saldo → validación o login</li><li>Bloqueo de tarjeta → confirmación</li><li>Denuncia de siniestro</li><li>"Mandame esto por mail"</li><li>"Quiero hablar con una persona"</li></ol></div>
-      <div class="card"><h3>Momentos "wow"</h3><ul style="padding-left:18px;margin:0"><li>Login web → Sofía ya te reconoce</li><li>Jailbreak bloqueado</li><li>Cambio de idioma automático</li><li>Handover con contexto y vuelta a Sofía</li><li>Mismo agente por voz</li></ul></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Footer ===== -->
-<footer>
-  <div class="wrap">
-    <div class="fcols">
-      <div><a class="brand" href="#" style="color:#fff"><span class="brand-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 4h8a4 4 0 0 1 0 8H5zM5 12h9a4 4 0 0 1 0 8H5z" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg></span><span>Belltech<small style="color:#BDB8E6">Banco &amp; Seguros</small></span></a><p style="margin-top:14px">Demo de IA conversacional construida con NiCE Cognigy.</p></div>
-      <div><h4>Productos</h4><a href="#productos">Cuentas</a><a href="#productos">Tarjetas</a><a href="#productos">Préstamos</a><a href="#seguros">Seguros</a></div>
-      <div><h4>Ayuda</h4><a href="#ayuda">Canales digitales</a><a href="#ayuda">Sucursales</a><a href="#" onclick="openChat();return false">Asistente virtual</a></div>
-      <div><h4>El Banco</h4><a href="#">Quiénes somos</a><a href="#">Sustentabilidad</a><a href="#">Trabajá con nosotros</a></div>
-      <div><h4>Información</h4><a href="#">Comisiones</a><a href="#">Botón de arrepentimiento</a><a href="#">Defensa del consumidor</a></div>
-    </div>
-    <div class="fbottom"><span>© 2026 Banco &amp; Seguros Belltech · Entidad ficticia con fines de demostración.</span><div class="social"><span>in</span><span>f</span><span>ig</span><span>X</span></div></div>
-  </div>
-</footer>
 
 <!-- ===== v16: Hacete cliente (QR + formulario) ===== -->
 <div class="modal-bg" id="altaModal" onclick="if(event.target===this)closeAlta()">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="altaTitle" style="text-align:center">
     <button class="x" onclick="closeAlta()" aria-label="Cerrar">×</button>
     <h3 id="altaTitle" style="margin:0 0 6px;font-size:22px">Hacete cliente en 1 minuto</h3>
-    <p style="color:var(--muted);margin:0 0 14px;font-size:14px">Escaneá el código con tu celular y completá el formulario. Al enviarlo ya tenés tu cuenta y podés entrar a Banca Online con tu email y la clave <b>Demo1234@</b>.</p>
-    <img src="qr-alta.png" alt="Código QR del formulario de alta" style="width:220px;height:220px;max-width:70vw;max-height:70vw;border-radius:12px;border:1px solid var(--border)">
+    <p style="color:#555;margin:0 0 14px;font-size:14px">Escaneá el código con tu celular y completá el formulario. Al enviarlo ya tenés tu cuenta y podés entrar a Banca Online con tu email y la clave <b>Demo1234@</b>.</p>
+    <img src="qr-alta.png" alt="Código QR del formulario de alta" style="width:220px;height:220px;max-width:70vw;max-height:70vw;border:1px solid #e5e5e5">
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
       <a class="btn btn-primary" id="altaLink" href="#" target="_blank" rel="noopener">Completar el formulario acá</a>
       <button class="btn btn-outline" onclick="closeAlta();askSofia('Quiero hacerme cliente y abrir una cuenta')">O hacelo hablando con Sofía</button>
@@ -542,9 +455,9 @@ body.no-webchat .sofia-fab{bottom:20px}
 <div class="modal-bg" id="loginModal" onclick="if(event.target===this)closeLogin()">
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="lmTitle">
     <button class="x" onclick="closeLogin()" aria-label="Cerrar">×</button>
-    <span class="brand-mark" style="margin-bottom:12px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 4h8a4 4 0 0 1 0 8H5zM5 12h9a4 4 0 0 1 0 8H5z" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/></svg></span>
+    <span class="eyebrow">Banco &amp; Seguros Belltech</span>
     <h3 id="lmTitle" style="margin:0 0 4px;font-size:22px">Banca Online</h3>
-    <p style="color:var(--muted);margin:0 0 8px;font-size:14px">Ingresá con tu email y clave.</p>
+    <p style="color:#555;margin:0 0 8px;font-size:14px">Ingresá con tu email y clave.</p>
     <div class="login-split"><div>
     <form class="loginForm" data-err="errB">
       <label for="emB">Email</label><input id="emB" name="email" type="email" required placeholder="tu@email.com" autocomplete="off">
@@ -565,8 +478,8 @@ body.no-webchat .sofia-fab{bottom:20px}
   <div class="sofia-card" id="sofiaCard" style="position:relative">
     <button class="sofia-close" aria-label="Cerrar" onclick="hideTeaser()">×</button>
     <div class="sofia-top"><span class="sofia-ava">S</span><div><b>Sofía</b><small>Asesora virtual · en línea</small></div></div>
-    <p id="sofiaGreet">¡Hola! Soy Sofía, tu asesora con IA. Ahora también podés hablarme directamente desde el navegador 🎙️, o si preferís, escribime. ¿Cómo arrancamos?</p>
-    <div class="fab-actions"><button type="button" onclick="openChat()">💬 Chatear</button><button type="button" class="call" id="fabCallBtn">📞 Llamar</button></div>
+    <p id="sofiaGreet">¡Hola! Soy Sofía, tu asesora con IA. Podés hablarme desde el navegador o escribirme. ¿Cómo arrancamos?</p>
+    <div class="fab-actions"><button type="button" onclick="openChat()">Chatear</button><button type="button" class="call" id="fabCallBtn">Llamar</button></div>
     <div class="chips" hidden>
       <button onclick="askSofia('¿Cuál es mi saldo?')">Mi saldo</button>
       <button onclick="askSofia('Perdí mi tarjeta')">Perdí mi tarjeta</button>
@@ -584,18 +497,29 @@ const CFG = window.DEMO_CONFIG || {};
 const isSet = (u) => u && !u.includes('PEGAR_TOKEN');
 const $ = (id) => document.getElementById(id);
 
-/* ---------- Carrusel ---------- */
-let cur = 0; const N = 3; let auto;
-const dots = $('dots');
-for (let i = 0; i < N; i++){ const b = document.createElement('button'); b.setAttribute('aria-label','Slide '+(i+1)); b.onclick = () => go(i); dots.appendChild(b); }
-function go(i){ cur = (i + N) % N; $('slides').style.transform = `translateX(-${cur*100}%)`; [...dots.children].forEach((d,k)=>d.classList.toggle('on',k===cur)); clearInterval(auto); auto = setInterval(()=>go(cur+1), 7000); }
-go(0);
-let tx = null; $('hero').addEventListener('touchstart', e => tx = e.touches[0].clientX, {passive:true});
-$('hero').addEventListener('touchend', e => { if (tx === null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 40) go(cur + (dx < 0 ? 1 : -1)); tx = null; });
+/* ---------- v20: conversación animada del hero (estilo landing Belltech) ---------- */
+(function(){
+  const script=[
+   {t:'user',x:'Hola, perdí mi tarjeta 😕',s:1},
+   {t:'sys',x:'Intención: bloqueo de tarjeta'},
+   {t:'bot',x:'Lo resuelvo ahora. Veo tu Visa Gold terminada en 4521. ¿La bloqueo?',s:2},
+   {t:'user',x:'Sí, bloqueala.'},
+   {t:'sys',x:'Bloqueo ejecutado · gestión TAR-118204'},
+   {t:'bot',x:'Listo, quedó bloqueada. Te mandé la constancia por mail y la nueva te llega en 5 días.',s:3}];
+  const box=$('msgs'),rail=[...document.querySelectorAll('#rail div')],clock=$('clock');let sec=0,tick;
+  const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  function run(){box.innerHTML='';rail.forEach(r=>r.classList.remove('on'));sec=0;clearInterval(tick);tick=setInterval(()=>{sec+=3;clock.textContent=fmt(sec)},350);
+   script.forEach((m,i)=>setTimeout(()=>{const d=document.createElement('div');d.className='msg '+m.t;d.textContent=m.x;box.appendChild(d);requestAnimationFrame(()=>d.classList.add('show'));
+   if(m.s)rail.forEach(r=>{if(+r.dataset.s<=m.s)r.classList.add('on')});if(i===script.length-1){setTimeout(()=>clearInterval(tick),300);setTimeout(run,4500)}},700+i*1500));}
+  run();
+})();
 
 /* ---------- Menú móvil ---------- */
-function toggleDrawer(o){ $('drawer').classList.toggle('open',o); $('drawerBg').classList.toggle('open',o); }
-document.querySelectorAll('.drawer a').forEach(a => a.addEventListener('click', () => toggleDrawer(false)));
+// v20: menú de la landing (en celular se despliega debajo del header)
+function toggleDrawer(o){ const n = $('nav'); if (n) n.classList.toggle('open', o === undefined ? !n.classList.contains('open') : o); }
+document.querySelectorAll('#nav a').forEach(a => a.addEventListener('click', () => toggleDrawer(false)));
+function openGuia(){ $('guiaModal').classList.add('open'); }
+function closeGuia(){ $('guiaModal').classList.remove('open'); }
 
 /* ---------- Login (v13: usuarios y datos desde la API BT_BYS / planilla BT_BYS_Datos_Demo) ---------- */
 // Todos los usuarios entran con la misma clave de demo. Los datos son ficticios.
@@ -652,68 +576,82 @@ document.querySelectorAll('.demo-users').forEach(box => {
   });
   box.addEventListener('click', e => { const b = e.target.closest('.du'); if (!b || !form) return; form.email.value = b.dataset.em; form.pass.value = DEMO_PASS; form.querySelector('[type=submit]').focus(); });
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAlta(); closeLogin(); toggleDrawer(false); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAlta(); closeLogin(); closeGuia(); toggleDrawer(false); } });
 
 if (session) {
   const first = session.nombre.split(' ')[0];
-  $('loginPanel').style.display = 'none'; $('welcomePanel').style.display = '';
+  $('loginPanel').style.display = 'none'; $('welcomePanel').style.display = 'block';
   $('wName').textContent = session.nombre;
   $('btnBanca').style.display = 'none';
   $('userPill').style.display = 'flex'; $('upName').textContent = first;
   $('upAva').textContent = session.nombre.split(' ').map(s=>s[0]).join('').slice(0,2);
   $('micuenta').style.display = 'block';
-  $('mcSub').textContent = 'Hola ' + first + ', este es el resumen de tus productos.';
-  $('mcPoliza').textContent = session.poliza || '—';
+  $('mcSub').textContent = 'Hola, ' + first + '.';
   renderMiCuenta();
   // v14: "Mi cuenta" se actualiza sola cada 15 s (si la pestaña está visible), al volver a la pestaña y después de cada respuesta de Sofía
   setInterval(() => { if (!document.hidden) renderMiCuenta(); }, 15000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) renderMiCuenta(); });
-  $('sofiaGreet').textContent = '¡Hola ' + first + '! 👋 Ya te reconocí. ¿En qué te ayudo hoy?';
-  if (window.matchMedia('(max-width:520px)').matches) document.querySelector('.user-pill .btn').style.display='none';
+  $('sofiaGreet').textContent = '¡Hola ' + first + '! Ya te reconocí. ¿En qué te ayudo hoy?';
 }
 
 /* ---------- Mi cuenta: datos en vivo desde la API ---------- */
 let _refT = null;
 function refrescarMiCuenta(){ clearTimeout(_refT); _refT = setTimeout(renderMiCuenta, 1500); }
+// v20: Mi cuenta con el diseño Belltech + constancias de lo que hace Sofía (movimientos, programadas y gestiones)
+const fmtMonto = (n, mon) => (mon === 'USD' ? pesos(n).replace('$ ', 'US$ ') : pesos(n));
+const ESTADO_FIN = ['resuelta', 'cerrada', 'ejecutada', 'cancelada', 'finalizada', 'pagada'];
 async function renderMiCuenta(){
   const grid = $('mcGrid');
   try {
-    // v18.4: también se traen las transferencias programadas pendientes
-    const [r, pr] = await Promise.all([apiGet({ accion: 'clientes', dni: session.dni }), apiGet({ accion: 'programadas', dni: session.dni }).catch(() => null)]);
+    // v18.4 / v20: también se traen programadas, movimientos y gestiones (API v6.9)
+    const [r, pr, mv, ge] = await Promise.all([
+      apiGet({ accion: 'clientes', dni: session.dni }),
+      apiGet({ accion: 'programadas', dni: session.dni }).catch(() => null),
+      apiGet({ accion: 'movimientos', dni: session.dni }).catch(() => null),
+      apiGet({ accion: 'gestiones', dni: session.dni }).catch(() => null)]);
     // v18: después de la baja total la persona deja de ser cliente
     if (!r.ok && r.resultado === 'NO_ENCONTRADO') {
-      grid.innerHTML = '<div class="acct"><span class="ico">👋</span><b>Ya no sos cliente de Banco Belltech</b><small>Se completó la baja total de tus productos. Gracias por haber confiado en nosotros. Cerramos tu sesión en unos segundos.</small><button class="btn btn-primary" onclick="logout()">Cerrar sesión</button></div>';
-      $('mcPolicy').style.display = 'none';
+      grid.innerHTML = '<div class="acc"><small>Banco &amp; Seguros Belltech</small><div class="amt" style="font-size:22px">Ya no sos cliente</div><p>Se completó la baja total de tus productos. Gracias por haber confiado en nosotros. Cerramos tu sesión en unos segundos.</p><button class="btn btn-primary btn-sm lnk" onclick="logout()">Cerrar sesión</button></div>';
+      $('mcMov').innerHTML = ''; $('mcGes').innerHTML = '';
       // v18.1: la sesión se cierra sola; si no, el chat y la llamada siguen usando al cliente eliminado (userId cli-<DNI>)
       if (!window._bajaLogout) window._bajaLogout = setTimeout(logout, 8000);
       return;
     }
     if (!r.ok) throw new Error(r.resultado);
-    const nom = { caja_ahorro: 'Caja de Ahorro', cuenta_corriente: 'Cuenta Corriente', paquete: 'Paquete' };
+    const nom = { caja_ahorro: 'Caja de ahorro', cuenta_corriente: 'Cuenta corriente', paquete: 'Paquete' };
+    const ask = (t) => 'askSofia(\'' + String(t).replace(/'/g, "\\'") + '\')';
     const cards = [];
     // v17: no se muestran cuentas cerradas, tarjetas ni seguros dados de baja
     (r.cuentas || []).filter(c => c.estado !== 'cerrada').forEach(c => {
-      const ico = c.tipo === 'cuenta_corriente' ? '📄' : '🏦';
-      const mon = c.moneda === 'USD' ? pesos(c.saldo).replace('$ ', 'US$ ') : pesos(c.saldo);
-      const extra = Number(c.acuerdo) > 0 ? 'Acuerdo disponible ' + pesos(c.acuerdo) : '•••• ' + esc(String(c.numero).slice(-4)) + ' · Alias ' + esc(c.alias);
-      cards.push('<div class="acct"><span class="ico">' + ico + '</span><b>' + esc(nom[c.tipo] || c.tipo) + (c.moneda === 'USD' ? ' en dólares' : '') + '</b><small>' + extra + '</small><span class="amt">' + mon + '</span><button class="link" style="text-align:left" onclick="askSofia(\'¿Cuál es el saldo de mi ' + esc(nom[c.tipo] || 'cuenta').toLowerCase() + '?\')">Preguntar a Sofía →</button></div>');
+      const extra = Number(c.acuerdo) > 0 ? 'Acuerdo disponible ' + pesos(c.acuerdo) : 'Alias ' + esc(c.alias);
+      cards.push('<div class="acc"><small>' + esc(nom[c.tipo] || c.tipo) + (c.moneda === 'USD' ? ' en dólares' : '') + ' · ' + esc(c.numero) + '</small><div class="amt">' + fmtMonto(c.saldo, c.moneda) + '</div><p>' + extra + '</p><button class="link lnk" onclick="' + ask('¿Cuál es el saldo de mi ' + (nom[c.tipo] || 'cuenta').toLowerCase() + '?') + '">Consultar con Sofía →</button></div>');
     });
     (r.tarjetas || []).filter(t => t.estado !== 'dada_de_baja').forEach(t => {
       const bloq = t.estado !== 'activa';
-      cards.push('<div class="acct"><span class="ico">💳</span><b>' + esc(t.marca + ' ' + t.nivel) + '</b><small>•••• ' + esc(t.ultimos_4) + (bloq ? ' · <b style="color:#c0392b">' + esc(t.estado) + '</b>' : ' · vence ' + esc(t.vencimiento) + ' · mínimo ' + pesos(t.pago_minimo)) + '</small><span class="amt">' + pesos(t.saldo_a_pagar) + '</span>' + (bloq ? '<small>Tu tarjeta nueva llega en 5 a 7 días hábiles.</small>' : '<button class="link" style="text-align:left" onclick="askSofia(\'Perdí mi tarjeta terminada en ' + esc(t.ultimos_4) + ', quiero bloquearla\')">Bloquear con Sofía →</button>') + '</div>');
+      cards.push('<div class="acc"><small>' + esc(t.marca + ' ' + t.nivel) + ' · terminada en ' + esc(t.ultimos_4) + '</small><div class="amt">' + pesos(t.saldo_a_pagar) + '</div><p>' + (bloq ? '<span class="st">' + esc(t.estado) + '</span>' : 'Vence el ' + esc(t.vencimiento) + ' · Pago mínimo ' + pesos(t.pago_minimo)) + '</p><button class="link lnk" onclick="' + ask(bloq ? '¿Cómo reactivo mi tarjeta?' : 'Quiero pagar mi tarjeta') + '">' + (bloq ? 'Consultar con Sofía →' : 'Pagar con Sofía →') + '</button></div>');
     });
     (r.prestamos || []).filter(l => l.estado !== 'cancelado').forEach(l => {   // v18: préstamos cancelados no se muestran
-      cards.push('<div class="acct"><span class="ico">💸</span><b>Préstamo personal</b><small>Cuota ' + (Number(l.cuotas_pagas) + 1) + ' de ' + esc(l.cuotas) + '</small><span class="amt">' + pesos(l.valor_cuota) + '</span><button class="link" style="text-align:left" onclick="askSofia(\'¿Cuánto me falta pagar de mi préstamo?\')">Preguntar a Sofía →</button></div>');
+      cards.push('<div class="acc"><small>Préstamo personal · ' + esc(l.numero) + '</small><div class="amt">' + pesos(l.valor_cuota) + '</div><p>Cuota ' + (Number(l.cuotas_pagas) + 1) + ' de ' + esc(l.cuotas) + '</p><button class="link lnk" onclick="' + ask('¿Cuánto me falta pagar de mi préstamo?') + '">Consultar con Sofía →</button></div>');
     });
-    ((pr && pr.ok && pr.pendientes) || []).forEach(p => {
-      cards.push('<div class="acct"><span class="ico">⏱</span><b>Transferencia programada</b><small>' + esc(p.ejecutar_txt) + ' hs · a ' + esc(p.alias) + (p.destinatario ? ' (' + esc(p.destinatario) + ')' : '') + '</small><span class="amt">' + pesos(p.monto) + '</span><button class="link" style="text-align:left" onclick="askSofia(\'Quiero cancelar la transferencia programada ' + esc(p.id) + '\')">Cancelar con Sofía →</button></div>');
+    (r.seguros || []).filter(s => s.estado !== 'baja').forEach(s => {
+      cards.push('<div class="acc dark"><small>Seguro de ' + esc(s.tipo) + ' · ' + esc(s.poliza) + '</small><div class="amt">' + (s.estado === 'vigente' || !s.estado ? 'Vigente' : esc(s.estado)) + '</div><p>' + esc(s.cobertura || '') + '</p><button class="link lnk" onclick="' + ask('Quiero denunciar un siniestro de mi póliza ' + s.poliza) + '">Denunciar siniestro →</button></div>');
     });
-    if (!cards.length) cards.push('<div class="acct"><span class="ico">🏦</span><b>Todavía no tenés productos</b><small>Abrí tu primera cuenta en minutos.</small><button class="btn btn-primary" onclick="askSofia(\'Quiero abrir una cuenta\')">Abrir una cuenta con Sofía</button></div>');
+    if (!cards.length) cards.push('<div class="acc"><small>Banco &amp; Seguros Belltech</small><div class="amt" style="font-size:22px">Todavía no tenés productos</div><p>Abrí tu primera cuenta en minutos.</p><button class="link lnk" onclick="' + ask('Quiero abrir una cuenta') + '">Abrir una cuenta con Sofía →</button></div>');
     grid.innerHTML = cards.join('');
-    const seg = (r.seguros || []).filter(s => s.estado !== 'baja')[0];
-    if (seg) { $('mcPoliza').textContent = seg.poliza + ' · ' + seg.tipo; $('mcPolicy').style.display = ''; } else $('mcPolicy').style.display = 'none';
+    // Últimos movimientos
+    const movs = ((mv && mv.ok && mv.movimientos) || []).slice(0, 6);
+    $('mcMov').innerHTML = movs.length ? movs.map(m => {
+      const n = Number(m.monto) || 0;
+      return '<div class="row"><span>' + esc(m.concepto) + '<em>' + esc(m.fecha) + (m.referencia ? ' · ' + esc(m.referencia) : '') + '</em></span><b>' + (n < 0 ? '− ' : '+ ') + pesos(Math.abs(n)) + '</b></div>';
+    }).join('') : '<p class="empty">Todavía no hay movimientos. Pedile a Sofía una transferencia o un pago y lo vas a ver acá.</p>';
+    // Gestiones y programadas
+    const items = [];
+    ((pr && pr.ok && pr.pendientes) || []).forEach(p => items.push('<div class="row"><span>Transferencia programada a ' + esc(p.alias) + ' · ' + pesos(p.monto) + '<em>' + esc(p.ejecutar_txt) + ' hs · ' + esc(p.id) + '</em></span><span class="pill o">Pendiente</span></div>'));
+    ((ge && ge.ok && ge.gestiones) || []).slice(0, 6).forEach(g => items.push('<div class="row"><span>' + esc(g.titulo) + '<em>' + esc(g.id) + ' · ' + esc(g.actualizado || g.fecha) + '</em></span><span class="pill' + (ESTADO_FIN.indexOf(String(g.estado).toLowerCase()) >= 0 ? '' : ' o') + '">' + esc(g.estado) + '</span></div>'));
+    ((pr && pr.ok && pr.recientes) || []).forEach(p => items.push('<div class="row"><span>Transferencia programada a ' + esc(p.alias) + ' · ' + pesos(p.monto) + '<em>' + esc(p.ejecutar_txt) + ' hs · ' + esc(p.id) + '</em></span><span class="pill">' + esc(p.estado) + '</span></div>'));
+    $('mcGes').innerHTML = items.length ? items.join('') : '<p class="empty">No tenés gestiones abiertas. Lo que hagas con Sofía (bloqueos, siniestros, programadas) aparece acá.</p>';
   } catch (e) {
-    grid.innerHTML = '<div class="acct"><b>No pudimos cargar tus productos</b><small>Probá recargar la página en unos segundos.</small></div>';
+    grid.innerHTML = '<div class="acc"><small>Mi cuenta</small><div class="amt" style="font-size:20px">No pudimos cargar tus productos</div><p>Probá recargar la página en unos segundos.</p></div>';
   }
 }
 
@@ -723,9 +661,9 @@ async function renderMiCuenta(){
   const url = (window.DEMO_CONFIG || {}).XAPP_PIN_URL || 'https://static-trial.cognigy.ai';
   const b = document.createElement('a');
   b.href = url; b.target = '_blank'; b.rel = 'noopener';
-  b.textContent = '🔐 Autorizar operación';
+  b.textContent = 'Autorizar operación';
   b.setAttribute('aria-label', 'Autorizar operación con el código que te da Sofía');
-  b.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:9998;background:#fff;color:var(--brand);border:2px solid var(--brand);font-weight:700;font-size:14px;padding:11px 16px;border-radius:999px;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.18)';
+  b.style.cssText = 'position:fixed;left:16px;bottom:16px;z-index:9998;background:#111C24;color:#fff;border-left:3px solid #FF6418;font:700 14px "Open Sans",Arial,sans-serif;padding:12px 16px;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.25)';
   document.body.appendChild(b);
 })();
 
@@ -764,7 +702,7 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
     userId: session ? 'cli-' + session.dni : 'anon-' + Math.random().toString(36).slice(2,10),
     sessionId: 'web-' + Date.now(),
     settings: {
-      colors: { primaryColor: CFG.PRIMARY_COLOR || '#2A1B6E' },
+      colors: { primaryColor: '#FF6418' },   // v20: naranja Belltech
       behavior: { enableTypingIndicator: true, enableSTT: true },
       homeScreen: { enabled: false },
       widgetSettings: { disableToggleButton: true },
@@ -821,19 +759,13 @@ $('askForm').addEventListener('submit', e => { e.preventDefault(); const t = $('
 if (window.matchMedia('(max-width:520px)').matches) hideTeaser();
 else setTimeout(() => { if (document.activeElement !== $('askInput') && $('sofiaFab').style.display !== 'none') hideTeaser(); }, 15000);
 
-/* ---------- Email (simulado vía Endpoint REST) ---------- */
-if (!CFG.REST_ENDPOINT_URL) $('emailCard').style.display = 'none';
-if (session) $('em').value = session.email;
-$('emailForm').addEventListener('submit', async ev => {
+/* ---------- v20: "Escribile a Sofía" (abre el chat con el mensaje) ---------- */
+$('sofiaForm').addEventListener('submit', ev => {
   ev.preventDefault();
-  const email = $('em').value.trim(), asunto = $('subj').value, mensaje = $('msg').value.trim(), st = $('emailStatus');
-  st.textContent = 'Enviando…'; st.className = 'status';
-  try {
-    const res = await fetch(CFG.REST_ENDPOINT_URL, { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ userId: email, sessionId: 'email-' + Date.now(), text: mensaje, data: { channel:'email', email, asunto, ...(session ? authData : {}) } }) });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    st.textContent = '¡Recibido! Sofía te va a responder a ' + email + '.'; st.className = 'status ok'; ev.target.reset(); if (session) $('em').value = session.email;
-  } catch (e) { st.textContent = 'No se pudo enviar (' + e.message + '). Revisá la URL del endpoint REST o CORS.'; st.className = 'status err'; }
+  const t = $('sfMsg').value.trim(); if (!t) return;
+  const tema = $('sfTema').value;
+  $('sfMsg').value = '';
+  askSofia(tema === 'Consulta general' ? t : tema + ': ' + t);
 });
 </script>
 

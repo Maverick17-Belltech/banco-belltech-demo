@@ -23,5 +23,5 @@ window.DEMO_CONFIG = {
   ALTA_FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLScfzQxufYXLBvjbnMpdkII1rzEJ-8u12m4mertHcGZ6DEwUFw/viewform",
 
   // Color principal de la marca (webchat y sitio)
-  PRIMARY_COLOR: "#0B3D91"
+  PRIMARY_COLOR: "#FF6418"
 };
