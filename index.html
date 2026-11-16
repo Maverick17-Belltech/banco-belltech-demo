@@ -233,6 +233,26 @@
   /* v20.1: el chat y la llamada de Cognigy siempre por encima de la página (header, hero y paneles) */
   .bt-top{z-index:2147483000 !important}
   [class*="webrtc_widget"],[data-cognigy-webchat-root],[class*="webchat-root"],[id*="webchat"]{z-index:2147483000 !important}   /* v20.1: evita la barra horizontal que generan los widgets de Cognigy */
+
+  /* ===== v21: validación de identidad (foto del DNI + selfie) ===== */
+  .idv{width:min(560px,100%)}
+  .idv .steps{display:flex;gap:0;margin:14px 0 16px;border-top:1px solid #eee}
+  .idv .steps div{flex:1;padding:10px 0 0;font:700 12px "Open Sans",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#aaa}
+  .idv .steps div.on{color:var(--rich);box-shadow:inset 0 3px 0 var(--orange)}
+  .idv .stage{position:relative;background:#111C24;aspect-ratio:4/3;overflow:hidden}
+  .idv video,.idv canvas.prev{width:100%;height:100%;object-fit:cover;display:block}
+  .idv video.selfie{transform:scaleX(-1)}
+  .idv .guide{position:absolute;inset:12% 18%;border:3px dashed rgba(255,255,255,.7);pointer-events:none}
+  .idv .guide.oval{inset:8% 26%;border-radius:50%}
+  .idv .hint2{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:rgba(17,28,36,.75);color:#fff;font:700 15px "Open Sans",Arial,sans-serif;text-align:center}
+  .idv .msg2{min-height:22px;margin:12px 0 0;font-size:15px;color:#555}
+  .idv .msg2.err{color:#C62828;font-weight:700}.idv .msg2.ok{color:#0E8A5F;font-weight:700}
+  .idv .acts2{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .idv .acts2 .btn{flex:1;min-width:150px}
+  .idv .badge{display:inline-block;margin-top:8px;font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;background:#FFE6D9;color:#B33F00}
+  .idv .res{padding:18px;background:var(--smoke);border-left:3px solid var(--orange);margin-top:6px}
+  .idv .res b{font:800 20px "Open Sans",Arial,sans-serif;color:var(--rich);display:block}
+  .idv small.priv{display:block;margin-top:12px;color:#888;font-size:12.5px}
   /* ===== v20: piezas funcionales (login, modales, Sofía flotante, estados) ===== */
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   .btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:#e5560f}
@@ -427,6 +447,22 @@
   <div class="bottom"><span>© 2026 Belltech. Demo con fines de demostración.</span><span>Política de privacidad</span></div>
 </div></footer>
 
+<!-- ===== v21: Validación de identidad (foto del DNI + selfie, en el navegador, sin guardar imágenes) ===== -->
+<div class="modal-bg" id="idvModal">
+  <div class="modal idv" role="dialog" aria-modal="true" aria-labelledby="idvTitle">
+    <button class="x" onclick="idvCancelar()" aria-label="Cerrar">×</button>
+    <span class="eyebrow">Alta de cliente</span><h3 id="idvTitle">Validá tu identidad</h3>
+    <div class="steps"><div id="idvS1" class="on">1 · Foto del DNI</div><div id="idvS2">2 · Selfie</div><div id="idvS3">3 · Resultado</div></div>
+    <div class="stage" id="idvStage"><video id="idvVideo" playsinline muted autoplay></video><canvas class="prev" id="idvPrev" hidden></canvas><div class="guide" id="idvGuide"></div><div class="hint2" id="idvHint">Preparando la cámara…</div></div>
+    <div class="res" id="idvRes" hidden></div>
+    <p class="msg2" id="idvMsg"></p>
+    <div class="acts2" id="idvActs"></div>
+    <input type="file" id="idvFile" accept="image/*" hidden>
+    <span class="badge" id="idvDemo" hidden>Validación simulada (modo demo)</span>
+    <small class="priv">Las fotos se procesan solo en tu navegador y no se guardan. Banco &amp; Seguros Belltech es una entidad ficticia de demostración.</small>
+  </div>
+</div>
+
 <!-- ===== Guía del presentador (modal) ===== -->
 <div class="modal-bg" id="guiaModal" onclick="if(event.target===this)closeGuia()">
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="guiaTitle">
@@ -545,7 +581,8 @@ const store = {
   clear(){ try { localStorage.removeItem('bt_session'); } catch(_) {} }
 };
 const session = store.get();
-function openAlta(){ const l = $('altaLink'); if (l) l.href = CFG.ALTA_FORM_URL || '#'; $('altaModal').classList.add('open'); }
+// v21: el alta se hace solo con Sofía (formulario + validación de identidad con la cámara)
+function openAlta(){ askSofia('Quiero hacerme cliente'); }
 function closeAlta(){ $('altaModal').classList.remove('open'); }
 function openLogin(){ $('loginModal').classList.add('open'); setTimeout(()=>$('emB').focus(),50); }
 function closeLogin(){ $('loginModal').classList.remove('open'); }
@@ -711,6 +748,139 @@ const proc = (() => {
   new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { subir(n); setTimeout(() => subir(n), 300); }))).observe(document.body, { childList: true });
 })();
 
+/* ---------- v21: validación de identidad (foto del DNI + selfie con prueba de vida) ----------
+   Corre en el navegador con face-api (detección de rostro, puntos de la cara y comparación). No se guarda ninguna imagen:
+   a la API solo se manda el resultado (aprobada / rechazada / cancelada, coincidencia y prueba de vida).
+   Si la librería o la cámara no están disponibles, se usa un modo demo simulado para que la demo no se corte. */
+const FACEAPI_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.js';
+const FACEAPI_MODELS = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model/';
+const IDV = { token: '', stream: null, dniDesc: null, cara: false, vida: false, intentos: 0, demo: false, loop: null, fin: false };
+let _faceapiListo = null;
+function cargarFaceApi(){
+  if (_faceapiListo) return _faceapiListo;
+  _faceapiListo = new Promise((ok, mal) => {
+    const tOut = setTimeout(() => mal(new Error('timeout')), 25000);
+    const sc = document.createElement('script'); sc.src = FACEAPI_URL;
+    sc.onload = async () => {
+      try {
+        await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(FACEAPI_MODELS), faceapi.nets.faceLandmark68Net.loadFromUri(FACEAPI_MODELS), faceapi.nets.faceRecognitionNet.loadFromUri(FACEAPI_MODELS)]);
+        clearTimeout(tOut); ok(window.faceapi);
+      } catch (e) { clearTimeout(tOut); mal(e); }
+    };
+    sc.onerror = () => { clearTimeout(tOut); mal(new Error('no carga')); };
+    document.head.appendChild(sc);
+  });
+  return _faceapiListo;
+}
+const idvEl = (id) => $(id);
+function idvPaso(n){ ['idvS1','idvS2','idvS3'].forEach((id,i) => idvEl(id).classList.toggle('on', i === n - 1)); }
+function idvMsg(t, cls){ const m = idvEl('idvMsg'); m.textContent = t || ''; m.className = 'msg2' + (cls ? ' ' + cls : ''); }
+function idvHint(t){ idvEl('idvHint').textContent = t; }
+function idvBotones(lista){ idvEl('idvActs').innerHTML = ''; lista.forEach(b => { const x = document.createElement('button'); x.type = 'button'; x.className = 'btn' + (b.alt ? ' btn-outline' : ''); x.textContent = b.t; x.onclick = b.f; idvEl('idvActs').appendChild(x); }); }
+function idvFrenar(){ clearInterval(IDV.loop); IDV.loop = null; if (IDV.stream) { IDV.stream.getTracks().forEach(t => t.stop()); IDV.stream = null; } }
+async function idvCamara(modo){
+  idvFrenar();
+  const v = idvEl('idvVideo'); v.hidden = false; idvEl('idvPrev').hidden = true;
+  v.classList.toggle('selfie', modo === 'user');
+  IDV.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: modo, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false });
+  v.srcObject = IDV.stream; await v.play().catch(() => {});
+}
+function idvFoto(src){
+  const c = idvEl('idvPrev'), w = src.videoWidth || src.naturalWidth || src.width, h = src.videoHeight || src.naturalHeight || src.height;
+  c.width = w; c.height = h; c.getContext('2d').drawImage(src, 0, 0, w, h);
+  idvEl('idvVideo').hidden = true; c.hidden = false; return c;
+}
+async function abrirIdentidad(token, nombre){
+  Object.assign(IDV, { token, dniDesc: null, cara: false, vida: false, intentos: 0, demo: false, fin: false });
+  idvEl('idvTitle').textContent = 'Validá tu identidad' + (nombre ? ', ' + nombre : '');
+  idvEl('idvRes').hidden = true; idvEl('idvStage').hidden = false; idvEl('idvDemo').hidden = true;
+  $('idvModal').classList.add('open');
+  try { const w = window.cognigyWebchat; if (w && w.isOpen && w.isOpen() && w.close) { w.close(); IDV.reabrirChat = true; } } catch (_) {}
+  idvPaso(1); idvMsg('Cargando el validador…'); idvBotones([]);
+  try { await cargarFaceApi(); } catch (e) { IDV.demo = true; idvEl('idvDemo').hidden = false; }
+  idvPasoDni();
+}
+async function idvPasoDni(){
+  idvPaso(1); idvEl('idvGuide').className = 'guide';
+  idvHint('Poné el frente de tu DNI dentro del recuadro');
+  idvMsg('Usá buena luz y que se vea entera la foto del DNI.');
+  try { await idvCamara('environment'); } catch (e) { idvHint('No pudimos usar la cámara'); idvMsg('Podés subir una foto del frente de tu DNI.', 'err'); }
+  idvBotones([{ t: 'Sacar la foto', f: () => idvSacarDni(idvEl('idvVideo')) }, { t: 'Subir una foto', alt: true, f: () => idvEl('idvFile').click() }]);
+}
+idvEl('idvFile').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const img = new Image(); img.onload = () => idvSacarDni(img); img.src = URL.createObjectURL(f); e.target.value = '';
+});
+async function idvSacarDni(src){
+  const c = idvFoto(src); idvFrenar(); IDV.intentos++;
+  if (IDV.demo) { IDV.cara = true; idvMsg('Foto del DNI recibida.', 'ok'); return setTimeout(idvPasoSelfie, 900); }
+  idvMsg('Buscando la cara en el DNI…');
+  const r = await faceapi.detectSingleFace(c, new faceapi.TinyFaceDetectorOptions({ inputSize: 608, scoreThreshold: 0.3 })).withFaceLandmarks().withFaceDescriptor().catch(() => null);
+  if (!r) {
+    idvMsg('No encontramos la foto de la cara en el DNI. Probá de nuevo más cerca y sin reflejos.', 'err');
+    if (IDV.intentos >= 3) return idvTerminar('rechazada', 0, 'no se detectó la cara en el DNI');
+    return idvBotones([{ t: 'Intentar de nuevo', f: idvPasoDni }, { t: 'Subir una foto', alt: true, f: () => idvEl('idvFile').click() }]);
+  }
+  IDV.dniDesc = r.descriptor; IDV.cara = true; idvMsg('¡Listo! Ahora la selfie.', 'ok'); setTimeout(idvPasoSelfie, 900);
+}
+async function idvPasoSelfie(){
+  idvPaso(2); idvEl('idvGuide').className = 'guide oval'; idvBotones([]);
+  idvHint('Mirá a la cámara');
+  idvMsg('Vamos a pedirte que gires la cabeza para comprobar que sos vos (prueba de vida).');
+  try { await idvCamara('user'); } catch (e) { return idvTerminar('rechazada', 0, 'no se pudo usar la cámara para la selfie'); }
+  const v = idvEl('idvVideo');
+  if (IDV.demo) {   // modo demo: se simula la prueba de vida
+    const pasos = ['Girá la cabeza hacia un lado', 'Ahora hacia el otro lado', 'Mirá de frente'];
+    let i = 0; idvHint(pasos[0]);
+    IDV.loop = setInterval(() => { i++; if (i < pasos.length) idvHint(pasos[i]); else { clearInterval(IDV.loop); IDV.vida = true; idvFoto(v); idvFrenar(); idvTerminar('aprobada', 0, ''); } }, 2200);
+    return;
+  }
+  const opt = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.4 });
+  let izq = false, der = false, frente = 0, ocupado = false; const t0 = Date.now();
+  idvHint('Girá la cabeza despacio hacia un lado y después hacia el otro');
+  IDV.loop = setInterval(async () => {
+    if (ocupado) return; ocupado = true;
+    try {
+      if (Date.now() - t0 > 30000) { idvFrenar(); return idvTerminar('rechazada', 0, 'no se completó la prueba de vida'); }
+      const r = await faceapi.detectSingleFace(v, opt).withFaceLandmarks();
+      if (!r) { idvHint('No te vemos: acercate y mirá a la cámara'); return; }
+      const lm = r.landmarks, ojoI = lm.getLeftEye(), ojoD = lm.getRightEye(), nariz = lm.getNose()[3];
+      const cx = (a) => a.reduce((s, p) => s + p.x, 0) / a.length;
+      const mitad = (cx(ojoI) + cx(ojoD)) / 2, dist = Math.abs(cx(ojoD) - cx(ojoI)) || 1;
+      const giro = (nariz.x - mitad) / dist;   // negativo: hacia un lado · positivo: hacia el otro
+      if (giro < -0.18) izq = true;
+      if (giro > 0.18) der = true;
+      if (!(izq && der)) { idvHint(izq || der ? 'Bien. Ahora hacia el otro lado' : 'Girá la cabeza despacio hacia un lado'); return; }
+      if (Math.abs(giro) < 0.08) frente++; else { frente = 0; idvHint('¡Bien! Ahora mirá de frente'); return; }
+      if (frente < 2) return;
+      clearInterval(IDV.loop); IDV.vida = true; idvHint('Comparando con tu DNI…');
+      const c = idvFoto(v); idvFrenar();
+      const s = await faceapi.detectSingleFace(c, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 })).withFaceLandmarks().withFaceDescriptor();
+      if (!s) return idvTerminar('rechazada', 0, 'no se pudo leer la selfie');
+      const d = faceapi.euclideanDistance(IDV.dniDesc, s.descriptor);
+      const sim = Math.max(0, Math.min(99, Math.round(100 - d * 25)));   // puntaje de demo: distancia 0,6 (umbral habitual) = 85
+      idvTerminar(d < 0.6 ? 'aprobada' : 'rechazada', sim, d < 0.6 ? '' : 'la cara del DNI no coincide con la selfie');
+    } catch (e) { /* frame con error: se sigue con el próximo */ } finally { ocupado = false; }
+  }, 250);
+}
+async function idvTerminar(resultado, similitud, motivo){
+  if (IDV.fin) return; IDV.fin = true; idvFrenar(); idvPaso(3); idvBotones([]);
+  idvEl('idvStage').hidden = true;
+  const res = idvEl('idvRes'); res.hidden = false;
+  res.innerHTML = resultado === 'aprobada'
+    ? '<b>Identidad validada</b>' + (similitud ? 'Coincidencia DNI y selfie: ' + similitud + ' %. ' : '') + 'Prueba de vida superada. Volvé al chat: Sofía termina tu alta.'
+    : resultado === 'cancelada' ? '<b>Validación cancelada</b>Podés retomarla con Sofía cuando quieras.'
+    : '<b>No pudimos validar tu identidad</b>' + (motivo ? 'Motivo: ' + motivo + '. ' : '') + 'Sofía te ayuda a intentarlo de nuevo.';
+  idvMsg('Enviando el resultado…');
+  try { await apiGet({ accion: 'identidad', t: IDV.token, resultado, similitud: similitud || '', vida: IDV.vida ? 'si' : 'no', cara: IDV.cara ? 'si' : 'no', modo: IDV.demo ? 'demo' : 'real', intentos: IDV.intentos, motivo: motivo || '' }); } catch (_) {}
+  idvMsg('');
+  setTimeout(() => {
+    $('idvModal').classList.remove('open');
+    whenReady(() => { try { abrirChat(); } catch (_) {} proc.mostrar(); try { webchat.sendMessage('', Object.assign({}, authData, { evento: 'identidad', t: IDV.token })); } catch (_) {} });
+  }, resultado === 'aprobada' ? 2200 : 3200);
+}
+function idvCancelar(){ if (!$('idvModal').classList.contains('open')) return; if (IDV.fin) { $('idvModal').classList.remove('open'); return; } idvTerminar('cancelada', 0, 'la persona cerró la validación'); }
+
 /* ---------- Webchat Cognigy ---------- */
 let webchat = null; const pending = [];
 const authData = session
@@ -736,7 +906,7 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         // El indicador se oculta solo con un mensaje visible: texto, formulario xApp o cierre del chat.
         const pl = (ev && ev.payload) || {}, cog = (pl.data && pl.data._cognigy) || {};
         const visible = ev && ev.type === 'webchat/incoming-message' &&
-          ((typeof pl.text === 'string' && pl.text.trim() !== '') || cog._app || cog._default || (pl.data && pl.data.cerrarChat));
+          ((typeof pl.text === 'string' && pl.text.trim() !== '') || cog._app || cog._default || (pl.data && (pl.data.cerrarChat || pl.data.validarIdentidad)));
         if (ev && ev.type === 'webchat/open') {
           chatAbierto = true;
           // v18.5: si el chat ya se había cerrado (con la X o solo después de la despedida), al reabrirlo se le avisa a Sofía
@@ -750,6 +920,7 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         if (visible || (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize'))) proc.ocultar();
         if (visible && typeof session !== 'undefined' && session) refrescarMiCuenta();
         const d = ev && ev.type === 'webchat/incoming-message' && ev.payload && ev.payload.data;
+        if (d && d.validarIdentidad === true && d.token) abrirIdentidad(d.token, d.nombre);   // v21
         if (d && d.cerrarChat === true) { conversacionTerminada = true; chatSeCerro = true; setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000); }
       });
     } catch (_) {}
