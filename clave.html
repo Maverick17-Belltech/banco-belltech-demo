@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clave de Banca Online | Banco & Seguros Belltech</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+  :root{--brand:#111C24;--brand-2:#1E2C38;--accent:#FF6418;--bg:#F2F2F2;--ink:#111C24;--muted:#555;--ok:#0E8A5F;--err:#C0392B}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Calibri,Carlito,"Open Sans",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--brand);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;font-weight:800}
+  header .mk{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--brand-2),var(--accent));display:grid;place-items:center}
+  main{max-width:520px;margin:24px auto;padding:0 16px}
+  .card{background:#fff;border-radius:0;border-top:3px solid var(--accent);padding:22px;box-shadow:0 10px 30px rgba(42,27,110,.10)}
+  h1{font:800 22px "Open Sans",Arial,sans-serif;margin:0 0 6px;color:var(--ink)}
+  p.sub{color:var(--muted);margin:0 0 18px;font-size:14.5px}
+  dl{display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin:0 0 18px;font-size:15px}
+  dt{color:var(--muted)} dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+  label{display:block;font-size:13.5px;color:var(--muted);margin:12px 0 6px}
+  input{width:100%;padding:12px;border:1px solid #ccc;border-radius:0;font-size:16px}
+  input:focus{outline:none;border-color:var(--accent)}
+  .row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+  button{flex:1;min-width:140px;border:0;border-radius:0;font-family:"Open Sans",Arial,sans-serif;padding:14px;font-size:15.5px;font-weight:700;cursor:pointer}
+  .ok{background:var(--accent);color:#fff}.ok:hover{background:#e5560f}
+  .no{background:#fff;color:var(--brand);box-shadow:inset 0 0 0 1.5px var(--brand)}
+  button:disabled{opacity:.6;cursor:wait}
+  .msg{padding:14px;border-radius:0;margin-top:16px;font-size:15px}
+  .msg.good{background:#E6F6EF;color:var(--ok)} .msg.bad{background:#FBEAEA;color:var(--err)} .msg.info{background:#EEF0FF;color:var(--brand)}
+  small.note{display:block;color:var(--muted);margin-top:14px;font-size:12.5px}
+  .pw{position:relative}.pw input{padding-right:70px}.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);flex:none;min-width:0;padding:6px 10px;background:none;color:var(--muted);font-size:13px}
+  ul.req{list-style:none;padding:0;margin:14px 0 0;font-size:14px;color:var(--muted)}
+  ul.req li{padding:3px 0 3px 22px;position:relative}
+  ul.req li:before{content:"";position:absolute;left:4px;top:9px;width:9px;height:9px;border:1.5px solid #bbb}
+  ul.req li.cumple{color:var(--ok)}ul.req li.cumple:before{background:var(--ok);border-color:var(--ok)}
+  .vence{font-size:13px;color:var(--muted);margin:-8px 0 12px}
+</style>
+</head>
+<body>
+<header><img src="assets/logo_blanco.png" alt="Belltech" style="height:28px;display:block"><span style="display:flex;align-items:center;gap:8px;font:600 12px 'Open Sans',Arial;color:rgba(255,255,255,.6);border-left:1px solid rgba(255,255,255,.2);padding-left:12px">powered by <img src="assets/nice.png" alt="NiCE" style="height:15px"></span><span id="ver" style="margin-left:auto;font:600 11px 'Open Sans',Arial;color:rgba(255,255,255,.45)">clave v1</span></header>
+<main>
+  <div class="card" id="card">
+    <h1>Clave de Banca Online</h1>
+    <p class="sub">Cargando…</p>
+  </div>
+  <small class="note">Banco &amp; Seguros Belltech · Demo de Belltech powered by NiCE. Entidad ficticia: no uses una clave real que uses en otro lado.</small>
+</main>
+<script>
+/* clave.html v1 – crear o cambiar la clave de Banca Online desde el link del mail (API v6.14).
+   La clave viaja por POST (nunca en la URL) y se guarda cifrada. Cancelar anula el link.
+   Regla de la demo: sin actividad por 5 minutos se cancela sola. */
+const API = (window.DEMO_CONFIG || {}).BYS_API_URL;
+const token = new URLSearchParams(location.search).get('t') || '';
+const card = document.getElementById('card');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const post = (b) => fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(b) }).then(r => r.json());
+const INICIO = (location.href.split('/clave.html')[0] || '.') + '/#banca';
+let venceT = null, inactT = null, ultima = Date.now(), terminado = false;
+function final(clase, titulo, html, boton) {
+  terminado = true; clearInterval(venceT); clearInterval(inactT);
+  card.innerHTML = '<h1>' + esc(titulo) + '</h1><div class="msg ' + clase + '">' + html + '</div>' +
+    (boton ? '<div class="row"><button class="ok" onclick="location.href=\'' + INICIO + '\'">Ir a Banca Online</button></div>' : '');
+}
+const ESTADO = {
+  usado: 'Este link ya se usó. Si necesitás cambiar la clave otra vez, pedíselo a Sofía.',
+  vencido: 'Este link venció. Pedile a Sofía que te mande uno nuevo.',
+  reemplazado: 'Este link ya no sirve porque pediste uno más nuevo. Usá el último mail que te llegó.',
+  cancelado: 'Este link se canceló. Tu clave actual sigue funcionando.'
+};
+async function iniciar() {
+  if (!API || !token) return final('bad', 'Clave de Banca Online', 'El link no es válido. Pedile a Sofía que te mande uno nuevo.');
+  let r = null;
+  try { r = await post({ accion: 'clave_estado', t: token }); } catch (_) {}
+  if (!r) return final('bad', 'Clave de Banca Online', 'No pude conectar con el banco. Probá de nuevo en unos minutos.');
+  if (!r.ok) return final('bad', 'Clave de Banca Online', 'El link no es válido. Pedile a Sofía que te mande uno nuevo.');
+  if (r.estado !== 'pendiente') return final('info', 'Clave de Banca Online', esc(ESTADO[r.estado] || 'Este link ya no está disponible.'));
+  card.innerHTML =
+    '<h1>' + (r.motivo === 'cambio' ? 'Cambiá tu clave' : 'Creá tu clave nueva') + (r.nombre ? ', ' + esc(r.nombre) : '') + '</h1>' +
+    '<p class="sub">Usuario de Banca Online: <b>' + esc(r.email) + '</b>. Elegí una clave que no uses en otro lado.</p>' +
+    '<p class="vence" id="vence"></p>' +
+    '<form id="f" autocomplete="off">' +
+    '<label for="n1">Clave nueva</label><div class="pw"><input id="n1" type="password" autocomplete="new-password" maxlength="64" required><button type="button" data-v="n1">Ver</button></div>' +
+    '<label for="n2">Repetí la clave</label><div class="pw"><input id="n2" type="password" autocomplete="new-password" maxlength="64" required><button type="button" data-v="n2">Ver</button></div>' +
+    '<ul class="req"><li id="r1">Al menos 8 caracteres</li><li id="r2">Al menos una letra</li><li id="r3">Al menos un número</li><li id="r4">Las dos claves coinciden</li></ul>' +
+    '<div class="row"><button type="submit" class="ok" id="bOk">Guardar clave</button><button type="button" class="no" id="bNo">Cancelar</button></div>' +
+    '<div id="m"></div></form>';
+  let seg = r.vence_en_seg;
+  const pintar = () => { const v = document.getElementById('vence'); if (!v) return; const m = Math.floor(seg / 60), s = seg % 60; v.textContent = 'El link vence en ' + m + ':' + String(s).padStart(2, '0') + ' min.'; };
+  pintar(); venceT = setInterval(() => { seg--; if (seg <= 0) return final('info', 'Clave de Banca Online', esc(ESTADO.vencido)); pintar(); }, 1000);
+  const n1 = document.getElementById('n1'), n2 = document.getElementById('n2');
+  const chequear = () => {
+    const a = n1.value, b = n2.value;
+    const ok = [a.length >= 8, /[A-Za-zÁÉÍÓÚÑáéíóúñ]/.test(a), /\d/.test(a), !!a && a === b];
+    ok.forEach((x, i) => document.getElementById('r' + (i + 1)).classList.toggle('cumple', x));
+    return ok.every(Boolean);
+  };
+  card.addEventListener('input', () => { ultima = Date.now(); chequear(); });
+  card.addEventListener('click', e => { ultima = Date.now(); const b = e.target.closest('[data-v]'); if (!b) return; const i = document.getElementById(b.dataset.v); i.type = i.type === 'password' ? 'text' : 'password'; b.textContent = i.type === 'password' ? 'Ver' : 'Ocultar'; });
+  document.getElementById('bNo').onclick = cancelar;
+  document.getElementById('f').onsubmit = async ev => {
+    ev.preventDefault();
+    const m = document.getElementById('m');
+    if (!chequear()) { m.innerHTML = '<div class="msg bad">Revisá los requisitos de la clave.</div>'; return; }
+    const bOk = document.getElementById('bOk'); bOk.disabled = true; m.innerHTML = '<div class="msg info">Guardando…</div>';
+    let x = null;
+    try { x = await post({ accion: 'clave_nueva', t: token, nueva: n1.value, repetir: n2.value }); } catch (_) {}
+    n1.value = ''; n2.value = '';
+    if (x && x.ok) return final('good', '¡Listo!', 'Tu clave nueva ya está activa. Ingresá a Banca Online con tu mail (' + esc(x.email) + ') y la clave que elegiste. Te mandamos un mail de aviso.', true);
+    if (x && /^LINK_/.test(x.resultado)) return final('info', 'Clave de Banca Online', esc(ESTADO[x.resultado.slice(5).toLowerCase()] || 'Este link ya no está disponible.'));
+    bOk.disabled = false; chequear();
+    m.innerHTML = '<div class="msg bad">' + (x && x.resultado === 'CLAVE_DEBIL' ? 'La clave no cumple los requisitos.' : x && x.resultado === 'NO_COINCIDEN' ? 'Las claves no coinciden.' : 'No pude guardar la clave. Probá de nuevo.') + '</div>';
+  };
+  // regla de la demo: 5 minutos sin actividad → se cancela sola
+  inactT = setInterval(() => { if (!terminado && Date.now() - ultima >= 5 * 60 * 1000) cancelar(true); }, 5000);
+  n1.focus();
+}
+async function cancelar(porInactividad) {
+  if (terminado) return; terminado = true;
+  try { await post({ accion: 'clave_cancelar', t: token }); } catch (_) {}
+  final('info', 'Cambio de clave cancelado', (porInactividad === true ? 'Pasaron 5 minutos sin actividad, así que cancelamos el cambio. ' : 'Cancelaste el cambio. ') + 'Tu clave actual sigue funcionando. Si lo necesitás, pedile a Sofía un link nuevo.', true);
+}
+document.addEventListener('keydown', e => { ultima = Date.now(); if (e.key === 'Escape' && !terminado && document.getElementById('bNo')) cancelar(); });
+iniciar();
+</script>
+</body>
+</html>

@@ -348,19 +348,36 @@
   .acc .cons .dsc{color:#B33F00}
   .acc .cons .dsc b{text-decoration:line-through}
   .acc .cons h6{font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#888;margin:0 0 4px}
+  /* v24: usuarios de prueba en una ventana + Mi cuenta pareja con "Detalle por producto" en solapas */
+  .login .more{display:inline-block;margin-top:14px}
+  #usersModal .modal{width:min(980px,100%)}
+  #usersModal .demo-users{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px;border-top:0;padding-top:0}
+  #usersModal .demo-users h4,#usersModal .demo-users .sub,#usersModal .demo-users h5{grid-column:1/-1}
+  #usersModal .du{margin-top:0}
+  .demo-users h5{font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin:12px 0 0}
+  .acc{display:flex;flex-direction:column}.acc .lnk{margin-top:auto;padding-top:10px;align-self:flex-start}
+  .det{margin-top:20px;background:#fff}
+  .det .tabs{display:flex;flex-wrap:wrap;border-bottom:1px solid #eee}
+  .det .tabs button{border:0;background:none;padding:16px 20px;font:700 14px "Open Sans",Arial,sans-serif;color:#666;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+  .det .tabs button.on{color:var(--rich);border-bottom-color:var(--orange)}
+  .det .tabs button:hover{color:var(--rich)}
+  .det .body{padding:10px 26px 22px}
+  .det h5{font:700 13px "Open Sans",Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);padding:20px 26px 0;margin:0}
+  .row.dsc span{color:#B33F00}.row.dsc b{text-decoration:line-through;color:#B33F00}
+  @media (max-width:760px){#usersModal .demo-users{grid-template-columns:1fr}.det .tabs button{padding:12px 12px;font-size:13px}.det .body{padding:6px 16px 18px}}
 </style>
 <meta name="robots" content="noindex">
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v23</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v25</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
   <button class="menu-btn" aria-label="Menú" onclick="toggleDrawer()">☰</button>
   <nav id="nav">
     <a href="#productos">Cuentas y tarjetas</a><a href="#seguros">Seguros</a><a href="#como-funciona">Cómo funciona Sofía</a><a href="#canales">Ayuda</a>
-    <a class="btn btn-ghost" href="#" onclick="openAlta();return false">Hacete cliente</a>
+    <a class="btn btn-ghost" href="#" id="btnAlta" onclick="openAlta();return false">Hacete cliente</a>
     <a class="btn" href="#" id="btnBanca" onclick="openLogin();return false">Banca Online</a>
     <div class="user-pill" id="userPill"><span class="avatar" id="upAva">—</span><span id="upName">—</span><button class="btn btn-ghost" onclick="logout()">Salir</button></div>
   </nav>
@@ -391,7 +408,7 @@
       <div class="err" id="errA"></div>
     </form>
     <p class="hint">¿Olvidaste tu clave? <button class="link" onclick="askSofia('Olvidé mi clave de banca online')">Pedile ayuda a Sofía</button></p>
-    <div class="demo-users" data-form="errA"></div>
+    <button type="button" class="link more" onclick="openUsers()">Ver usuarios de prueba →</button>
   </div>
   <div class="login welcome" id="welcomePanel">
     <span class="tag">Sesión iniciada · Sofía ya te reconoce</span>
@@ -413,6 +430,7 @@
 <section class="account" id="micuenta"><div class="wrap">
   <div class="top"><div><span class="eyebrow">Mi cuenta</span><h2 id="mcSub">Hola.</h2><span class="mc-upd" id="mcUpd"></span></div><button class="btn btn-outline" onclick="openChat()">Pedile algo a Sofía</button></div>
   <div class="acc-grid" id="mcGrid"><div class="acc"><small>Mi cuenta</small><div class="amt" style="font-size:20px">Cargando tus productos…</div><p>Consultando el sistema del banco</p></div></div>
+  <div class="det" id="mcDet" hidden><h5>Detalle por producto</h5><div class="tabs" id="mcTabs" role="tablist"></div><div class="body" id="mcDetBody"></div></div>
   <div class="feed">
     <div><h5>Últimos movimientos</h5><div id="mcMov"><p class="empty">Cargando…</p></div></div>
     <div><h5>Gestiones y programadas</h5><div id="mcGes"><p class="empty">Cargando…</p></div></div>
@@ -511,6 +529,15 @@
   </div>
 </div>
 
+<!-- ===== v24: usuarios de prueba (completa el ingreso de Banca Online) ===== -->
+<div class="modal-bg" id="usersModal" onclick="if(event.target===this)closeUsers()">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Usuarios de prueba">
+    <button class="x" onclick="closeUsers()" aria-label="Cerrar">×</button>
+    <span class="eyebrow">Banca Online · demo</span>
+    <div class="demo-users" data-form="errA" data-cerrar="1"></div>
+  </div>
+</div>
+
 <!-- ===== Login modal ===== -->
 <div class="modal-bg" id="loginModal" onclick="if(event.target===this)closeLogin()">
   <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="lmTitle">
@@ -588,6 +615,8 @@ const DEMO_PASS = "Demo1234@";
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pesos = (n) => { const [e, d] = Number(n || 0).toFixed(2).split('.'); return '$ ' + e.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + d; };
 const apiGet = (q) => fetch(API + '?' + new URLSearchParams(q)).then(r => r.json());
+// v25: POST con text/plain (sin preflight CORS) para datos sensibles (clave)
+const apiPost = (b) => fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(b) }).then(r => r.json());
 let PERSONAS = null;
 function cargarPersonas(){ if (!PERSONAS) PERSONAS = apiGet({ accion: 'personas' }).then(j => (j && j.ok && Array.isArray(j.personas)) ? j.personas : []).catch(() => []); return PERSONAS; }
 function rolDe(p){
@@ -606,11 +635,24 @@ function openAlta(){ askSofia('Quiero hacerme cliente'); }
 function closeAlta(){ $('altaModal').classList.remove('open'); }
 function openLogin(){ $('loginModal').classList.add('open'); setTimeout(()=>$('emB').focus(),50); }
 function closeLogin(){ $('loginModal').classList.remove('open'); }
+function openUsers(){ $('usersModal').classList.add('open'); }   // v24
+function closeUsers(){ $('usersModal').classList.remove('open'); }
 function togglePw(id,b){ const i=$(id); i.type = i.type==='password'?'text':'password'; b.textContent = i.type==='password'?'Ver':'Ocultar'; }
 document.querySelectorAll('.loginForm').forEach(f => f.addEventListener('submit', async ev => {
   ev.preventDefault();
   const errEl = $(f.dataset.err); errEl.textContent = 'Validando…';
   const email = f.email.value.trim().toLowerCase(), pass = f.pass.value;
+  // v25: la clave se valida en la API (POST: no viaja en la URL). Cada cliente puede tener su clave propia (clave.html).
+  let r = null;
+  try { r = await apiPost({ accion: 'acceso', email, clave_web: pass }); } catch (_) {}
+  if (r && r.ok && r.persona) {
+    const p = r.persona, lista = await cargarPersonas(), q = lista.find(x => x.dni === p.dni);
+    store.set({ email, nombre: (p.nombre + ' ' + p.apellido).trim(), dni: p.dni, fecha_nacimiento: p.fecha_nacimiento, poliza: p.poliza, rol: q ? rolDe(q) : 'Cliente', loginAt: new Date().toISOString() });
+    location.reload(); return;
+  }
+  if (r && r.resultado === 'CREDENCIALES_INVALIDAS') { errEl.innerHTML = 'Email o clave incorrectos. <button type="button" class="link" onclick="askSofia(\'Olvidé mi clave de Banca Online\')">¿Te olvidaste la clave?</button>'; return; }
+  if (r && r.error !== 'clave inválida') { errEl.textContent = 'No pude conectar con el sistema. Probá de nuevo.'; return; }
+  // API anterior a v6.14: validación con la clave de demo
   const lista = await cargarPersonas();
   const p = lista.find(x => x.email === email);
   if (!p || pass !== DEMO_PASS) { errEl.textContent = lista.length ? 'Email o clave incorrectos.' : 'No pude conectar con el sistema. Probá de nuevo.'; return; }
@@ -633,11 +675,13 @@ document.querySelectorAll('.demo-users').forEach(box => {
     // Clientes base + las últimas 6 altas hechas en la demo
     const base = lista.filter(p => p.origen !== 'DEMO'), demo = lista.filter(p => p.origen === 'DEMO').slice(-6).reverse();
     const items = demo.concat(base);
-    box.innerHTML = head + (items.length ? items.map(p => '<button type="button" class="du" data-em="' + esc(p.email) + '"><b>' + esc(p.nombre + ' ' + p.apellido) + '</b><span>' + esc(rolDe(p)) + (p.poliza ? ' · Póliza ' + esc(p.poliza) : '') + '</span><small>' + esc(p.email) + '</small></button>').join('') : '<p class="sub">No pude cargar los usuarios. Recargá la página.</p>');
+    const btn = p => '<button type="button" class="du" data-em="' + esc(p.email) + '"' + (p.tiene_clave ? ' data-propia="1"' : '') + '><b>' + esc(p.nombre + ' ' + p.apellido) + '</b><span>' + esc(rolDe(p)) + (p.poliza ? ' · Póliza ' + esc(p.poliza) : '') + '</span><small>' + esc(p.email) + (p.tiene_clave ? ' · clave propia' : '') + '</small></button>';
+    // v24: agrupados (clientes base y altas hechas con Sofía)
+    box.innerHTML = head + (items.length ? (base.length ? '<h5>Clientes de la demo</h5>' + base.map(btn).join('') : '') + (demo.length ? '<h5>Altas hechas con Sofía</h5>' + demo.map(btn).join('') : '') : '<p class="sub">No pude cargar los usuarios. Recargá la página.</p>');
   });
-  box.addEventListener('click', e => { const b = e.target.closest('.du'); if (!b || !form) return; form.email.value = b.dataset.em; form.pass.value = DEMO_PASS; form.querySelector('[type=submit]').focus(); });
+  box.addEventListener('click', e => { const b = e.target.closest('.du'); if (!b || !form) return; form.email.value = b.dataset.em; form.pass.value = b.dataset.propia ? '' : DEMO_PASS; if (box.dataset.cerrar) closeUsers(); (b.dataset.propia ? form.pass : form.querySelector('[type=submit]')).focus(); });   // v25: con clave propia se escribe a mano
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAlta(); closeLogin(); closeGuia(); idvCancelar(); toggleDrawer(false); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAlta(); closeLogin(); closeUsers(); closeGuia(); idvCancelar(); toggleDrawer(false); } });
 
 // v22: la sesión se activa al cargar (login) o en el momento, cuando Sofía termina un alta por chat
 let _sesionActiva = false;
@@ -647,6 +691,7 @@ function activarSesion(){
   $('loginPanel').style.display = 'none'; $('welcomePanel').style.display = 'block';
   $('wName').textContent = session.nombre;
   $('btnBanca').style.display = 'none';
+  if ($('btnAlta')) $('btnAlta').style.display = 'none';   // v25: un cliente con sesión no ve "Hacete cliente"
   $('userPill').style.display = 'flex'; $('upName').textContent = first;
   $('upAva').textContent = session.nombre.split(' ').map(s=>s[0]).join('').slice(0,2);
   $('micuenta').style.display = 'block';
@@ -692,13 +737,19 @@ async function verCambios(){
 }
 // v22: lo nuevo se resalta, se muestra "Actualizado recién" y un aviso para ir a Mi cuenta
 let _mcPrevio = null, _mcUpdT = null;
+// v24: solapa elegida en "Detalle por producto" (se mantiene en cada actualización)
+let _detSel = '', _mcPrevioDet = false;
+document.addEventListener('click', e => { const b = e.target.closest('#mcTabs button'); if (!b) return; _detSel = b.dataset.k; _mcPrevioDet = true; renderMiCuenta(); });
+// v24: fechas de gestiones que llegan como fecha ISO de la planilla → dd-mm-aaaa hh:mm
+function fechaGes(v){ const s = String(v || ''); if (!/^\d{4}-\d{2}-\d{2}T/.test(s)) return s; const d = new Date(s); if (isNaN(d)) return s; const p = n => String(n).padStart(2, '0'); return p(d.getDate()) + '-' + p(d.getMonth() + 1) + '-' + d.getFullYear() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); }
 function marcarNuevos(){
-  const els = [...document.querySelectorAll('#mcGrid .acc, #mcMov .row, #mcGes .row')];
+  const els = [...document.querySelectorAll('#mcGrid .acc, #mcMov .row, #mcGes .row, #mcDetBody .row')];
   const textos = els.map(e => e.innerText.replace(/\s+/g, ' ').trim());
   const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
   const u = $('mcUpd');
   let hay = 0;
-  if (_mcPrevio) els.forEach((e, i) => { if (!_mcPrevio.has(textos[i])) { e.classList.add('nuevo'); hay++; } });
+  if (_mcPrevio && !_mcPrevioDet) els.forEach((e, i) => { if (!_mcPrevio.has(textos[i])) { e.classList.add('nuevo'); hay++; } });
+  _mcPrevioDet = false;
   if (hay) {
     u.textContent = 'Actualizado recién (' + hora + ')'; u.classList.add('on');
     clearTimeout(_mcUpdT); _mcUpdT = setTimeout(() => u.classList.remove('on'), 10000);
@@ -743,11 +794,10 @@ async function renderMiCuenta(){
     });
     // v23: últimos 5 consumos de cada tarjeta (los desconocidos se marcan y no suman)
     const fechaN = (f) => { const p = String(f || '').split(/[-\s]/); return p.length >= 3 ? Number(p[2] + p[1].padStart(2, '0') + p[0].padStart(2, '0')) : 0; };
-    const consDe = (u4) => ((co && co.ok && co.consumos) || []).filter(c => String(c.ultimos_4) === String(u4)).sort((a, b) => fechaN(b.fecha) - fechaN(a.fecha)).slice(0, 5);
-    const listaCons = (u4) => { const cs = consDe(u4); return cs.length ? '<div class="cons"><h6>Últimos consumos</h6>' + cs.map(c => '<div' + (c.estado === 'desconocido' ? ' class="dsc"' : '') + '><span><em>' + esc(String(c.fecha).slice(0, 5)) + '</em>' + esc(c.comercio) + (Number(c.cuotas) > 1 ? ' · cuota ' + esc(c.cuota_actual) + '/' + esc(c.cuotas) : '') + (c.estado === 'desconocido' ? ' · desconocido' : c.estado === 'pagado' ? ' · pagado' : '') + '</span><b>' + pesos(c.monto) + '</b></div>').join('') + '</div>' : ''; };
+    const consDe = (u4, max) => ((co && co.ok && co.consumos) || []).filter(c => String(c.ultimos_4) === String(u4)).sort((a, b) => fechaN(b.fecha) - fechaN(a.fecha)).slice(0, max || 5);
     (r.tarjetas || []).filter(t => t.estado !== 'dada_de_baja').forEach(t => {
       const bloq = t.estado !== 'activa';
-      cards.push('<div class="acc"><small>' + esc(t.marca + ' ' + t.nivel) + ' · terminada en ' + esc(t.ultimos_4) + '</small><div class="amt">' + pesos(t.saldo_a_pagar) + '</div><p>' + (bloq ? '<span class="st">' + esc(t.estado) + '</span>' : 'Vence el ' + esc(t.vencimiento) + ' · Pago mínimo ' + pesos(t.pago_minimo)) + '</p>' + listaCons(t.ultimos_4) + '<button class="link lnk" onclick="' + ask(t.estado === 'pausada' ? 'Quiero reactivar mi tarjeta terminada en ' + t.ultimos_4 : bloq ? '¿Cuándo llega la tarjeta nueva que reemplaza a la terminada en ' + t.ultimos_4 + '?' : 'Quiero pagar mi tarjeta terminada en ' + t.ultimos_4) + '">' + (t.estado === 'pausada' ? 'Reactivar con Sofía →' : bloq ? 'Consultar con Sofía →' : 'Pagar con Sofía →') + '</button></div>');   // v23
+      cards.push('<div class="acc"><small>' + esc(t.marca + ' ' + t.nivel) + ' · ' + esc(t.ultimos_4) + '</small><div class="amt">' + pesos(t.saldo_a_pagar) + '</div><p>' + (bloq ? '<span class="st">' + esc(t.estado) + '</span>' : 'Vence el ' + esc(t.vencimiento) + ' · Pago mínimo ' + pesos(t.pago_minimo)) + '</p><button class="link lnk" onclick="' + ask(t.estado === 'pausada' ? 'Quiero reactivar mi tarjeta terminada en ' + t.ultimos_4 : bloq ? '¿Cuándo llega la tarjeta nueva que reemplaza a la terminada en ' + t.ultimos_4 + '?' : 'Quiero pagar mi tarjeta terminada en ' + t.ultimos_4) + '">' + (t.estado === 'pausada' ? 'Reactivar con Sofía →' : bloq ? 'Consultar con Sofía →' : 'Pagar con Sofía →') + '</button></div>');   // v23
     });
     (r.prestamos || []).filter(l => l.estado !== 'cancelado').forEach(l => {   // v18: préstamos cancelados no se muestran
       cards.push('<div class="acc"><small>Préstamo personal · ' + esc(l.numero) + '</small><div class="amt">' + pesos(l.valor_cuota) + '</div><p>Cuota ' + (Number(l.cuotas_pagas) + 1) + ' de ' + esc(l.cuotas) + '</p><button class="link lnk" onclick="' + ask('¿Cuánto me falta pagar de mi préstamo?') + '">Consultar con Sofía →</button></div>');
@@ -757,6 +807,29 @@ async function renderMiCuenta(){
     });
     if (!cards.length) cards.push('<div class="acc"><small>Banco &amp; Seguros Belltech</small><div class="amt" style="font-size:22px">Todavía no tenés productos</div><p>Abrí tu primera cuenta en minutos.</p><button class="link lnk" onclick="' + ask('Quiero abrir una cuenta') + '">Abrir una cuenta con Sofía →</button></div>');
     grid.innerHTML = cards.join('');
+    // v24: Detalle por producto (una solapa por cuenta y por tarjeta)
+    const prods = [];
+    (r.cuentas || []).filter(c => c.estado !== 'cerrada').forEach(c => prods.push({ k: 'c:' + c.numero, t: (nom[c.tipo] || c.tipo) + ' ' + c.numero, cuenta: c }));
+    (r.tarjetas || []).filter(t => t.estado !== 'dada_de_baja').forEach(t => prods.push({ k: 't:' + t.ultimos_4, t: t.marca + ' ' + t.nivel + ' ' + t.ultimos_4, tarjeta: t }));
+    const movsTodos = (mv && mv.ok && mv.movimientos) || [];
+    if (!prods.length) { $('mcDet').hidden = true; }
+    else {
+      if (!prods.some(x => x.k === _detSel)) _detSel = prods[0].k;
+      $('mcDet').hidden = false;
+      $('mcTabs').innerHTML = prods.map(x => '<button type="button" role="tab" data-k="' + esc(x.k) + '" class="' + (x.k === _detSel ? 'on' : '') + '" aria-selected="' + (x.k === _detSel) + '">' + esc(x.t) + '</button>').join('');
+      const sel = prods.find(x => x.k === _detSel);
+      let html = '';
+      if (sel.cuenta) {
+        const ms = movsTodos.filter(m => m.cuenta === sel.cuenta.numero).slice(0, 8);
+        html = ms.length ? ms.map(m => { const n = Number(m.monto) || 0; return '<div class="row"><span>' + esc(m.concepto) + '<em>' + esc(m.fecha) + (m.referencia ? ' · ' + esc(m.referencia) : '') + '</em></span><b>' + (n < 0 ? '− ' : '+ ') + fmtMonto(Math.abs(n), sel.cuenta.moneda) + '</b></div>'; }).join('')
+          : '<p class="empty">Esta cuenta todavía no tiene movimientos.</p>';
+      } else {
+        const cs = consDe(sel.tarjeta.ultimos_4, 8);
+        html = cs.length ? cs.map(c => '<div class="row' + (c.estado === 'desconocido' ? ' dsc' : '') + '"><span>' + esc(c.comercio) + (Number(c.cuotas) > 1 ? ' · cuota ' + esc(c.cuota_actual) + ' de ' + esc(c.cuotas) : '') + '<em>' + esc(c.fecha) + ' · ' + esc(c.rubro || '') + (c.estado === 'desconocido' ? ' · desconocido, en análisis' : c.estado === 'pagado' ? ' · pagado' : '') + '</em></span><b>' + pesos(c.monto) + '</b></div>').join('')
+          : '<p class="empty">Esta tarjeta no tiene consumos en el período.</p>';
+      }
+      $('mcDetBody').innerHTML = html;
+    }
     // Últimos movimientos
     const movs = ((mv && mv.ok && mv.movimientos) || []).slice(0, 6);
     $('mcMov').innerHTML = movs.length ? movs.map(m => {
@@ -766,7 +839,7 @@ async function renderMiCuenta(){
     // Gestiones y programadas
     const items = [];
     ((pr && pr.ok && pr.pendientes) || []).forEach(p => items.push('<div class="row"><span>Transferencia programada a ' + esc(p.alias) + ' · ' + pesos(p.monto) + '<em>' + esc(p.ejecutar_txt) + ' hs · ' + esc(p.id) + '</em></span><span class="pill o">Pendiente</span></div>'));
-    ((ge && ge.ok && ge.gestiones) || []).slice(0, 6).forEach(g => items.push('<div class="row"><span>' + esc(g.titulo) + '<em>' + esc(g.id) + ' · ' + esc(g.actualizado || g.fecha) + '</em></span><span class="pill' + (ESTADO_FIN.indexOf(String(g.estado).toLowerCase()) >= 0 ? '' : ' o') + '">' + esc(g.estado) + '</span></div>'));
+    ((ge && ge.ok && ge.gestiones) || []).slice(0, 6).forEach(g => items.push('<div class="row"><span>' + esc(g.titulo) + '<em>' + esc(g.id) + ' · ' + esc(fechaGes(g.actualizado || g.fecha)) + '</em></span><span class="pill' + (ESTADO_FIN.indexOf(String(g.estado).toLowerCase()) >= 0 ? '' : ' o') + '">' + esc(g.estado) + '</span></div>'));
     ((pr && pr.ok && pr.recientes) || []).forEach(p => items.push('<div class="row"><span>Transferencia programada a ' + esc(p.alias) + ' · ' + pesos(p.monto) + '<em>' + esc(p.ejecutar_txt) + ' hs · ' + esc(p.id) + '</em></span><span class="pill">' + esc(p.estado) + '</span></div>'));
     $('mcGes').innerHTML = items.length ? items.join('') : '<p class="empty">No tenés gestiones abiertas. Lo que hagas con Sofía (bloqueos, siniestros, programadas) aparece acá.</p>';
     marcarNuevos();
