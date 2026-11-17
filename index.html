@@ -341,12 +341,19 @@
   #mcToast.open{display:flex}
   #mcToast button{background:var(--orange);color:#fff;border:0;padding:8px 12px;font:700 13px "Open Sans",Arial,sans-serif;cursor:pointer;white-space:nowrap}
   #mcToast button.x{background:transparent;padding:4px 6px;font-size:18px;line-height:1}
+  /* v23: últimos consumos de la tarjeta en Mi cuenta */
+  .acc .cons{margin:12px 0 10px;border-top:1px solid #eee;padding-top:8px}
+  .acc .cons div{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:4px 0;color:#333}
+  .acc .cons em{font-style:normal;color:#888;font-size:12.5px;margin-right:6px}
+  .acc .cons .dsc{color:#B33F00}
+  .acc .cons .dsc b{text-decoration:line-through}
+  .acc .cons h6{font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#888;margin:0 0 4px}
 </style>
 <meta name="robots" content="noindex">
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v22</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v23</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -711,11 +718,12 @@ async function renderMiCuenta(){
   const grid = $('mcGrid');
   try {
     // v18.4 / v20: también se traen programadas, movimientos y gestiones (API v6.9)
-    const [r, pr, mv, ge] = await Promise.all([
+    const [r, pr, mv, ge, co] = await Promise.all([
       apiGet({ accion: 'clientes', dni: session.dni }),
       apiGet({ accion: 'programadas', dni: session.dni }).catch(() => null),
       apiGet({ accion: 'movimientos', dni: session.dni }).catch(() => null),
-      apiGet({ accion: 'gestiones', dni: session.dni }).catch(() => null)]);
+      apiGet({ accion: 'gestiones', dni: session.dni }).catch(() => null),
+      apiGet({ accion: 'consumos', dni: session.dni }).catch(() => null)]);   // v23: últimos consumos de la tarjeta
     // v18: después de la baja total la persona deja de ser cliente
     if (!r.ok && r.resultado === 'NO_ENCONTRADO') {
       grid.innerHTML = '<div class="acc"><small>Banco &amp; Seguros Belltech</small><div class="amt" style="font-size:22px">Ya no sos cliente</div><p>Se completó la baja total de tus productos. Gracias por haber confiado en nosotros. Cerramos tu sesión en unos segundos.</p><button class="btn btn-primary btn-sm lnk" onclick="logout()">Cerrar sesión</button></div>';
@@ -733,9 +741,13 @@ async function renderMiCuenta(){
       const extra = Number(c.acuerdo) > 0 ? 'Acuerdo disponible ' + pesos(c.acuerdo) : 'Alias ' + esc(c.alias);
       cards.push('<div class="acc"><small>' + esc(nom[c.tipo] || c.tipo) + (c.moneda === 'USD' ? ' en dólares' : '') + ' · ' + esc(c.numero) + '</small><div class="amt">' + fmtMonto(c.saldo, c.moneda) + '</div><p>' + extra + '</p><button class="link lnk" onclick="' + ask('¿Cuál es el saldo de mi ' + (nom[c.tipo] || 'cuenta').toLowerCase() + '?') + '">Consultar con Sofía →</button></div>');
     });
+    // v23: últimos 5 consumos de cada tarjeta (los desconocidos se marcan y no suman)
+    const fechaN = (f) => { const p = String(f || '').split(/[-\s]/); return p.length >= 3 ? Number(p[2] + p[1].padStart(2, '0') + p[0].padStart(2, '0')) : 0; };
+    const consDe = (u4) => ((co && co.ok && co.consumos) || []).filter(c => String(c.ultimos_4) === String(u4)).sort((a, b) => fechaN(b.fecha) - fechaN(a.fecha)).slice(0, 5);
+    const listaCons = (u4) => { const cs = consDe(u4); return cs.length ? '<div class="cons"><h6>Últimos consumos</h6>' + cs.map(c => '<div' + (c.estado === 'desconocido' ? ' class="dsc"' : '') + '><span><em>' + esc(String(c.fecha).slice(0, 5)) + '</em>' + esc(c.comercio) + (Number(c.cuotas) > 1 ? ' · cuota ' + esc(c.cuota_actual) + '/' + esc(c.cuotas) : '') + (c.estado === 'desconocido' ? ' · desconocido' : c.estado === 'pagado' ? ' · pagado' : '') + '</span><b>' + pesos(c.monto) + '</b></div>').join('') + '</div>' : ''; };
     (r.tarjetas || []).filter(t => t.estado !== 'dada_de_baja').forEach(t => {
       const bloq = t.estado !== 'activa';
-      cards.push('<div class="acc"><small>' + esc(t.marca + ' ' + t.nivel) + ' · terminada en ' + esc(t.ultimos_4) + '</small><div class="amt">' + pesos(t.saldo_a_pagar) + '</div><p>' + (bloq ? '<span class="st">' + esc(t.estado) + '</span>' : 'Vence el ' + esc(t.vencimiento) + ' · Pago mínimo ' + pesos(t.pago_minimo)) + '</p><button class="link lnk" onclick="' + ask(bloq ? '¿Cómo reactivo mi tarjeta?' : 'Quiero pagar mi tarjeta') + '">' + (bloq ? 'Consultar con Sofía →' : 'Pagar con Sofía →') + '</button></div>');
+      cards.push('<div class="acc"><small>' + esc(t.marca + ' ' + t.nivel) + ' · terminada en ' + esc(t.ultimos_4) + '</small><div class="amt">' + pesos(t.saldo_a_pagar) + '</div><p>' + (bloq ? '<span class="st">' + esc(t.estado) + '</span>' : 'Vence el ' + esc(t.vencimiento) + ' · Pago mínimo ' + pesos(t.pago_minimo)) + '</p>' + listaCons(t.ultimos_4) + '<button class="link lnk" onclick="' + ask(t.estado === 'pausada' ? 'Quiero reactivar mi tarjeta terminada en ' + t.ultimos_4 : bloq ? '¿Cuándo llega la tarjeta nueva que reemplaza a la terminada en ' + t.ultimos_4 + '?' : 'Quiero pagar mi tarjeta terminada en ' + t.ultimos_4) + '">' + (t.estado === 'pausada' ? 'Reactivar con Sofía →' : bloq ? 'Consultar con Sofía →' : 'Pagar con Sofía →') + '</button></div>');   // v23
     });
     (r.prestamos || []).filter(l => l.estado !== 'cancelado').forEach(l => {   // v18: préstamos cancelados no se muestran
       cards.push('<div class="acc"><small>Préstamo personal · ' + esc(l.numero) + '</small><div class="amt">' + pesos(l.valor_cuota) + '</div><p>Cuota ' + (Number(l.cuotas_pagas) + 1) + ' de ' + esc(l.cuotas) + '</p><button class="link lnk" onclick="' + ask('¿Cuánto me falta pagar de mi préstamo?') + '">Consultar con Sofía →</button></div>');
