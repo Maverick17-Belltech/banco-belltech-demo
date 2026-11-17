@@ -370,7 +370,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v26</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v27</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -650,6 +650,7 @@ document.querySelectorAll('.loginForm').forEach(f => f.addEventListener('submit'
     store.set({ email, nombre: (p.nombre + ' ' + p.apellido).trim(), dni: p.dni, fecha_nacimiento: p.fecha_nacimiento, poliza: p.poliza, rol: q ? rolDe(q) : 'Cliente', loginAt: new Date().toISOString() });
     location.reload(); return;
   }
+  if (r && r.resultado === 'CUENTA_BLOQUEADA') { errEl.textContent = 'Por seguridad, tu acceso está bloqueado por ' + r.minutos + ' minutos porque hubo intentos fallidos de verificar tu identidad. Tus tarjetas siguen funcionando.'; return; }   // v27
   if (r && r.resultado === 'CREDENCIALES_INVALIDAS') { errEl.innerHTML = 'Email o clave incorrectos. <button type="button" class="link" onclick="askSofia(\'Olvidé mi clave de Banca Online\')">¿Te olvidaste la clave?</button>'; return; }
   if (r && r.error !== 'clave inválida') { errEl.textContent = 'No pude conectar con el sistema. Probá de nuevo.'; return; }
   // API anterior a v6.14: validación con la clave de demo
@@ -675,7 +676,7 @@ document.querySelectorAll('.demo-users').forEach(box => {
     // Clientes base + las últimas 6 altas hechas en la demo
     const base = lista.filter(p => p.origen !== 'DEMO'), demo = lista.filter(p => p.origen === 'DEMO').slice(-6).reverse();
     const items = demo.concat(base);
-    const btn = p => '<button type="button" class="du" data-em="' + esc(p.email) + '"' + (p.tiene_clave ? ' data-propia="1"' : '') + '><b>' + esc(p.nombre + ' ' + p.apellido) + '</b><span>' + esc(rolDe(p)) + (p.poliza ? ' · Póliza ' + esc(p.poliza) : '') + '</span><small>' + esc(p.email) + (p.tiene_clave ? ' · clave propia' : '') + '</small></button>';
+    const btn = p => '<button type="button" class="du" data-em="' + esc(p.email) + '"' + (p.tiene_clave ? ' data-propia="1"' : '') + '><b>' + esc(p.nombre + ' ' + p.apellido) + '</b><span>' + esc(rolDe(p)) + (p.poliza ? ' · Póliza ' + esc(p.poliza) : '') + '</span><small>' + esc(p.email) + (p.tiene_clave ? ' · clave propia' : '') + (p.bloqueado ? ' · bloqueado por seguridad' : '') + '</small></button>';
     // v24: agrupados (clientes base y altas hechas con Sofía)
     box.innerHTML = head + (items.length ? (base.length ? '<h5>Clientes de la demo</h5>' + base.map(btn).join('') : '') + (demo.length ? '<h5>Altas hechas con Sofía</h5>' + demo.map(btn).join('') : '') : '<p class="sub">No pude cargar los usuarios. Recargá la página.</p>');
   });
@@ -809,6 +810,13 @@ async function renderMiCuenta(){
       apiGet({ accion: 'gestiones', dni: session.dni }).catch(() => null),
       apiGet({ accion: 'consumos', dni: session.dni }).catch(() => null)]);   // v23: últimos consumos de la tarjeta
     // v18: después de la baja total la persona deja de ser cliente
+    // v27: bloqueo de seguridad → se informa y se cierra la sesión
+    if (!r.ok && r.resultado === 'CLIENTE_BLOQUEADO') {
+      grid.innerHTML = '<div class="acc"><small>Seguridad</small><div class="amt" style="font-size:22px">Acceso bloqueado por seguridad</div><p>Hubo intentos fallidos de verificar tu identidad, así que bloqueamos el acceso a Banca Online y a Sofía por ' + esc(r.minutos) + ' minutos. Tus tarjetas siguen funcionando. Cerramos tu sesión en unos segundos.</p></div>';
+      $('mcMov').innerHTML = ''; $('mcGes').innerHTML = ''; $('mcDet').hidden = true;
+      if (!window._bloqLogout) window._bloqLogout = setTimeout(logout, 10000);
+      return;
+    }
     if (!r.ok && r.resultado === 'NO_ENCONTRADO') {
       grid.innerHTML = '<div class="acc"><small>Banco &amp; Seguros Belltech</small><div class="amt" style="font-size:22px">Ya no sos cliente</div><p>Se completó la baja total de tus productos. Gracias por haber confiado en nosotros. Cerramos tu sesión en unos segundos.</p><button class="btn btn-primary btn-sm lnk" onclick="logout()">Cerrar sesión</button></div>';
       $('mcMov').innerHTML = ''; $('mcGes').innerHTML = '';
