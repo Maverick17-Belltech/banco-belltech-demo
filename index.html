@@ -370,7 +370,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v25</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v26</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -727,14 +727,47 @@ function refrescarMiCuenta(){ clearTimeout(_refT); _refT = setTimeout(verCambios
 // v22: contador de cambios de la API (accion=version). Si cambió, se recarga Mi cuenta.
 let _verApi = null, _verOcupado = false;
 async function verCambios(){
-  if (!session || _verOcupado) return; _verOcupado = true;
+  const dniEv = dniEventos();
+  if ((!session && !dniEv) || _verOcupado) return; _verOcupado = true;
   try {
     const r = await apiGet({ accion: 'version', _: Date.now() });
     const v = r && r.ok ? String(r.ver) : null;
-    if (v === null) { await renderMiCuenta(); }            // API anterior a v6.11: se recarga igual
-    else if (v !== _verApi) { _verApi = v; await renderMiCuenta(); }
+    if (v === null) { if (session) await renderMiCuenta(); }            // API anterior a v6.11: se recarga igual
+    else if (v !== _verApi) { _verApi = v; if (session) await renderMiCuenta(); await revisarEventos(dniEv); }
   } catch (_) {} finally { _verOcupado = false; }
 }
+
+/* ---------- v26: Sofía orquestadora ----------
+   Lo que pasa FUERA del chat (clave cambiada o cancelada en clave.html, autorización por mail, programada ejecutada) queda
+   como evento en la API. La página lo detecta (con el contador de cambios), lo marca como entregado y se lo pasa a Sofía con
+   un mensaje solo de datos { evento: 'externo', tipo, … }; Sofía lo informa con un mensaje fijo. Sin sesión se siguen los
+   eventos del DNI que Sofía indique (dato seguirEventos, por ejemplo al mandar el link de la clave). */
+const _evEntregados = new Set();
+function seguirLeer(){ try { const x = JSON.parse(localStorage.getItem('bt_seguir') || 'null'); return x && x.hasta > Date.now() ? x.dni : ''; } catch (_) { return ''; } }
+function seguirGuardar(dni){ try { localStorage.setItem('bt_seguir', JSON.stringify({ dni: String(dni), hasta: Date.now() + 60 * 60000 })); } catch (_) {} }
+function dniEventos(){ return (session && session.dni) || seguirLeer(); }
+async function revisarEventos(dni){
+  if (!dni) return;
+  let r = null;
+  try { r = await apiGet({ accion: 'eventos', dni, _: Date.now() }); } catch (_) {}
+  const lista = ((r && r.ok && r.eventos) || []).filter(e => !_evEntregados.has(e.id) && Date.now() - Number(e.ts) < 2 * 3600000).sort((a, b) => a.ts - b.ts);
+  for (const e of lista) {
+    _evEntregados.add(e.id);
+    try { await apiGet({ accion: 'evento_visto', id: e.id }); } catch (_) {}
+    avisarSofia(e);
+    await new Promise(ok => setTimeout(ok, 1500));
+  }
+}
+function avisarSofia(e){
+  whenReady(() => {
+    if (!chatAbierto) omitirAvisoVolvio = true;
+    try { abrirChat(); } catch (_) {}
+    proc.mostrar();
+    try { webchat.sendMessage('', Object.assign({}, authData, { evento: 'externo', id: e.id, tipo: e.tipo, titulo: e.titulo, detalle: e.detalle || {} })); } catch (_) {}
+  });
+}
+// sin sesión: se revisan los eventos del DNI que Sofía pidió seguir
+setInterval(() => { if (!session && seguirLeer() && !document.hidden) verCambios(); }, 5000);
 // v22: lo nuevo se resalta, se muestra "Actualizado recién" y un aviso para ir a Mi cuenta
 let _mcPrevio = null, _mcUpdT = null;
 // v24: solapa elegida en "Detalle por producto" (se mantiene en cada actualización)
@@ -1116,6 +1149,7 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         if (d && d.validarIdentidad === true && d.token) abrirIdentidad(d.token, d.nombre);   // v21
         if (d && d.altaOk === true && d.cliente) entrarComoCliente(d.cliente);                // v22
         if (d && d.actualizarCuenta === true) refrescarMiCuenta();                            // v22
+        if (d && d.seguirEventos) { seguirGuardar(d.seguirEventos); _verApi = _verApi || null; }   // v26
         if (d && d.cerrarChat === true) { conversacionTerminada = true; chatSeCerro = true; setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000); }
       });
     } catch (_) {}
