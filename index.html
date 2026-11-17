@@ -370,7 +370,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v27</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v28</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -749,6 +749,8 @@ function seguirGuardar(dni){ try { localStorage.setItem('bt_seguir', JSON.string
 function dniEventos(){ return (session && session.dni) || seguirLeer(); }
 async function revisarEventos(dni){
   if (!dni) return;
+  // v28: durante una llamada los eventos los toma Sofía por voz (SUB - Eventos); la página no abre el chat. Al cortar se revisa de nuevo.
+  if (window.enLlamada) return;
   let r = null;
   try { r = await apiGet({ accion: 'eventos', dni, _: Date.now() }); } catch (_) {}
   const lista = ((r && r.ok && r.eventos) || []).filter(e => !_evEntregados.has(e.id) && Date.now() - Number(e.ts) < 2 * 3600000).sort((a, b) => a.ts - b.ts);
@@ -1207,10 +1209,12 @@ $('sofiaForm').addEventListener('submit', ev => {
     clearTimeout(idleTimer);
     try { window.destroyWebRTCWidget && window.destroyWebRTCWidget(); } catch (_) {}
     active = false; fab.style.display = ''; hideTeaser();          // vuelve el "¿Te ayudo?"
+    window.enLlamada = false;   // v28: si quedó algún evento sin decir en la llamada, ahora lo pasa al chat
+    setTimeout(() => { try { revisarEventos(dniEventos()); } catch (_) {} }, 3000);
   }
   async function startVoice(auto) {
     if (active || !window.initWebRTCWidget || !VOICE) return;
-    active = true;
+    active = true; window.enLlamada = true;   // v28
     try { const w = window.cognigyWebchat; if (w && w.isOpen && w.isOpen() && w.close) w.close(); } catch (_) {}
     fab.style.display = 'none';                                      // se minimiza el globito
     // si hay sesión de Banca Online, la llamada sale con userId "cli-<DNI>" (igual que el chat) y Cognigy reconoce al cliente desde el primer mensaje.
