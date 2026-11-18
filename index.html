@@ -202,10 +202,19 @@
   .acc small{display:block;font:700 12px "Open Sans",Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#888}
   .acc .amt{font:800 30px "Open Sans",Arial,sans-serif;color:var(--rich);margin:8px 0 2px}
   .acc p{font-size:15px;color:#555}
-  .acc .dato{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;margin-top:4px}
-  .acc .dato b{font-weight:700;color:var(--jet);word-break:break-all}
-  .acc .copiar{font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--orange);background:none;border:1px solid var(--orange);padding:2px 8px;cursor:pointer}
-  .acc .copiar:hover{background:var(--orange);color:#fff}
+  .acc.cta-click{cursor:pointer;transition:box-shadow .15s,transform .15s}
+  .acc.cta-click:hover,.acc.cta-click:focus-visible{box-shadow:0 8px 24px rgba(17,28,36,.12);transform:translateY(-2px);outline:none}
+  #ctaModal{position:fixed;inset:0;z-index:2147482990;background:rgba(17,28,36,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+  #ctaModal[hidden]{display:none}
+  #ctaModal .box{background:#fff;max-width:520px;width:100%;border-top:4px solid var(--orange);padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+  #ctaModal small{display:block;font:700 12px "Open Sans",Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#888}
+  #ctaModal h4{margin:6px 0 14px;font:800 20px "Open Sans",Arial,sans-serif;color:var(--rich)}
+  #ctaModal .cta-row{display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #eee}
+  #ctaModal .cta-row span{font-size:14px;color:#888}
+  #ctaModal .cta-row b{font-size:16px;color:var(--jet);word-break:break-all}
+  #ctaModal .cta-row button{font:700 12px "Open Sans",Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:var(--orange);border:0;padding:7px 12px;cursor:pointer}
+  #ctaModal .pie{display:flex;justify-content:flex-end;margin-top:16px}
+  #ctaModal .pie button{font:700 14px "Open Sans",Arial,sans-serif;background:none;border:1px solid var(--rich);color:var(--rich);padding:8px 18px;cursor:pointer}
   .acc.dark{background:var(--rich);color:#fff;border-left-color:var(--orange)}.acc.dark .amt{color:#fff}.acc.dark p{color:rgba(255,255,255,.65)}
   .feed{margin-top:20px;background:#fff;display:grid;grid-template-columns:1fr 1fr}
   .feed > div{padding:26px}
@@ -374,7 +383,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v29</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v30</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -430,6 +439,7 @@
   </div>
 </div></section>
 
+<div id="ctaModal" hidden role="dialog" aria-modal="true" aria-labelledby="ctaTit"><div class="box"><small>Datos para recibir transferencias</small><h4 id="ctaTit"></h4><div id="ctaBody"></div><div class="pie"><button type="button" id="ctaCerrar" onclick="cerrarDatosCta()">Cerrar</button></div></div></div>
 <div id="mcToast" role="status"><span id="mcToastTxt">Sofía actualizó Mi cuenta</span><button type="button" id="mcToastVer" onclick="irAMiCuenta()">Ver en Mi cuenta</button><button type="button" class="x" aria-label="Cerrar" onclick="cerrarToast()">×</button></div>
 <section class="account" id="micuenta"><div class="wrap">
   <div class="top"><div><span class="eyebrow">Mi cuenta</span><h2 id="mcSub">Hola.</h2><span class="mc-upd" id="mcUpd"></span></div><button class="btn btn-outline" onclick="openChat()">Pedile algo a Sofía</button></div>
@@ -802,6 +812,28 @@ let _toastT = null;
 function mostrarToast(t, sinBoton){ $('mcToastTxt').textContent = t; $('mcToastVer').hidden = !!sinBoton;   // v29: sinBoton para avisos de la página (Copiar)
   $('mcToast').classList.add('open'); clearTimeout(_toastT); _toastT = setTimeout(cerrarToast, 10000); }
 function cerrarToast(){ $('mcToast').classList.remove('open'); }
+// v30: ventana con alias y CBU de una cuenta (se abre al hacer clic en la cuenta en Mi cuenta). Solo muestra y copia:
+//      no cambia nada en el banco, por eso no se le avisa a Sofía. Se cierra con Cerrar, Escape, clic afuera o a los 5 minutos.
+const _ctaDatos = {};
+let _ctaT = null;
+function abrirDatosCta(num){
+  const d = _ctaDatos[num]; if (!d) return;
+  $('ctaTit').textContent = d.titulo;
+  $('ctaBody').innerHTML = [['Alias', d.alias], ['CBU', d.cbu]].map(x => '<div class="cta-row"><span>' + x[0] + '</span><b>' + esc(x[1]) + '</b><button type="button" onclick="copiarDato(\'' + esc(x[1]) + '\',\'' + x[0] + '\')">Copiar</button></div>').join('');
+  $('ctaModal').hidden = false; $('ctaCerrar').focus();
+  clearTimeout(_ctaT); _ctaT = setTimeout(cerrarDatosCta, 5 * 60000);
+}
+function cerrarDatosCta(){ $('ctaModal').hidden = true; clearTimeout(_ctaT); }
+document.addEventListener('click', e => {
+  const card = e.target.closest && e.target.closest('.cta-click');
+  if (card && !e.target.closest('button')) abrirDatosCta(card.getAttribute('data-cta'));
+  if (e.target.id === 'ctaModal') cerrarDatosCta();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('ctaModal').hidden) cerrarDatosCta();
+  const card = e.target.closest && e.target.closest('.cta-click');
+  if (card && (e.key === 'Enter' || e.key === ' ') && e.target === card) { e.preventDefault(); abrirDatosCta(card.getAttribute('data-cta')); }
+});
 // v29: copiar CBU o alias al portapapeles (solo en la página; no cambia nada en el banco)
 function copiarDato(v, que){
   const ok = () => mostrarToast(que + ' copiado: ' + v, true);
@@ -843,12 +875,10 @@ async function renderMiCuenta(){
     const cards = [];
     // v17: no se muestran cuentas cerradas, tarjetas ni seguros dados de baja
     (r.cuentas || []).filter(c => c.estado !== 'cerrada').forEach(c => {
-      // v29: CBU y alias visibles con botón Copiar (el acuerdo de la cuenta corriente sigue arriba)
-      const cp = (v, que) => '<button type="button" class="copiar" onclick="copiarDato(\'' + esc(v) + '\',\'' + que + '\')">Copiar</button>';
-      const extra = (Number(c.acuerdo) > 0 ? 'Acuerdo disponible ' + pesos(c.acuerdo) + '<br>' : '') +
-        '<span class="dato">Alias <b>' + esc(c.alias) + '</b>' + cp(c.alias, 'Alias') + '</span>' +
-        '<span class="dato">CBU <b>' + esc(c.cbu) + '</b>' + cp(c.cbu, 'CBU') + '</span>';
-      cards.push('<div class="acc"><small>' + esc(nom[c.tipo] || c.tipo) + (c.moneda === 'USD' ? ' en dólares' : '') + ' · ' + esc(c.numero) + '</small><div class="amt">' + fmtMonto(c.saldo, c.moneda) + '</div><p>' + extra + '</p><button class="link lnk" onclick="' + ask('¿Cuál es el saldo de mi ' + (nom[c.tipo] || 'cuenta').toLowerCase() + '?') + '">Consultar con Sofía →</button></div>');
+      const extra = Number(c.acuerdo) > 0 ? 'Acuerdo disponible ' + pesos(c.acuerdo) : 'Alias ' + esc(c.alias);
+      // v30: al hacer clic en la cuenta se abre una ventana con el alias y el CBU para copiarlos
+      _ctaDatos[c.numero] = { titulo: (nom[c.tipo] || c.tipo) + (c.moneda === 'USD' ? ' en dólares' : '') + ' · ' + c.numero, alias: c.alias, cbu: String(c.cbu || '') };
+      cards.push('<div class="acc cta-click" role="button" tabindex="0" title="Ver alias y CBU" data-cta="' + esc(c.numero) + '"><small>' + esc(nom[c.tipo] || c.tipo) + (c.moneda === 'USD' ? ' en dólares' : '') + ' · ' + esc(c.numero) + '</small><div class="amt">' + fmtMonto(c.saldo, c.moneda) + '</div><p>' + extra + '</p><button class="link lnk" onclick="' + ask('¿Cuál es el saldo de mi ' + (nom[c.tipo] || 'cuenta').toLowerCase() + '?') + '">Consultar con Sofía →</button></div>');
     });
     // v23: últimos 5 consumos de cada tarjeta (los desconocidos se marcan y no suman)
     const fechaN = (f) => { const p = String(f || '').split(/[-\s]/); return p.length >= 3 ? Number(p[2] + p[1].padStart(2, '0') + p[0].padStart(2, '0')) : 0; };
