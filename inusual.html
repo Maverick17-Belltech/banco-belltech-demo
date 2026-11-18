@@ -33,10 +33,11 @@
 <header><img src="assets/logo_blanco.png" alt="Belltech" style="height:28px;display:block"><span style="display:flex;align-items:center;gap:8px;font:600 12px 'Open Sans',Arial;color:rgba(255,255,255,.6);border-left:1px solid rgba(255,255,255,.2);padding-left:12px">powered by <img src="assets/nice.png" alt="NiCE" style="height:15px"></span></header>
 <main>
   <div class="card" id="card"><h1>¿Fuiste vos?</h1><p class="sub">Cargando…</p></div>
-  <small class="note">Banco &amp; Seguros Belltech · Demo de Belltech powered by NiCE. Entidad ficticia: no ingreses datos reales. <span style="opacity:.7">inusual v1</span></small>
+  <small class="note">Banco &amp; Seguros Belltech · Demo de Belltech powered by NiCE. Entidad ficticia: no ingreses datos reales. <span style="opacity:.7">inusual v2</span></small>
 </main>
 <script>
-// inusual v1 – página del mail "¿Fuiste vos?" (actividad inusual, API v6.26).
+// inusual v2 – (v2: "No fui yo" también pausa las tarjetas, API v6.27)
+// página del mail "¿Fuiste vos?" (actividad inusual, API v6.26).
 // "Sí, fui yo" libera las operaciones; "No fui yo" muestra las operaciones para desconocerlas y bloquea el acceso.
 // Sofía se entera sola (eventos). Cancelar = "Volver"; a los 5 minutos sin actividad la página se cierra y el aviso sigue pendiente.
 const API = (window.DEMO_CONFIG || {}).BYS_API_URL;
@@ -58,7 +59,7 @@ function paso1() {
   document.getElementById('no').onclick = paso2;
 }
 function paso2() {
-  card.innerHTML = '<h1>Marcá lo que no reconocés</h1><p class="sub">Vamos a registrar un desconocimiento por cada operación marcada y a bloquear el acceso a Banca Online y a Sofía hasta que lo revise un asesor. Tus tarjetas siguen funcionando.</p>' + listaHtml(true) +
+  card.innerHTML = '<h1>Marcá lo que no reconocés</h1><p class="sub">Vamos a registrar un desconocimiento por cada operación marcada y a bloquear el acceso a Banca Online y a Sofía hasta que lo revise un asesor. También vamos a pausar tus tarjetas para que nadie las pueda usar.</p>' + listaHtml(true) +
     '<div class="row"><button class="peligro" id="env">Desconocer y bloquear</button><button class="no" id="vol">Volver</button></div>';
   document.getElementById('env').onclick = () => responder('no');
   document.getElementById('vol').onclick = paso1;
@@ -80,7 +81,7 @@ async function responder(fui) {
   if (fui === 'no') params.desconocer = [...card.querySelectorAll('input[type=checkbox]:checked')].map(i => i.value).join(',');
   let r; try { r = await api(params); } catch (e) { card.querySelectorAll('button').forEach(b => b.disabled = false); return alert('No pudimos conectarnos. Probá de nuevo.'); }
   if (r.resultado === 'CONFIRMADO') return fin('good', '<b>¡Gracias! Confirmaste que fuiste vos.</b><br>Ya podés seguir operando. Sofía ya se enteró: si estabas hablando con ella, te ofrece seguir con la operación que había quedado frenada.');
-  if (r.resultado === 'BLOQUEADO') return fin('good', '<b>Listo, bloqueamos el acceso.</b><br>' + ((r.gestiones || []).length ? 'Registramos estos desconocimientos:<br>' + r.gestiones.map(g => esc(g.id) + ' · ' + esc(g.tipo) + ' ' + esc(g.operacion) + (g.monto ? ' · ' + pesos(g.monto) : '')).join('<br>') + '<br>' : '') + 'Te mandamos el detalle por mail. Sofía ya se enteró. Tus tarjetas siguen funcionando.');
+  if (r.resultado === 'BLOQUEADO') return fin('good', '<b>Listo, bloqueamos el acceso.</b><br>' + ((r.gestiones || []).length ? 'Registramos estos desconocimientos:<br>' + r.gestiones.map(g => esc(g.id) + ' · ' + esc(g.tipo) + ' ' + esc(g.operacion) + (g.monto ? ' · ' + pesos(g.monto) : '')).join('<br>') + '<br>' : '') + '' + (r.tarjetas_pausadas ? 'También pausamos tus tarjetas; se reactivan cuando se levante el bloqueo. ' : '') + 'Te mandamos el detalle por mail. Sofía ya se enteró.');
   if (r.resultado === 'NO_PENDIENTE') return fin('info', 'Este aviso ya no está pendiente (' + esc(r.estado) + ').');
   fin('bad', 'Hubo un problema (' + esc(r.resultado || r.error) + '). Probá de nuevo o hablá con Sofía.');
 }

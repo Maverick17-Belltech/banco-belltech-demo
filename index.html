@@ -383,7 +383,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v31</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v32</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -664,7 +664,7 @@ document.querySelectorAll('.loginForm').forEach(f => f.addEventListener('submit'
     store.set({ email, nombre: (p.nombre + ' ' + p.apellido).trim(), dni: p.dni, fecha_nacimiento: p.fecha_nacimiento, poliza: p.poliza, rol: q ? rolDe(q) : 'Cliente', loginAt: new Date().toISOString() });
     location.reload(); return;
   }
-  if (r && r.resultado === 'CUENTA_BLOQUEADA') { errEl.textContent = r.indefinido ? 'Por seguridad, tu acceso está bloqueado hasta que lo revise un asesor (avisaste que no fuiste vos). Tus tarjetas siguen funcionando.' : 'Por seguridad, tu acceso está bloqueado por ' + r.minutos + ' minutos porque hubo intentos fallidos de verificar tu identidad. Tus tarjetas siguen funcionando.'; return; }   // v27 · v31: bloqueo indefinido
+  if (r && r.resultado === 'CUENTA_BLOQUEADA') { errEl.textContent = r.indefinido ? 'Por seguridad, tu acceso está bloqueado hasta que lo revise un asesor (avisaste que no fuiste vos). Tus tarjetas quedaron pausadas hasta que se levante el bloqueo.' : 'Por seguridad, tu acceso está bloqueado por ' + r.minutos + ' minutos porque hubo intentos fallidos de verificar tu identidad. Tus tarjetas quedaron pausadas hasta que se levante el bloqueo.'; return; }   // v27 · v31: bloqueo indefinido
   if (r && r.resultado === 'CREDENCIALES_INVALIDAS') { errEl.innerHTML = 'Email o clave incorrectos. <button type="button" class="link" onclick="askSofia(\'Olvidé mi clave de Banca Online\')">¿Te olvidaste la clave?</button>'; return; }
   if (r && r.error !== 'clave inválida') { errEl.textContent = 'No pude conectar con el sistema. Probá de nuevo.'; return; }
   // API anterior a v6.14: validación con la clave de demo
@@ -857,7 +857,7 @@ async function renderMiCuenta(){
     // v18: después de la baja total la persona deja de ser cliente
     // v27: bloqueo de seguridad → se informa y se cierra la sesión
     if (!r.ok && r.resultado === 'CLIENTE_BLOQUEADO') {
-      grid.innerHTML = '<div class="acc"><small>Seguridad</small><div class="amt" style="font-size:22px">Acceso bloqueado por seguridad</div><p>' + (r.indefinido ? 'Avisaste que no fuiste vos, así que bloqueamos el acceso a Banca Online y a Sofía hasta que lo revise un asesor.' : 'Hubo intentos fallidos de verificar tu identidad, así que bloqueamos el acceso a Banca Online y a Sofía por ' + esc(r.minutos) + ' minutos.') + ' Tus tarjetas siguen funcionando. Cerramos tu sesión en unos segundos.</p></div>';   // v31
+      grid.innerHTML = '<div class="acc"><small>Seguridad</small><div class="amt" style="font-size:22px">Acceso bloqueado por seguridad</div><p>' + (r.indefinido ? 'Avisaste que no fuiste vos, así que bloqueamos el acceso a Banca Online y a Sofía hasta que lo revise un asesor.' : 'Hubo intentos fallidos de verificar tu identidad, así que bloqueamos el acceso a Banca Online y a Sofía por ' + esc(r.minutos) + ' minutos.') + ' Por precaución también pausamos tus tarjetas: se reactivan solas cuando se levante el bloqueo. Cerramos tu sesión en unos segundos.</p></div>';   // v31
       $('mcMov').innerHTML = ''; $('mcGes').innerHTML = ''; $('mcDet').hidden = true;
       if (!window._bloqLogout) window._bloqLogout = setTimeout(logout, 10000);
       return;
