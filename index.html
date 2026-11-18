@@ -202,6 +202,10 @@
   .acc small{display:block;font:700 12px "Open Sans",Arial,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#888}
   .acc .amt{font:800 30px "Open Sans",Arial,sans-serif;color:var(--rich);margin:8px 0 2px}
   .acc p{font-size:15px;color:#555}
+  .acc .dato{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;margin-top:4px}
+  .acc .dato b{font-weight:700;color:var(--jet);word-break:break-all}
+  .acc .copiar{font:700 11px "Open Sans",Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--orange);background:none;border:1px solid var(--orange);padding:2px 8px;cursor:pointer}
+  .acc .copiar:hover{background:var(--orange);color:#fff}
   .acc.dark{background:var(--rich);color:#fff;border-left-color:var(--orange)}.acc.dark .amt{color:#fff}.acc.dark p{color:rgba(255,255,255,.65)}
   .feed{margin-top:20px;background:#fff;display:grid;grid-template-columns:1fr 1fr}
   .feed > div{padding:26px}
@@ -370,7 +374,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v28</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v29</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -426,7 +430,7 @@
   </div>
 </div></section>
 
-<div id="mcToast" role="status"><span id="mcToastTxt">Sofía actualizó Mi cuenta</span><button type="button" onclick="irAMiCuenta()">Ver en Mi cuenta</button><button type="button" class="x" aria-label="Cerrar" onclick="cerrarToast()">×</button></div>
+<div id="mcToast" role="status"><span id="mcToastTxt">Sofía actualizó Mi cuenta</span><button type="button" id="mcToastVer" onclick="irAMiCuenta()">Ver en Mi cuenta</button><button type="button" class="x" aria-label="Cerrar" onclick="cerrarToast()">×</button></div>
 <section class="account" id="micuenta"><div class="wrap">
   <div class="top"><div><span class="eyebrow">Mi cuenta</span><h2 id="mcSub">Hola.</h2><span class="mc-upd" id="mcUpd"></span></div><button class="btn btn-outline" onclick="openChat()">Pedile algo a Sofía</button></div>
   <div class="acc-grid" id="mcGrid"><div class="acc"><small>Mi cuenta</small><div class="amt" style="font-size:20px">Cargando tus productos…</div><p>Consultando el sistema del banco</p></div></div>
@@ -795,8 +799,15 @@ function marcarNuevos(){
   _mcPrevio = new Set(textos);
 }
 let _toastT = null;
-function mostrarToast(t){ $('mcToastTxt').textContent = t; $('mcToast').classList.add('open'); clearTimeout(_toastT); _toastT = setTimeout(cerrarToast, 10000); }
+function mostrarToast(t, sinBoton){ $('mcToastTxt').textContent = t; $('mcToastVer').hidden = !!sinBoton;   // v29: sinBoton para avisos de la página (Copiar)
+  $('mcToast').classList.add('open'); clearTimeout(_toastT); _toastT = setTimeout(cerrarToast, 10000); }
 function cerrarToast(){ $('mcToast').classList.remove('open'); }
+// v29: copiar CBU o alias al portapapeles (solo en la página; no cambia nada en el banco)
+function copiarDato(v, que){
+  const ok = () => mostrarToast(que + ' copiado: ' + v, true);
+  try { navigator.clipboard.writeText(v).then(ok, () => { fallbackCopiar(v); ok(); }); } catch (e) { fallbackCopiar(v); ok(); }
+}
+function fallbackCopiar(v){ const t = document.createElement('textarea'); t.value = v; t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (e) {} t.remove(); }
 function irAMiCuenta(){ cerrarToast(); $('micuenta').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 // v20: Mi cuenta con el diseño Belltech + constancias de lo que hace Sofía (movimientos, programadas y gestiones)
 const fmtMonto = (n, mon) => (mon === 'USD' ? pesos(n).replace('$ ', 'US$ ') : pesos(n));
@@ -832,7 +843,11 @@ async function renderMiCuenta(){
     const cards = [];
     // v17: no se muestran cuentas cerradas, tarjetas ni seguros dados de baja
     (r.cuentas || []).filter(c => c.estado !== 'cerrada').forEach(c => {
-      const extra = Number(c.acuerdo) > 0 ? 'Acuerdo disponible ' + pesos(c.acuerdo) : 'Alias ' + esc(c.alias);
+      // v29: CBU y alias visibles con botón Copiar (el acuerdo de la cuenta corriente sigue arriba)
+      const cp = (v, que) => '<button type="button" class="copiar" onclick="copiarDato(\'' + esc(v) + '\',\'' + que + '\')">Copiar</button>';
+      const extra = (Number(c.acuerdo) > 0 ? 'Acuerdo disponible ' + pesos(c.acuerdo) + '<br>' : '') +
+        '<span class="dato">Alias <b>' + esc(c.alias) + '</b>' + cp(c.alias, 'Alias') + '</span>' +
+        '<span class="dato">CBU <b>' + esc(c.cbu) + '</b>' + cp(c.cbu, 'CBU') + '</span>';
       cards.push('<div class="acc"><small>' + esc(nom[c.tipo] || c.tipo) + (c.moneda === 'USD' ? ' en dólares' : '') + ' · ' + esc(c.numero) + '</small><div class="amt">' + fmtMonto(c.saldo, c.moneda) + '</div><p>' + extra + '</p><button class="link lnk" onclick="' + ask('¿Cuál es el saldo de mi ' + (nom[c.tipo] || 'cuenta').toLowerCase() + '?') + '">Consultar con Sofía →</button></div>');
     });
     // v23: últimos 5 consumos de cada tarjeta (los desconocidos se marcan y no suman)
