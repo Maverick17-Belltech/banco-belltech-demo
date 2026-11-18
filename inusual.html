@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¿Fuiste vos? | Banco & Seguros Belltech</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Carlito:wght@400;700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+  :root{--brand:#111C24;--accent:#FF6418;--bg:#F2F2F2;--ink:#111C24;--muted:#555;--ok:#0E8A5F;--err:#C0392B}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Calibri,Carlito,"Open Sans",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:var(--brand);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}
+  main{max-width:560px;margin:24px auto;padding:0 16px}
+  .card{background:#fff;border-top:3px solid var(--accent);padding:22px;box-shadow:0 10px 30px rgba(17,28,36,.10)}
+  h1{font:800 22px "Open Sans",Arial,sans-serif;margin:0 0 6px}
+  p.sub{color:var(--muted);margin:0 0 16px;font-size:15px}
+  .op{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #eee;font-size:15px}
+  .op input{margin-top:4px;width:18px;height:18px;accent-color:var(--accent)}
+  .op .d{flex:1}.op small{display:block;color:var(--muted)} .op b{white-space:nowrap}
+  .row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+  button{flex:1;min-width:150px;border:0;font-family:"Open Sans",Arial,sans-serif;padding:14px;font-size:15.5px;font-weight:700;cursor:pointer}
+  .ok{background:var(--accent);color:#fff}.ok:hover{background:#e5560f}
+  .no{background:#fff;color:var(--brand);box-shadow:inset 0 0 0 1.5px var(--brand)}
+  .peligro{background:var(--err);color:#fff}
+  button:disabled{opacity:.6;cursor:wait}
+  .msg{padding:14px;margin-top:6px;font-size:15px}
+  .msg.good{background:#E6F6EF;color:var(--ok)} .msg.bad{background:#FBEAEA;color:var(--err)} .msg.info{background:#EEF0FF;color:var(--brand)}
+  small.note{display:block;color:var(--muted);margin-top:14px;font-size:12.5px}
+</style>
+</head>
+<body>
+<header><img src="assets/logo_blanco.png" alt="Belltech" style="height:28px;display:block"><span style="display:flex;align-items:center;gap:8px;font:600 12px 'Open Sans',Arial;color:rgba(255,255,255,.6);border-left:1px solid rgba(255,255,255,.2);padding-left:12px">powered by <img src="assets/nice.png" alt="NiCE" style="height:15px"></span></header>
+<main>
+  <div class="card" id="card"><h1>¿Fuiste vos?</h1><p class="sub">Cargando…</p></div>
+  <small class="note">Banco &amp; Seguros Belltech · Demo de Belltech powered by NiCE. Entidad ficticia: no ingreses datos reales. <span style="opacity:.7">inusual v1</span></small>
+</main>
+<script>
+// inusual v1 – página del mail "¿Fuiste vos?" (actividad inusual, API v6.26).
+// "Sí, fui yo" libera las operaciones; "No fui yo" muestra las operaciones para desconocerlas y bloquea el acceso.
+// Sofía se entera sola (eventos). Cancelar = "Volver"; a los 5 minutos sin actividad la página se cierra y el aviso sigue pendiente.
+const API = (window.DEMO_CONFIG || {}).BYS_API_URL;
+const token = new URLSearchParams(location.search).get('t') || '';
+const card = document.getElementById('card');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pesos = n => '$ ' + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+let ops = [], ultima = Date.now(), vigia = null, cerrada = false;
+async function api(params) { const u = new URL(API); Object.entries(params).forEach(([k, v]) => u.searchParams.set(k, v)); return (await fetch(u.toString())).json(); }
+function fin(clase, html) { cerrada = true; clearInterval(vigia); card.innerHTML = '<h1>¿Fuiste vos?</h1><div class="msg ' + clase + '">' + html + '</div>'; }
+function listaHtml(conCasillas) {
+  return ops.map(o => '<label class="op">' + (conCasillas ? '<input type="checkbox" value="' + esc(o.id) + '" checked>' : '') +
+    '<span class="d">' + esc(o.tipo) + ' · ' + esc(o.detalle) + '<small>' + esc(o.fecha) + ' · ' + esc(o.id) + '</small></span>' + (o.monto ? '<b>' + pesos(o.monto) + '</b>' : '') + '</label>').join('');
+}
+function paso1() {
+  card.innerHTML = '<h1>¿Fuiste vos?</h1><p class="sub">Detectamos estas operaciones en poco tiempo y frenamos la siguiente para cuidarte.</p>' + listaHtml(false) +
+    '<div class="row"><button class="ok" id="si">Sí, fui yo</button><button class="no" id="no">No fui yo</button></div>';
+  document.getElementById('si').onclick = () => responder('si');
+  document.getElementById('no').onclick = paso2;
+}
+function paso2() {
+  card.innerHTML = '<h1>Marcá lo que no reconocés</h1><p class="sub">Vamos a registrar un desconocimiento por cada operación marcada y a bloquear el acceso a Banca Online y a Sofía hasta que lo revise un asesor. Tus tarjetas siguen funcionando.</p>' + listaHtml(true) +
+    '<div class="row"><button class="peligro" id="env">Desconocer y bloquear</button><button class="no" id="vol">Volver</button></div>';
+  document.getElementById('env').onclick = () => responder('no');
+  document.getElementById('vol').onclick = paso1;
+}
+async function iniciar() {
+  if (!API || !token) return fin('bad', 'El link no es válido.');
+  let r; try { r = await api({ accion: 'inusual_estado', t: token }); } catch (e) { return fin('bad', 'No pudimos conectarnos. Probá de nuevo en unos segundos.'); }
+  if (!r.ok) return fin('bad', 'El link no es válido.');
+  if (r.estado !== 'pendiente') return fin('info', { verificada: 'Ya confirmaste que fuiste vos respondiendo las preguntas de seguridad con Sofía.', confirmada_mail: 'Ya confirmaste que fuiste vos.', no_fui_yo: 'Ya nos avisaste que no fuiste vos: el acceso está bloqueado.', vencida: 'Este link venció. Si querés seguir operando, respondé las preguntas de seguridad con Sofía.' }[r.estado] || 'Este aviso ya no está pendiente.');
+  ops = r.operaciones || [];
+  paso1();
+  ['click', 'keydown', 'touchstart', 'scroll'].forEach(ev => document.addEventListener(ev, () => { ultima = Date.now(); }, { passive: true }));
+  vigia = setInterval(() => { if (!cerrada && Date.now() - ultima >= 5 * 60000) fin('info', 'Pasaron 5 minutos sin actividad y cerramos esta página. El aviso sigue pendiente: podés volver a abrir el link del mail o confirmar con Sofía.'); }, 15000);
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !cerrada && document.getElementById('vol')) paso1(); });
+async function responder(fui) {
+  card.querySelectorAll('button').forEach(b => b.disabled = true);
+  const params = { accion: 'inusual_responder', t: token, fui };
+  if (fui === 'no') params.desconocer = [...card.querySelectorAll('input[type=checkbox]:checked')].map(i => i.value).join(',');
+  let r; try { r = await api(params); } catch (e) { card.querySelectorAll('button').forEach(b => b.disabled = false); return alert('No pudimos conectarnos. Probá de nuevo.'); }
+  if (r.resultado === 'CONFIRMADO') return fin('good', '<b>¡Gracias! Confirmaste que fuiste vos.</b><br>Ya podés seguir operando. Sofía ya se enteró: si estabas hablando con ella, te ofrece seguir con la operación que había quedado frenada.');
+  if (r.resultado === 'BLOQUEADO') return fin('good', '<b>Listo, bloqueamos el acceso.</b><br>' + ((r.gestiones || []).length ? 'Registramos estos desconocimientos:<br>' + r.gestiones.map(g => esc(g.id) + ' · ' + esc(g.tipo) + ' ' + esc(g.operacion) + (g.monto ? ' · ' + pesos(g.monto) : '')).join('<br>') + '<br>' : '') + 'Te mandamos el detalle por mail. Sofía ya se enteró. Tus tarjetas siguen funcionando.');
+  if (r.resultado === 'NO_PENDIENTE') return fin('info', 'Este aviso ya no está pendiente (' + esc(r.estado) + ').');
+  fin('bad', 'Hubo un problema (' + esc(r.resultado || r.error) + '). Probá de nuevo o hablá con Sofía.');
+}
+iniciar();
+</script>
+</body>
+</html>
