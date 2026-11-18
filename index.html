@@ -383,7 +383,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v32</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v33</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -857,9 +857,13 @@ async function renderMiCuenta(){
     // v18: después de la baja total la persona deja de ser cliente
     // v27: bloqueo de seguridad → se informa y se cierra la sesión
     if (!r.ok && r.resultado === 'CLIENTE_BLOQUEADO') {
-      grid.innerHTML = '<div class="acc"><small>Seguridad</small><div class="amt" style="font-size:22px">Acceso bloqueado por seguridad</div><p>' + (r.indefinido ? 'Avisaste que no fuiste vos, así que bloqueamos el acceso a Banca Online y a Sofía hasta que lo revise un asesor.' : 'Hubo intentos fallidos de verificar tu identidad, así que bloqueamos el acceso a Banca Online y a Sofía por ' + esc(r.minutos) + ' minutos.') + ' Por precaución también pausamos tus tarjetas: se reactivan solas cuando se levante el bloqueo. Cerramos tu sesión en unos segundos.</p></div>';   // v31
+      grid.innerHTML = '<div class="acc"><small>Seguridad</small><div class="amt" style="font-size:22px">Acceso bloqueado por seguridad</div><p>' + (r.indefinido ? 'Avisaste que no fuiste vos, así que bloqueamos el acceso a Banca Online y a Sofía hasta que lo revise un asesor.' : 'Hubo intentos fallidos de verificar tu identidad, así que bloqueamos el acceso a Banca Online y a Sofía por ' + esc(r.minutos) + ' minutos.') + ' Por precaución también pausamos tus tarjetas: se reactivan solas cuando se levante el bloqueo. Cerramos tu sesión en <b id="bloqSeg">60</b> segundos para que puedas terminar de leer el chat.</p><button class="link lnk" onclick="logout()">Cerrar sesión ahora →</button></div>';   // v31
       $('mcMov').innerHTML = ''; $('mcGes').innerHTML = ''; $('mcDet').hidden = true;
-      if (!window._bloqLogout) window._bloqLogout = setTimeout(logout, 10000);
+      // v33: 60 segundos (antes 10) para leer lo que dice Sofía; si hay una llamada en curso, espera a que termine
+      if (!window._bloqLogout) { let seg = 60; window._bloqLogout = setInterval(() => {
+        if (seg > 0) seg--; const el = document.getElementById('bloqSeg'); if (el) el.textContent = seg;
+        if (seg <= 0 && !window.enLlamada) { clearInterval(window._bloqLogout); logout(); }
+      }, 1000); }
       return;
     }
     if (!r.ok && r.resultado === 'NO_ENCONTRADO') {
