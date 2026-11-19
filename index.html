@@ -388,7 +388,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v35</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v36</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -773,16 +773,28 @@ async function revisarEventos(dni){
   let r = null;
   try { r = await apiGet({ accion: 'eventos', dni, _: Date.now() }); } catch (_) {}
   const lista = ((r && r.ok && r.eventos) || []).filter(e => !_evEntregados.has(e.id) && Date.now() - Number(e.ts) < 2 * 3600000).sort((a, b) => a.ts - b.ts);
+  // v36: novedades del siniestro → solo la última de cada siniestro, solo si es reciente (10 min) y solo con el chat ACTIVO;
+  //      las demás se marcan como entregadas sin decir nada (llegan por mail, se ven en Mi cuenta y Sofía las informa si le preguntan).
+  const ultimaSin = {};
+  lista.filter(e => e.tipo === 'siniestro_estado').forEach(e => { ultimaSin[(e.detalle || {}).siniestro || ''] = e.id; });
+  let diferir = false;
   for (const e of lista) {
+    if (e.tipo === 'siniestro_estado') {
+      const vigente = ultimaSin[(e.detalle || {}).siniestro || ''] === e.id && Date.now() - Number(e.ts) < 10 * 60000;
+      if (!vigente || !chatActivo()) { _evEntregados.add(e.id); try { await apiGet({ accion: 'evento_visto', id: e.id }); } catch (_) {} continue; }
+      // no interrumpir: si el cliente acaba de escribir o Sofía está respondiendo, se espera y se reintenta
+      if (Date.now() - _ultMsgCliente < 25000 || (_esperandoSofia && Date.now() - _ultMsgCliente < 60000)) { diferir = true; continue; }
+    }
     _evEntregados.add(e.id);
     try { await apiGet({ accion: 'evento_visto', id: e.id }); } catch (_) {}
-    // v35: las novedades del siniestro solo se le pasan a Sofía si el chat está abierto (ya llegan por mail y se ven en Mi cuenta;
-    //      en un chat nuevo Sofía informa el estado cuando el cliente lo consulta)
-    if (e.tipo === 'siniestro_estado' && !chatAbierto) continue;
     avisarSofia(e);
     await new Promise(ok => setTimeout(ok, 1500));
   }
+  if (diferir) setTimeout(() => { try { revisarEventos(dniEventos()); } catch (_) {} }, 15000);
 }
+// v36: el chat está "activo" si está abierto, o si hubo mensajes en los últimos 15 min y no se cerró después
+let _ultMsgChat = 0, _ultMsgCliente = 0, _ultCierreChat = 0, _esperandoSofia = false;
+function chatActivo(){ return chatAbierto || (_ultMsgChat > _ultCierreChat && Date.now() - _ultMsgChat < 15 * 60000); }
 function avisarSofia(e){
   whenReady(() => {
     if (!chatAbierto) omitirAvisoVolvio = true;
@@ -1222,6 +1234,10 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         }
         if (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize')) chatSeCerro = true;
         if (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize')) chatAbierto = false;
+        // v36: actividad del chat (para decidir si Sofía avisa novedades sin interrumpir)
+        if (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize')) _ultCierreChat = Date.now();
+        if (ev && ev.type === 'webchat/outgoing-message') { _ultMsgChat = _ultMsgCliente = Date.now(); _esperandoSofia = true; }
+        if (visible) { _ultMsgChat = Date.now(); _esperandoSofia = false; }
         if (ev && ev.type === 'webchat/outgoing-message') proc.mostrar();
         if (visible || (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize'))) proc.ocultar();
         if (visible && typeof session !== 'undefined' && session) refrescarMiCuenta();
