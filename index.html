@@ -388,7 +388,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v34</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v35</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -776,6 +776,9 @@ async function revisarEventos(dni){
   for (const e of lista) {
     _evEntregados.add(e.id);
     try { await apiGet({ accion: 'evento_visto', id: e.id }); } catch (_) {}
+    // v35: las novedades del siniestro solo se le pasan a Sofía si el chat está abierto (ya llegan por mail y se ven en Mi cuenta;
+    //      en un chat nuevo Sofía informa el estado cuando el cliente lo consulta)
+    if (e.tipo === 'siniestro_estado' && !chatAbierto) continue;
     avisarSofia(e);
     await new Promise(ok => setTimeout(ok, 1500));
   }
