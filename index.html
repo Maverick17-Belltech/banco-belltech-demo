@@ -388,7 +388,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v36</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v37</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -776,11 +776,11 @@ async function revisarEventos(dni){
   // v36: novedades del siniestro → solo la última de cada siniestro, solo si es reciente (10 min) y solo con el chat ACTIVO;
   //      las demás se marcan como entregadas sin decir nada (llegan por mail, se ven en Mi cuenta y Sofía las informa si le preguntan).
   const ultimaSin = {};
-  lista.filter(e => e.tipo === 'siniestro_estado').forEach(e => { ultimaSin[(e.detalle || {}).siniestro || ''] = e.id; });
+  lista.filter(e => e.tipo === 'siniestro_estado' || e.tipo === 'asistencia_estado').forEach(e => { ultimaSin[(e.detalle || {}).siniestro || (e.detalle || {}).pedido || ''] = e.id; });   // v37: + grúa/asistencia
   let diferir = false;
   for (const e of lista) {
-    if (e.tipo === 'siniestro_estado') {
-      const vigente = ultimaSin[(e.detalle || {}).siniestro || ''] === e.id && Date.now() - Number(e.ts) < 10 * 60000;
+    if (e.tipo === 'siniestro_estado' || e.tipo === 'asistencia_estado') {
+      const vigente = ultimaSin[(e.detalle || {}).siniestro || (e.detalle || {}).pedido || ''] === e.id && Date.now() - Number(e.ts) < 10 * 60000;
       if (!vigente || !chatActivo()) { _evEntregados.add(e.id); try { await apiGet({ accion: 'evento_visto', id: e.id }); } catch (_) {} continue; }
       // no interrumpir: si el cliente acaba de escribir o Sofía está respondiendo, se espera y se reintenta
       if (Date.now() - _ultMsgCliente < 25000 || (_esperandoSofia && Date.now() - _ultMsgCliente < 60000)) { diferir = true; continue; }
