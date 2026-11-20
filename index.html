@@ -388,7 +388,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v37</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v38</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -927,8 +927,9 @@ async function renderMiCuenta(){
     (r.prestamos || []).filter(l => l.estado !== 'cancelado').forEach(l => {   // v18: préstamos cancelados no se muestran
       cards.push('<div class="acc"><small>Préstamo personal · ' + esc(l.numero) + '</small><div class="amt">' + pesos(l.valor_cuota) + '</div><p>Cuota ' + (Number(l.cuotas_pagas) + 1) + ' de ' + esc(l.cuotas) + '</p><button class="link lnk" onclick="' + ask('¿Cuánto me falta pagar de mi préstamo?') + '">Consultar con Sofía →</button></div>');
     });
-    (r.seguros || []).filter(s => s.estado !== 'baja').forEach(s => {
-      cards.push('<div class="acc dark cta-click" role="button" tabindex="0" title="Ver coberturas" data-pol="' + esc(s.poliza) + '" data-tit="' + esc('Seguro de ' + s.tipo + ' · ' + s.poliza + (s.bien ? ' · ' + s.bien : '')) + '"><small>Seguro de ' + esc(s.tipo) + ' · ' + esc(s.poliza) + '</small><div class="amt">' + (s.estado === 'vigente' || !s.estado ? 'Vigente' : esc(s.estado)) + '</div><p>' + esc(s.cobertura || '') + (s.bien ? '<br>' + esc(s.bien) : '') + '</p><button class="link lnk" onclick="' + ask('Quiero denunciar un siniestro de mi póliza ' + s.poliza) + '">Denunciar siniestro →</button></div>');
+    (r.seguros || []).filter(s => s.estado !== 'baja' && !/^cancelada/.test(String(s.estado || ''))).forEach(s => {   // v38: canceladas fuera
+      const pendInsp = String(s.estado || '').indexOf('pendiente de inspección') === 0;   // v38: seguro de auto recién contratado
+      cards.push('<div class="acc dark cta-click" role="button" tabindex="0" title="Ver coberturas" data-pol="' + esc(s.poliza) + '" data-tit="' + esc('Seguro de ' + s.tipo + ' · ' + s.poliza + (s.bien ? ' · ' + s.bien : '')) + '"><small>Seguro de ' + esc(s.tipo) + ' · ' + esc(s.poliza) + '</small><div class="amt">' + (s.estado === 'vigente' || !s.estado ? 'Vigente' : esc(s.estado)) + '</div><p>' + esc(s.cobertura || '') + (s.bien ? '<br>' + esc(s.bien) : '') + '</p>' + (pendInsp ? '<button class="link lnk" onclick="' + ask('Mandame el link para las fotos de inspección de mi póliza ' + s.poliza) + '">Subir fotos de inspección con Sofía →</button></div>' : '<button class="link lnk" onclick="' + ask('Quiero denunciar un siniestro de mi póliza ' + s.poliza) + '">Denunciar siniestro →</button></div>'));
     });
     if (!cards.length) cards.push('<div class="acc"><small>Banco &amp; Seguros Belltech</small><div class="amt" style="font-size:22px">Todavía no tenés productos</div><p>Abrí tu primera cuenta en minutos.</p><button class="link lnk" onclick="' + ask('Quiero abrir una cuenta') + '">Abrir una cuenta con Sofía →</button></div>');
     grid.innerHTML = cards.join('');

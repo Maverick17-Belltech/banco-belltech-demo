@@ -36,9 +36,10 @@
 <header><img src="assets/logo_blanco.png" alt="Belltech" style="height:28px;display:block"><span style="display:flex;align-items:center;gap:8px;font:600 12px 'Open Sans',Arial;color:rgba(255,255,255,.6);border-left:1px solid rgba(255,255,255,.2);padding-left:12px">powered by <img src="assets/nice.png" alt="NiCE" style="height:15px"></span></header>
 <main>
   <div class="card" id="card"><h1>Fotos del siniestro</h1><p class="sub">Cargando…</p></div>
-  <small class="note">Banco &amp; Seguros Belltech · Demo de Belltech powered by NiCE. Entidad ficticia: no subas fotos con datos reales. <span style="opacity:.7">fotos v2</span></small>
+  <small class="note">Banco &amp; Seguros Belltech · Demo de Belltech powered by NiCE. Entidad ficticia: no subas fotos con datos reales. <span style="opacity:.7">fotos v3</span></small>
 </main>
 <script>
+// fotos v3 – seguro de auto: fotos de inspección del vehículo (estado.documento = inspeccion; API v6.40).
 // fotos v2 – robo total: pide la denuncia policial (foto o PDF; API v6.35, estado.documento = denuncia).
 // fotos v1 – subir fotos de un siniestro (API v6.28). Se achican en el navegador (máx. 1600 px, JPEG) antes de subirlas.
 // "Listo, enviar" o "Cancelar": en los dos casos Sofía se entera (eventos fotos_recibidas / fotos_canceladas).
@@ -47,13 +48,14 @@ const API = (window.DEMO_CONFIG || {}).BYS_API_URL;
 const token = new URLSearchParams(location.search).get('t') || '';
 const card = document.getElementById('card');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let den = false, max = 6, subidas = 0, ocupado = false, cerrada = false, ultima = Date.now(), vigia = null, sin = '';
+let den = false, insp = false, max = 6, subidas = 0, ocupado = false, cerrada = false, ultima = Date.now(), vigia = null, sin = '';
 const post = b => fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ t: token }, b)) }).then(r => r.json());
-const titulo = () => (den ? 'Denuncia policial del siniestro' : 'Fotos del siniestro');
+const titulo = () => (den ? 'Denuncia policial del siniestro' : insp ? 'Inspección de tu seguro de auto' : 'Fotos del siniestro');
 function fin(clase, html) { cerrada = true; clearInterval(vigia); card.innerHTML = '<h1>' + titulo() + (sin ? ' ' + esc(sin) : '') + '</h1><div class="msg ' + clase + '">' + html + '</div>'; }
 function pantalla() {
   card.innerHTML = '<h1>' + titulo() + ' ' + esc(sin) + '</h1><p class="sub">' + (den
       ? 'Como es un robo total, no hacen falta fotos del auto: subí la denuncia policial (una foto de cada hoja o el PDF, hasta ' + max + ' archivos).'
+      : insp ? 'Subí las fotos de tu auto: frente, atrás, los dos costados y la cédula (hasta ' + max + ' fotos). Con eso tu póliza queda vigente. Podés sacarlas con la cámara del celular.'
       : 'Subí hasta ' + max + ' fotos: los daños, la patente del otro vehículo, el lugar. Podés sacarlas con la cámara del celular.') + '</p>' +
     '<label class="elegir" id="lblElegir">＋ ' + (den ? 'Elegir foto o PDF de la denuncia' : 'Elegir o sacar fotos') + '<input type="file" id="arch" accept="' + (den ? 'image/*,application/pdf' : 'image/*') + '" multiple></label><div class="grid" id="grid"></div>' +
     '<div class="row"><button class="ok" id="listo" disabled>Listo, enviar</button><button class="no" id="cancelar">Cancelar</button></div>';
@@ -101,6 +103,8 @@ async function terminar(accion) {
   if (cerrada || ocupado) return;
   card.querySelectorAll('button').forEach(b => b.disabled = true);
   let r; try { r = await post({ accion }); } catch (e) { card.querySelectorAll('button').forEach(b => b.disabled = false); return alert('No pudimos conectarnos. Probá de nuevo.'); }
+  if (r.resultado === 'RECIBIDAS' && insp) return fin('good', '<b>¡Listo! Recibimos ' + (r.cantidad === 1 ? 'la foto' : 'las ' + r.cantidad + ' fotos') + '.</b><br>Tu póliza ya está vigente. Sofía ya se enteró.');
+  if (r.resultado === 'CANCELADO' && insp) return fin('info', 'No subiste las fotos. Tu póliza sigue pendiente de inspección; cuando quieras, pedile a Sofía un link nuevo. Sofía ya se enteró.');
   if (r.resultado === 'RECIBIDAS') return fin('good', den ? '<b>¡Listo! Recibimos la denuncia policial.</b><br>Queda agregada a tu siniestro. Sofía ya se enteró.' : '<b>¡Listo! Recibimos ' + (r.cantidad === 1 ? 'la foto' : 'las ' + r.cantidad + ' fotos') + '.</b><br>Quedan agregadas a tu denuncia. Sofía ya se enteró.');
   if (r.resultado === 'CANCELADO') return fin('info', den ? 'No subiste la denuncia policial. La necesitamos para avanzar: cuando la tengas, pedile a Sofía un link nuevo. Sofía ya se enteró.' : 'No subiste fotos. La denuncia sigue en curso; si después querés subirlas, pedile a Sofía un link nuevo. Sofía ya se enteró.');
   if (r.resultado === 'NO_PENDIENTE') return fin('info', 'Este link ya no está activo.');
@@ -110,9 +114,10 @@ async function iniciar() {
   if (!API || !token) return fin('bad', 'El link no es válido.');
   let r; try { r = await post({ accion: 'fotos_estado' }); } catch (e) { return fin('bad', 'No pudimos conectarnos. Probá de nuevo en unos segundos.'); }
   if (!r.ok) return fin('bad', 'El link no es válido. Pedile a Sofía uno nuevo.');
-  sin = r.siniestro || ''; max = r.max || 6; subidas = r.cantidad || 0; den = r.documento === 'denuncia';
+  sin = r.siniestro || ''; max = r.max || 6; subidas = r.cantidad || 0; den = r.documento === 'denuncia'; insp = r.documento === 'inspeccion';
   if (den) document.title = 'Denuncia policial del siniestro | Banco & Seguros Belltech';
-  if (r.estado !== 'pendiente') return fin('info', { recibidas: den ? 'Ya recibimos la denuncia policial de este siniestro.' : 'Ya recibimos las fotos de este siniestro.', cancelado: 'Este link se canceló. Pedile a Sofía uno nuevo si querés subir fotos.', vencido: 'Este link venció. Pedile a Sofía uno nuevo.', reemplazado: 'Este link fue reemplazado por uno más nuevo: usá el último que te mandamos.' }[r.estado] || 'Este link ya no está activo.');
+  if (insp) document.title = 'Inspección de tu seguro de auto | Banco & Seguros Belltech';
+  if (r.estado !== 'pendiente') return fin('info', { recibidas: den ? 'Ya recibimos la denuncia policial de este siniestro.' : insp ? 'Ya recibimos las fotos de la inspección: tu póliza está vigente.' : 'Ya recibimos las fotos de este siniestro.', cancelado: 'Este link se canceló. Pedile a Sofía uno nuevo si querés subir fotos.', vencido: 'Este link venció. Pedile a Sofía uno nuevo.', reemplazado: 'Este link fue reemplazado por uno más nuevo: usá el último que te mandamos.' }[r.estado] || 'Este link ya no está activo.');
   pantalla(); if (subidas) document.getElementById('listo').disabled = false;
   ['click', 'keydown', 'touchstart', 'scroll', 'change'].forEach(ev => document.addEventListener(ev, () => { ultima = Date.now(); }, { passive: true }));
   vigia = setInterval(() => { if (!cerrada && !ocupado && Date.now() - ultima >= 5 * 60000) terminar(subidas ? 'fotos_listo' : 'fotos_cancelar'); }, 15000);
