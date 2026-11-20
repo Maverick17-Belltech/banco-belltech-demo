@@ -388,7 +388,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v38</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v39</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -924,7 +924,7 @@ async function renderMiCuenta(){
       const bloq = t.estado !== 'activa';
       cards.push('<div class="acc"><small>' + esc(t.marca + ' ' + t.nivel) + ' · ' + esc(t.ultimos_4) + '</small><div class="amt">' + pesos(t.saldo_a_pagar) + '</div><p>' + (bloq ? '<span class="st">' + esc(t.estado) + '</span>' : 'Vence el ' + esc(t.vencimiento) + ' · Pago mínimo ' + pesos(t.pago_minimo)) + '</p><button class="link lnk" onclick="' + ask(t.estado === 'pausada' ? 'Quiero reactivar mi tarjeta terminada en ' + t.ultimos_4 : bloq ? '¿Cuándo llega la tarjeta nueva que reemplaza a la terminada en ' + t.ultimos_4 + '?' : 'Quiero pagar mi tarjeta terminada en ' + t.ultimos_4) + '">' + (t.estado === 'pausada' ? 'Reactivar con Sofía →' : bloq ? 'Consultar con Sofía →' : 'Pagar con Sofía →') + '</button></div>');   // v23
     });
-    (r.prestamos || []).filter(l => l.estado !== 'cancelado').forEach(l => {   // v18: préstamos cancelados no se muestran
+    (r.prestamos || []).filter(l => ['cancelado', 'revocado'].indexOf(l.estado) < 0).forEach(l => {   // v18: préstamos cancelados no se muestran · v39: ni revocados
       cards.push('<div class="acc"><small>Préstamo personal · ' + esc(l.numero) + '</small><div class="amt">' + pesos(l.valor_cuota) + '</div><p>Cuota ' + (Number(l.cuotas_pagas) + 1) + ' de ' + esc(l.cuotas) + '</p><button class="link lnk" onclick="' + ask('¿Cuánto me falta pagar de mi préstamo?') + '">Consultar con Sofía →</button></div>');
     });
     (r.seguros || []).filter(s => s.estado !== 'baja' && !/^cancelada/.test(String(s.estado || ''))).forEach(s => {   // v38: canceladas fuera
