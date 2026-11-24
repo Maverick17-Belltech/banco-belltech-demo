@@ -75,11 +75,11 @@
     <div class="box"><h2>Últimos comentarios</h2><p class="s">Lo que escribieron los clientes</p><div id="coms"></div></div>
   </div>
   <div class="box"><h2>Últimas conversaciones</h2><p class="s">Una fila por encuesta (sin datos personales)</p><div class="tw" id="tConv"></div></div>
-  <small class="note">Banco &amp; Seguros Belltech · Demo de Belltech powered by NiCE. Datos ficticios de la demo. Tiempo de respuesta y mensajes: solo chat (los mide la página). Se actualiza cada 30 segundos. <span style="opacity:.7">reporte v1</span></small>
+  <small class="note">Banco &amp; Seguros Belltech · Demo de Belltech powered by NiCE. Datos ficticios de la demo. Tiempo de respuesta y mensajes: solo chat (los mide la página). Se actualiza cada 30 segundos. <span style="opacity:.7">reporte v2</span></small>
 </main>
 <div id="tip"></div>
 <script>
-// reporte v1 – panel de la encuesta de satisfacción (API v6.43, GET encuestas_resumen: sin dni, token ni sesión).
+// reporte v2 – estado rechazada ("no quiso responder"). reporte v1 – panel de la encuesta de satisfacción (API v6.43, GET encuestas_resumen: sin dni, token ni sesión).
 const API = (window.DEMO_CONFIG || {}).BYS_API_URL;
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -89,7 +89,7 @@ const nf1 = n => n == null ? '–' : n.toLocaleString('es-AR', { minimumFraction
 const pct = (a, b) => b ? Math.round(a * 100 / b) + '%' : '–';
 const seg = ms => ms == null ? '–' : (ms / 1000).toLocaleString('es-AR', { maximumFractionDigits: 1 }) + ' s';
 const dur = s => s == null ? '–' : (s >= 60 ? Math.floor(s / 60) + ' min ' + (s % 60 ? Math.round(s % 60) + ' s' : '') : Math.round(s) + ' s');
-const est = e => ({ pendiente: 'pendiente', omitida: 'omitida (por mail)', respondida: 'respondida', vencida: 'vencida' }[e] || e);
+const est = e => ({ pendiente: 'pendiente', omitida: 'omitida (por mail)', rechazada: 'no quiso responder', respondida: 'respondida', vencida: 'vencida' }[e] || e);
 function filtrar() {
   const ahora = Date.now(), hoy = new Date(); hoy.setHours(0, 0, 0, 0);
   return datos.filter(x => (!can || x.canal === can) && (per === 'todo' || (per === 'hoy' ? x.ts >= hoy.getTime() : x.ts >= ahora - 7 * 864e5)));
