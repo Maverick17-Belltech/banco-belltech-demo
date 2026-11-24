@@ -409,7 +409,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v42</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v43</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -1269,7 +1269,7 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         // v41: métricas de la conversación (solo mensajes con texto del cliente; los avisos de la página van sin texto)
         if (ev && ev.type === 'webchat/outgoing-message' && (typeof pl.text !== 'string' || pl.text.trim() !== '')) metCliente();
         if (visible && !(pl.data && pl.data.cerrarChat)) metSofia();
-        if (ev && ev.type === 'webchat/close' && ENC.abierta) encOmitir(false);   // v42: cerrar el chat con la encuesta abierta = le llega por mail
+        if (ev && ev.type === 'webchat/close' && ENC.abierta) encOmitir(false, true);   // v42: cerrar el chat con la encuesta abierta = le llega por mail
         if (visible) { _ultMsgChat = Date.now(); _esperandoSofia = false; }
         if (ev && ev.type === 'webchat/outgoing-message') proc.mostrar();
         if (visible || (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize'))) proc.ocultar();
@@ -1280,7 +1280,9 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         if (d && d.actualizarCuenta === true) refrescarMiCuenta();                            // v22
         if (d && d.seguirEventos) { seguirGuardar(d.seguirEventos); _verApi = _verApi || null; }   // v26
         // v41: si Sofía mandó una encuesta (token), se muestra antes de cerrar; el chat se cierra al enviarla u omitirla
-        if (d && d.cerrarChat === true) { conversacionTerminada = true; chatSeCerro = true; if (d.encuesta && API) encAbrir(String(d.encuesta)); else { metReset(); setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000); } }
+        // v43: Sofía ofrece la encuesta en su mensaje (data.encuesta) y el chat sigue abierto; la cierra después con cerrarChat
+        if (d && d.encuesta && !d.cerrarChat && API) encAbrir(String(d.encuesta));
+        if (d && d.cerrarChat === true) { conversacionTerminada = true; chatSeCerro = true; clearTimeout(ENC.respaldo); if (!ENC.abierta) metReset(); setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000); }
       });
     } catch (_) {}
   })
@@ -1303,7 +1305,7 @@ function metDatos(){
   return { inicio_ts: MET.inicio || fin, duracion_seg: MET.inicio ? Math.round((fin - MET.inicio) / 1000) : 0, msgs_cliente: MET.cli, msgs_sofia: MET.sof,
     resp_prom_ms: t.length ? Math.round(t.reduce((a, b) => a + b, 0) / t.length) : null, resp_max_ms: t.length ? Math.max.apply(null, t) : null };
 }
-// Encuesta (v42): primero pide permiso. Sí → 3 preguntas (Enviar / Ahora no). No, Ahora no o Escape → sin mail. X del chat o 5 min → mail.
+// Encuesta (v43: Sofía la ofrece en su mensaje y se entera del resultado) (v42): primero pide permiso. Sí → 3 preguntas (Enviar / Ahora no). No, Ahora no o Escape → sin mail. X del chat o 5 min → mail.
 const ENC = { token: '', sat: 0, res: '', abierta: false, ocupada: false, metricas: null, ultima: 0, vigia: null };
 const encEsc = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function encPost(b){
@@ -1316,14 +1318,14 @@ function encAbrir(token){
   Object.assign(ENC, { token, sat: 0, res: '', abierta: true, ocupada: false, metricas: metDatos(), ultima: Date.now() });
   metReset();
   // v42: primero se pide permiso (Sí / No); con "No, gracias" no se manda mail
-  $('encTit').textContent = '¿Nos ayudás con una encuesta?'; $('encSub').textContent = '3 preguntas · menos de un minuto';
-  $('encBody').innerHTML = '<p class="enc-q" style="font-weight:400">Tu opinión nos ayuda a mejorar la atención de Sofía.</p>' +
+  $('encTit').textContent = 'Encuesta de satisfacción'; $('encSub').textContent = '3 preguntas · menos de un minuto';
+  $('encBody').innerHTML = '<p class="enc-q" style="font-weight:400">¿Nos ayudás a mejorar la atención de Sofía?</p>' +
     '<div class="enc-row"><button type="button" class="enc-ok" id="encSi">Sí, responder</button><button type="button" class="enc-no" id="encNo">No, gracias</button></div>';
   $('encSi').onclick = encPreguntas; $('encNo').onclick = () => encOmitir(true);
   if (!ENC.oyentes) { ENC.oyentes = true; ['pointerdown', 'keydown', 'input'].forEach(t => $('encCard').addEventListener(t, () => { ENC.ultima = Date.now(); }, true)); }
   clearInterval(ENC.vigia);
   ENC.vigia = setInterval(() => { if (ENC.abierta && !ENC.ocupada && Date.now() - ENC.ultima > 5 * 60000) encOmitir(false); }, 10000);   // 5 min sin actividad → mail
-  setTimeout(() => { if (ENC.abierta) { document.body.appendChild($('encCard')); $('encCard').hidden = false; } }, 1500);   // v42: al final del body, arriba del chat
+  setTimeout(() => { if (ENC.abierta) { document.body.appendChild($('encCard')); $('encCard').hidden = false; } }, 800);   // v42: al final del body, arriba del chat
 }
 function encPreguntas(){
   ENC.ultima = Date.now();
@@ -1339,29 +1341,42 @@ function encPreguntas(){
   $('encEnviar').onclick = encEnviar; $('encOmitir').onclick = () => encOmitir(true);
 }
 function encListo(){ ENC.ultima = Date.now(); $('encEnviar').disabled = !(ENC.sat && ENC.res); }
-function encFin(html, ms){
-  ENC.abierta = false; ENC.ocupada = false; clearInterval(ENC.vigia);
-  $('encBody').innerHTML = '<p class="enc-fin">' + html + '</p>'; $('encCard').hidden = false;
-  setTimeout(() => { $('encCard').hidden = true; try { if (chatAbierto) webchat.close(); } catch (_) {} hideTeaser(); }, ms);
+// v43: el resultado se le avisa a Sofía (mensaje solo de datos, evento externo encuesta_resultado); ella agradece o lamenta,
+// se despide y manda cerrarChat. Respaldo: si en 25 s no llegó el cierre, la página cierra el chat igual.
+function encAvisar(det, silencioso){
+  whenReady(() => {
+    try { webchat.sendMessage('', Object.assign({}, authData, { evento: 'externo', id: 'ENC-' + ENC.token, tipo: 'encuesta_resultado', titulo: 'Encuesta de satisfacción', detalle: det })); } catch (_) {}
+    if (silencioso) { setTimeout(() => proc.ocultar(), 300); return; }   // chat cerrado con la X: Sofía se entera sin hablar
+    clearTimeout(ENC.respaldo);
+    ENC.respaldo = setTimeout(() => { try { if (chatAbierto) webchat.close(); } catch (_) {} hideTeaser(); }, 25000);
+  });
+}
+function encFin(html, ms, det, silencioso){
+  ENC.abierta = false; ENC.ocupada = false; clearInterval(ENC.vigia); metReset();
+  $('encBody').innerHTML = '<p class="enc-fin">' + html + '</p>'; $('encCard').hidden = !html;
+  setTimeout(() => { $('encCard').hidden = true; }, ms);
+  if (det) encAvisar(det, silencioso);
 }
 function encEnviar(){
   if (!ENC.abierta || ENC.ocupada || !ENC.sat || !ENC.res) return;
   ENC.ocupada = true; $('encEnviar').disabled = true; $('encOmitir').disabled = true; $('encErr').textContent = '';
   encPost({ accion: 'encuesta_responder', satisfaccion: ENC.sat, resuelto: ENC.res, comentario: ($('encCom').value || '').trim(), metricas: ENC.metricas, por: 'chat' })
     .then(r => {
-      if (r && (r.ok || r.resultado === 'YA_RESPONDIDA')) return encFin('¡Gracias por tu respuesta! Nos ayuda a mejorar la atención.', 2500);
+      if (r && (r.ok || r.resultado === 'YA_RESPONDIDA')) return encFin('¡Gracias por tu respuesta!', 1500, { resultado: 'respondida', satisfaccion: ENC.sat, resuelto: ENC.res });
       throw new Error((r && (r.resultado || r.error)) || 'error');
     })
     .catch(() => { ENC.ocupada = false; $('encEnviar').disabled = false; $('encOmitir').disabled = false; $('encErr').textContent = 'No pudimos enviar la encuesta. Probá de nuevo o tocá Omitir.'; });
 }
 // v42: sinMail = el cliente dijo que no ("No, gracias", "Ahora no", Escape) → no se manda mail.
 // Cerrar el chat con la X o 5 min sin actividad → la encuesta le llega por mail (si tiene).
-function encOmitir(sinMail){
+// cerrado = el cliente cerró el chat con la X (Sofía se entera sin decir nada).
+function encOmitir(sinMail, cerrado){
   if (!ENC.abierta || ENC.ocupada) return;
   ENC.ocupada = true; $('encCard').hidden = true;
+  const res = sinMail ? 'rechazada' : (cerrado ? 'cerro_chat' : 'sin_respuesta');
   encPost(Object.assign({ accion: 'encuesta_omitir', metricas: ENC.metricas }, sinMail ? { sin_mail: 'si' } : {}))
-    .then(r => encFin(r && r.mail ? 'Listo. Si querés responderla más tarde, te la mandamos por mail' + (r.email ? ' a ' + encEsc(r.email) : '') + '.' : 'Listo, gracias por comunicarte.', r && r.mail ? 3500 : 1500))
-    .catch(() => encFin('Listo, gracias por comunicarte.', 1500));
+    .then(r => encFin('', 0, { resultado: res, mail: !!(r && r.mail), email: (r && r.email) || '' }, cerrado))
+    .catch(() => encFin('', 0, { resultado: res, mail: false }, cerrado));
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && ENC.abierta) encOmitir(true); });
 // v16.1: open() con el chat ya abierto lo cerraba; ahora solo se abre si está cerrado
