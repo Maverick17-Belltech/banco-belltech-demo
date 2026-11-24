@@ -409,7 +409,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v43</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v44</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -809,7 +809,9 @@ async function revisarEventos(dni){
   for (const e of lista) {
     if (ES_NOVEDAD.indexOf(e.tipo) >= 0) {
       const vigente = ultimaSin[(e.detalle || {}).siniestro || (e.detalle || {}).pedido || (e.detalle || {}).id || ''] === e.id && Date.now() - Number(e.ts) < 10 * 60000;
-      if (!vigente || !chatActivo()) { _evEntregados.add(e.id); try { await apiGet({ accion: 'evento_visto', id: e.id }); } catch (_) {} continue; }
+      // v44: lo que pasó durante una llamada lo dice Sofía en la llamada; al cortar no se abre el chat con esas novedades
+      const enLaLlamada = window._finLlamada && Number(e.ts) <= window._finLlamada + 5000;
+      if (!vigente || enLaLlamada || !chatActivo()) { _evEntregados.add(e.id); try { await apiGet({ accion: 'evento_visto', id: e.id }); } catch (_) {} continue; }
       // no interrumpir: si el cliente acaba de escribir o Sofía está respondiendo, se espera y se reintenta
       if (Date.now() - _ultMsgCliente < 25000 || (_esperandoSofia && Date.now() - _ultMsgCliente < 60000)) { diferir = true; continue; }
     }
@@ -822,7 +824,8 @@ async function revisarEventos(dni){
 }
 // v36: el chat está "activo" si está abierto, o si hubo mensajes en los últimos 15 min y no se cerró después
 let _ultMsgChat = 0, _ultMsgCliente = 0, _ultCierreChat = 0, _esperandoSofia = false;
-function chatActivo(){ return chatAbierto || (_ultMsgChat > _ultCierreChat && Date.now() - _ultMsgChat < 15 * 60000); }
+// v44: después de la despedida (encuesta ofrecida o chat cerrado por Sofía) el chat ya no cuenta como activo para las novedades
+function chatActivo(){ if (conversacionTerminada || ENC.abierta) return false; return chatAbierto || (_ultMsgChat > _ultCierreChat && Date.now() - _ultMsgChat < 15 * 60000); }
 function avisarSofia(e){
   whenReady(() => {
     if (!chatAbierto) omitirAvisoVolvio = true;
@@ -1281,7 +1284,7 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         if (d && d.seguirEventos) { seguirGuardar(d.seguirEventos); _verApi = _verApi || null; }   // v26
         // v41: si Sofía mandó una encuesta (token), se muestra antes de cerrar; el chat se cierra al enviarla u omitirla
         // v43: Sofía ofrece la encuesta en su mensaje (data.encuesta) y el chat sigue abierto; la cierra después con cerrarChat
-        if (d && d.encuesta && !d.cerrarChat && API) encAbrir(String(d.encuesta));
+        if (d && d.encuesta && !d.cerrarChat && API) { conversacionTerminada = true; encAbrir(String(d.encuesta)); }   // v44: ya se despidió
         if (d && d.cerrarChat === true) { conversacionTerminada = true; chatSeCerro = true; clearTimeout(ENC.respaldo); if (!ENC.abierta) metReset(); setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000); }
       });
     } catch (_) {}
@@ -1418,7 +1421,7 @@ $('sofiaForm').addEventListener('submit', ev => {
     clearTimeout(idleTimer);
     try { window.destroyWebRTCWidget && window.destroyWebRTCWidget(); } catch (_) {}
     active = false; fab.style.display = ''; hideTeaser();          // vuelve el "¿Te ayudo?"
-    window.enLlamada = false;   // v28: si quedó algún evento sin decir en la llamada, ahora lo pasa al chat
+    window.enLlamada = false; window._finLlamada = Date.now();   // v28 · v44: las novedades de la llamada no se pasan al chat
     setTimeout(() => { try { revisarEventos(dniEventos()); } catch (_) {} }, 3000);
   }
   async function startVoice(auto) {
