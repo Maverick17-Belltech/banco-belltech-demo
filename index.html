@@ -303,6 +303,27 @@
   .empty{font-size:15px;color:#888;padding:10px 0}
   .ins-grid button.lnk,.cap button.lnk{display:inline-block;margin-top:14px;color:var(--orange);font:700 14px "Open Sans",Arial,sans-serif;background:none;border:0;padding:0;cursor:pointer}
   /* modales */
+  /* v41: encuesta de satisfacción al cerrar el chat */
+  #encCard{position:fixed;right:20px;bottom:20px;z-index:2147483002;width:min(380px,calc(100vw - 32px));max-height:calc(100vh - 40px);overflow:auto;background:#fff;border-top:3px solid var(--orange);box-shadow:0 20px 50px rgba(17,28,36,.35);padding:20px 20px 16px;font-family:"Open Sans",Arial,sans-serif;color:var(--rich)}
+  #encCard[hidden]{display:none}
+  #encCard .enc-h b{display:block;font-size:18px;font-weight:800}
+  #encCard .enc-h span{display:block;font-size:12.5px;color:#666;margin-top:2px}
+  #encCard .enc-q{font-size:14px;font-weight:700;margin:16px 0 8px}
+  #encCard .enc-q small{font-weight:400;color:#777}
+  #encCard .enc-stars{display:flex;gap:6px}
+  #encCard .enc-stars button{width:44px;height:44px;border:1.5px solid #ccc;background:#fff;font-size:24px;line-height:1;color:#bbb;cursor:pointer}
+  #encCard .enc-stars button.on{color:var(--orange);border-color:var(--orange)}
+  #encCard .enc-yn{display:flex;gap:8px}
+  #encCard .enc-yn button{flex:1;padding:10px;border:1.5px solid #ccc;background:#fff;font:700 14px "Open Sans",Arial,sans-serif;cursor:pointer;color:var(--rich)}
+  #encCard .enc-yn button.on{border-color:var(--orange);background:#FFF1EA}
+  #encCard textarea{width:100%;padding:10px;font:inherit;font-size:14px;border:1px solid #ccc;resize:vertical}
+  #encCard .enc-row{display:flex;gap:8px;margin-top:14px}
+  #encCard .enc-row button{flex:1;padding:12px;border:0;font:700 14.5px "Open Sans",Arial,sans-serif;cursor:pointer}
+  #encCard .enc-ok{background:var(--orange);color:#fff}
+  #encCard .enc-ok:disabled{opacity:.5;cursor:not-allowed}
+  #encCard .enc-no{background:#fff;color:var(--rich);box-shadow:inset 0 0 0 1.5px var(--rich)}
+  #encCard .enc-err{color:#C0392B;font-size:13px;margin:8px 0 0;min-height:1em}
+  #encCard .enc-fin{font-size:15px;margin:14px 0 4px}
   .modal-bg{position:fixed;inset:0;background:rgba(17,28,36,.6);display:none;align-items:center;justify-content:center;z-index:120;padding:16px}
   .modal-bg.open{display:flex}
   .modal{background:#fff;width:min(440px,100%);padding:32px;position:relative;box-shadow:0 30px 70px rgba(0,0,0,.35);border-top:3px solid var(--orange);max-height:92vh;overflow:auto}
@@ -388,7 +409,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v40</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v41</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -498,11 +519,17 @@
   <div class="top">
     <div><img src="assets/logo_blanco.png" alt="Belltech"><div class="powered">powered by <img src="assets/nice.png" alt="NiCE"></div><p>Banco &amp; Seguros Belltech es una entidad ficticia creada por Belltech para demostrar IA conversacional con NiCE Cognigy.</p></div>
     <div><h5>Productos</h5><a href="#productos">Cuentas</a><a href="#productos">Tarjetas</a><a href="#productos">Préstamos</a><a href="#seguros">Seguros</a></div>
-    <div><h5>Ayuda</h5><a href="#" onclick="openChat();return false">Chatear con Sofía</a><a href="#" onclick="document.getElementById('fabCallBtn').click();return false">Llamar a Sofía</a><a href="#" onclick="askSofia('¿Dónde hay una sucursal o cajero cerca?');return false">Sucursales</a><a href="#" onclick="openGuia();return false">Guía de la demo</a></div>
+    <div><h5>Ayuda</h5><a href="#" onclick="openChat();return false">Chatear con Sofía</a><a href="#" onclick="document.getElementById('fabCallBtn').click();return false">Llamar a Sofía</a><a href="#" onclick="askSofia('¿Dónde hay una sucursal o cajero cerca?');return false">Sucursales</a><a href="#" onclick="openGuia();return false">Guía de la demo</a><a href="reporte.html" target="_blank" rel="noopener">Reporte de atención</a></div>
     <div><h5>Belltech</h5><a href="https://belltech.la" target="_blank" rel="noopener">belltech.la</a><a href="#">LinkedIn</a><a href="#">Instagram</a></div>
   </div>
   <div class="bottom"><span>© 2026 Belltech. Demo con fines de demostración.</span><span>Política de privacidad</span></div>
 </div></footer>
+
+<!-- ===== v41: Encuesta de satisfacción (aparece cuando Sofía se despide en el chat) ===== -->
+<div id="encCard" role="dialog" aria-labelledby="encTit" hidden>
+  <div class="enc-h"><b id="encTit">¿Cómo te atendió Sofía?</b><span>3 preguntas · menos de un minuto</span></div>
+  <div id="encBody"></div>
+</div>
 
 <!-- ===== v21: Validación de identidad (foto del DNI + selfie, en el navegador, sin guardar imágenes) ===== -->
 <div class="modal-bg" id="idvModal" onclick="if(event.target===this)idvCancelar()">
@@ -1239,6 +1266,10 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         // v36: actividad del chat (para decidir si Sofía avisa novedades sin interrumpir)
         if (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize')) _ultCierreChat = Date.now();
         if (ev && ev.type === 'webchat/outgoing-message') { _ultMsgChat = _ultMsgCliente = Date.now(); _esperandoSofia = true; }
+        // v41: métricas de la conversación (solo mensajes con texto del cliente; los avisos de la página van sin texto)
+        if (ev && ev.type === 'webchat/outgoing-message' && (typeof pl.text !== 'string' || pl.text.trim() !== '')) metCliente();
+        if (visible && !(pl.data && pl.data.cerrarChat)) metSofia();
+        if (ev && ev.type === 'webchat/close' && ENC.abierta) encOmitir();   // v41: cerrar el chat con la encuesta abierta = omitir
         if (visible) { _ultMsgChat = Date.now(); _esperandoSofia = false; }
         if (ev && ev.type === 'webchat/outgoing-message') proc.mostrar();
         if (visible || (ev && (ev.type === 'webchat/close' || ev.type === 'webchat/minimize'))) proc.ocultar();
@@ -1248,7 +1279,8 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
         if (d && d.altaOk === true && d.cliente) entrarComoCliente(d.cliente);                // v22
         if (d && d.actualizarCuenta === true) refrescarMiCuenta();                            // v22
         if (d && d.seguirEventos) { seguirGuardar(d.seguirEventos); _verApi = _verApi || null; }   // v26
-        if (d && d.cerrarChat === true) { conversacionTerminada = true; chatSeCerro = true; setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000); }
+        // v41: si Sofía mandó una encuesta (token), se muestra antes de cerrar; el chat se cierra al enviarla u omitirla
+        if (d && d.cerrarChat === true) { conversacionTerminada = true; chatSeCerro = true; if (d.encuesta && API) encAbrir(String(d.encuesta)); else { metReset(); setTimeout(() => { try { w.close(); } catch (_) {} hideTeaser(); }, 4000); } }
       });
     } catch (_) {}
   })
@@ -1258,6 +1290,69 @@ if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
   $('chatStatus').textContent = 'Configurá WEBCHAT_CONFIG_URL en config.js'; $('chatStatus').className = 'status err';
 }
 function whenReady(fn){ webchat ? fn() : pending.push(fn); }
+
+/* ---------- v41: métricas de la conversación y encuesta de satisfacción ---------- */
+// Se mide en la página: inicio, mensajes del cliente (con texto), mensajes de Sofía y su tiempo de respuesta
+// (desde el mensaje del cliente hasta la primera respuesta visible). Se reinician al terminar la conversación.
+const MET = { inicio: 0, cli: 0, sof: 0, t: [], pend: 0 };
+function metReset(){ MET.inicio = 0; MET.cli = 0; MET.sof = 0; MET.t = []; MET.pend = 0; }
+function metCliente(){ const n = Date.now(); if (!MET.inicio) MET.inicio = n; MET.cli++; if (!MET.pend) MET.pend = n; }
+function metSofia(){ const n = Date.now(); if (!MET.inicio) MET.inicio = n; MET.sof++; if (MET.pend) { MET.t.push(n - MET.pend); MET.pend = 0; } }
+function metDatos(){
+  const fin = Date.now(), t = MET.t;
+  return { inicio_ts: MET.inicio || fin, duracion_seg: MET.inicio ? Math.round((fin - MET.inicio) / 1000) : 0, msgs_cliente: MET.cli, msgs_sofia: MET.sof,
+    resp_prom_ms: t.length ? Math.round(t.reduce((a, b) => a + b, 0) / t.length) : null, resp_max_ms: t.length ? Math.max.apply(null, t) : null };
+}
+// Encuesta: Enviar / Omitir · Escape, cerrar el chat o 5 minutos sin actividad = Omitir (si el cliente tiene mail, le llega por mail)
+const ENC = { token: '', sat: 0, res: '', abierta: false, ocupada: false, metricas: null, ultima: 0, vigia: null };
+const encEsc = x => String(x == null ? '' : x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function encPost(b){
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 15000);
+  return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ t: ENC.token }, b)), signal: ctl.signal })
+    .then(r => r.json()).finally(() => clearTimeout(to));
+}
+function encAbrir(token){
+  if (ENC.abierta) return;
+  Object.assign(ENC, { token, sat: 0, res: '', abierta: true, ocupada: false, metricas: metDatos(), ultima: Date.now() });
+  metReset();
+  const b = $('encBody');
+  b.innerHTML = '<p class="enc-q">1. ¿Qué tan satisfecho quedaste con la atención?</p><div class="enc-stars" id="encStars">' +
+    [1, 2, 3, 4, 5].map(n => '<button type="button" data-v="' + n + '" aria-label="' + n + ' de 5">★</button>').join('') + '</div>' +
+    '<p class="enc-q">2. ¿Resolviste tu consulta?</p><div class="enc-yn" id="encYN"><button type="button" data-v="si">Sí</button><button type="button" data-v="no">No</button></div>' +
+    '<p class="enc-q">3. ¿Querés dejarnos un comentario? <small>(opcional)</small></p><textarea id="encCom" rows="3" maxlength="500" placeholder="Contanos qué te pareció"></textarea>' +
+    '<div class="enc-row"><button type="button" class="enc-ok" id="encEnviar" disabled>Enviar</button><button type="button" class="enc-no" id="encOmitir">Omitir</button></div><p class="enc-err" id="encErr"></p>';
+  b.querySelectorAll('#encStars button').forEach(x => x.onclick = () => { ENC.sat = Number(x.dataset.v); b.querySelectorAll('#encStars button').forEach(y => y.classList.toggle('on', Number(y.dataset.v) <= ENC.sat)); encListo(); });
+  b.querySelectorAll('#encYN button').forEach(x => x.onclick = () => { ENC.res = x.dataset.v; b.querySelectorAll('#encYN button').forEach(y => y.classList.toggle('on', y === x)); encListo(); });
+  $('encEnviar').onclick = encEnviar; $('encOmitir').onclick = () => encOmitir();
+  ['pointerdown', 'keydown', 'input'].forEach(t => $('encCard').addEventListener(t, () => { ENC.ultima = Date.now(); }, true));
+  clearInterval(ENC.vigia);
+  ENC.vigia = setInterval(() => { if (ENC.abierta && !ENC.ocupada && Date.now() - ENC.ultima > 5 * 60000) encOmitir(); }, 10000);
+  setTimeout(() => { if (ENC.abierta) $('encCard').hidden = false; }, 1500);   // deja leer la despedida
+}
+function encListo(){ ENC.ultima = Date.now(); $('encEnviar').disabled = !(ENC.sat && ENC.res); }
+function encFin(html, ms){
+  ENC.abierta = false; ENC.ocupada = false; clearInterval(ENC.vigia);
+  $('encBody').innerHTML = '<p class="enc-fin">' + html + '</p>'; $('encCard').hidden = false;
+  setTimeout(() => { $('encCard').hidden = true; try { if (chatAbierto) webchat.close(); } catch (_) {} hideTeaser(); }, ms);
+}
+function encEnviar(){
+  if (!ENC.abierta || ENC.ocupada || !ENC.sat || !ENC.res) return;
+  ENC.ocupada = true; $('encEnviar').disabled = true; $('encOmitir').disabled = true; $('encErr').textContent = '';
+  encPost({ accion: 'encuesta_responder', satisfaccion: ENC.sat, resuelto: ENC.res, comentario: ($('encCom').value || '').trim(), metricas: ENC.metricas, por: 'chat' })
+    .then(r => {
+      if (r && (r.ok || r.resultado === 'YA_RESPONDIDA')) return encFin('¡Gracias por tu respuesta! Nos ayuda a mejorar la atención.', 2500);
+      throw new Error((r && (r.resultado || r.error)) || 'error');
+    })
+    .catch(() => { ENC.ocupada = false; $('encEnviar').disabled = false; $('encOmitir').disabled = false; $('encErr').textContent = 'No pudimos enviar la encuesta. Probá de nuevo o tocá Omitir.'; });
+}
+function encOmitir(){
+  if (!ENC.abierta || ENC.ocupada) return;
+  ENC.ocupada = true; $('encCard').hidden = true;
+  encPost({ accion: 'encuesta_omitir', metricas: ENC.metricas })
+    .then(r => encFin(r && r.mail ? 'Listo. Si querés responderla más tarde, te la mandamos por mail' + (r.email ? ' a ' + encEsc(r.email) : '') + '.' : 'Listo, gracias por comunicarte.', r && r.mail ? 3500 : 1500))
+    .catch(() => encFin('Listo, gracias por comunicarte.', 1500));
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && ENC.abierta) encOmitir(); });
 // v16.1: open() con el chat ya abierto lo cerraba; ahora solo se abre si está cerrado
 let chatAbierto = false;
 // v18.5: al volver a abrir el chat (después de la X o de la despedida) se mantiene el historial y Sofía saluda de nuevo (sin recargar la página)
@@ -1311,10 +1406,16 @@ $('sofiaForm').addEventListener('submit', ev => {
       ? { userId: 'cli-' + session.dni }
       : { userId: 'anon-' + Math.random().toString(36).slice(2, 10) };
     const widget = await window.initWebRTCWidget(VOICE, opts);
-    let ending = false;
-    const done = () => { if (ending) return; ending = true; setTimeout(backToSofia, 4000); };   // deja ver el final 4 s
+    let ending = false, vozIni = 0;
+    const done = () => {
+      if (ending) return; ending = true; setTimeout(backToSofia, 4000);   // deja ver el final 4 s
+      // v41: duración de la llamada para el reporte (solo si Sofía dejó una encuesta en esta llamada; la API la busca por DNI)
+      const API_V = (window.DEMO_CONFIG || {}).BYS_API_URL, dni = typeof session !== 'undefined' && session && session.dni;
+      if (vozIni && API_V && dni) { const ini = vozIni, dur = Math.round((Date.now() - vozIni) / 1000);
+        setTimeout(() => { fetch(API_V, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ accion: 'encuesta_metricas', dni, inicio_ts: ini, duracion_seg: dur }) }).catch(() => {}); }, 3000); }
+    };
     widget.on('newRTCSession', (s) => {
-      clearTimeout(idleTimer);
+      clearTimeout(idleTimer); if (!vozIni) vozIni = Date.now();   // v41
       // el widget emite 'terminated' (cortó alguien), 'failed' y 'close'
       ['terminated', 'failed', 'close', 'ended'].forEach(ev => { try { s.on(ev, done); } catch (_) {} });
     });
