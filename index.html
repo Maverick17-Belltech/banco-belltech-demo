@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Banco &amp; Seguros Belltech | Demo Belltech powered by NiCE</title>
+<script src="marca.js"></script><!-- v45: nombre de la asistente y del banco desde la planilla -->
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Carlito:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -409,7 +410,7 @@
 </head>
 <body>
 
-<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v44</span></div>
+<div class="strip"><b>Banco &amp; Seguros Belltech</b> · Demo de Belltech powered by NiCE · "Banco &amp; Seguros Belltech" es una entidad ficticia. No ingreses datos reales. <span id="verPagina" style="opacity:.7">v45</span></div>
 
 <header><div class="wrap">
   <a class="logo" href="#inicio" aria-label="Belltech powered by NiCE"><img src="assets/logo_blanco.png" alt="Belltech"><span class="pw">powered by <img src="assets/nice.png" alt="NiCE"></span></a>
@@ -762,7 +763,7 @@ async function entrarComoCliente(c){
     const nombre = ((per.nombre || c.nombre || '') + ' ' + (per.apellido || c.apellido || '')).trim();
     session = { email: String(per.email || c.email || '').toLowerCase(), nombre, dni: String(c.dni), fecha_nacimiento: per.fecha_nacimiento || c.fecha_nacimiento || '', poliza: '', rol: 'Nuevo cliente', loginAt: new Date().toISOString() };
     store.set(session);
-    authData = { authenticated: true, canal: 'web', email: session.email, nombre: session.nombre, dni: session.dni, fecha_nacimiento: session.fecha_nacimiento, poliza: '' };
+    authData = { authenticated: true, canal: 'web', email: session.email, nombre: session.nombre, dni: session.dni, fecha_nacimiento: session.fecha_nacimiento, poliza: '', marca: window.BT_MARCA || undefined };   // v45: marca
     _sesionActiva = false; activarSesion();
     mostrarToast('Ya sos cliente: tu cuenta está en Mi cuenta');
   } catch (_) {}
@@ -1236,12 +1237,16 @@ let webchat = null; const pending = [];
 let authData = session
   ? { authenticated: true, canal: 'web', email: session.email, nombre: session.nombre, dni: session.dni, fecha_nacimiento: session.fecha_nacimiento, poliza: session.poliza }
   : { authenticated: false, canal: 'web' };
+// v45: nombre de la asistente y del banco (marca.js) → Cognigy lo recibe con cada mensaje (context.marca)
+if (window.BT_MARCA) authData.marca = window.BT_MARCA;
+window.addEventListener('bt-marca', e => { authData.marca = e.detail; });
 if (isSet(CFG.WEBCHAT_CONFIG_URL) && typeof initWebchat === 'function') {
   initWebchat(CFG.WEBCHAT_CONFIG_URL, {
     userId: session ? 'cli-' + session.dni : 'anon-' + Math.random().toString(36).slice(2,10),
     sessionId: 'web-' + Date.now(),
     settings: {
       colors: { primaryColor: '#FF6418' },   // v20: naranja Belltech
+      layout: { title: ((window.BT_MARCA || {}).asistente || 'Sofía') + ' · ' + ((window.BT_MARCA || {}).banco || 'Banco & Seguros Belltech') },   // v45: título del chat con la marca de la planilla (si el webchat lo admite)
       behavior: { enableTypingIndicator: true, enableSTT: true },
       homeScreen: { enabled: false },
       widgetSettings: { disableToggleButton: true },
